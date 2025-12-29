@@ -1,139 +1,186 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" data-bs-theme="dark">
 <head>
     <meta charset="UTF-8">
     <title>Provisioning | NEXUS</title>
     <link href="{{ url_for('static', filename='css/all.min.css') }}" rel="stylesheet">
     <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
-
+    
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Roboto:wght@300;400;500;700&display=swap');
+
+        :root {
+            /* THÈME PROXMOX / DARK IDENTIQUE AU DASHBOARD */
+            --bg-body: #0f172a;
+            --bg-card: #1e293b;
+            --border-color: #334155;
+            --primary: #3b82f6;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --bg-terminal: #020617;
+        }
+
         body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); /* Fond sombre immersif pour le focus */
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
             height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             overflow: hidden;
-            color: white;
         }
 
         .focus-container {
             width: 100%;
-            max-width: 480px;
+            max-width: 500px;
             text-align: center;
         }
 
-        /* CARD STYLE */
+        /* CARTE PRINCIPALE STYLE RACK */
         .status-card {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 30px;
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-top: 4px solid var(--primary); /* Ligne de statut bleue au début */
+            border-radius: 8px;
             padding: 40px;
-            box-shadow: 0 50px 100px -20px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
             position: relative;
             overflow: hidden;
+            transition: border-top-color 0.5s ease;
         }
 
-        /* ANIMATIONS */
-        .spinner-ring {
+        .status-card.success {
+            border-top-color: var(--success);
+        }
+
+        /* SPINNER TECH */
+        .spinner-container {
+            position: relative;
             width: 80px; height: 80px;
-            border: 6px solid rgba(255, 255, 255, 0.1);
-            border-top: 6px solid #38bdf8; /* Bleu cyan */
-            border-radius: 50%;
             margin: 0 auto 30px auto;
+        }
+        
+        .spinner-ring {
+            width: 100%; height: 100%;
+            border: 4px solid rgba(59, 130, 246, 0.1);
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
             animation: spin 1s linear infinite;
         }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         .check-icon {
-            font-size: 5rem; color: #4ade80; /* Vert fluo */
+            font-size: 5rem; color: var(--success);
             display: none; margin-bottom: 20px;
-            animation: popIn 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
+
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         @keyframes popIn { 0% { transform: scale(0); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
 
-        /* TEXTE */
-        h2 { font-weight: 800; margin-bottom: 10px; letter-spacing: -1px; }
-        p { color: #94a3b8; font-size: 0.95rem; margin-bottom: 30px; }
+        /* TYPOGRAPHIE */
+        h2 { font-weight: 700; margin-bottom: 10px; color: white; letter-spacing: -0.5px; }
+        p { color: var(--text-muted); font-size: 0.95rem; margin-bottom: 30px; }
 
-        /* IP DISPLAY */
+        /* IP DISPLAY (STYLE TERMINAL) */
         .ip-reveal {
-            background: #0f172a;
-            border: 2px solid #38bdf8;
-            color: #38bdf8;
-            font-family: 'Courier New', monospace;
-            font-size: 1.8rem;
+            background-color: var(--bg-terminal);
+            border: 1px solid var(--border-color);
+            color: var(--success);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.5rem;
             font-weight: bold;
             padding: 20px;
-            border-radius: 16px;
-            margin-bottom: 30px;
-            display: none; /* Caché au début */
-            box-shadow: 0 0 30px rgba(56, 189, 248, 0.2);
+            border-radius: 6px;
+            margin-bottom: 25px;
+            display: none;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
         }
 
-        /* BOUTON (Caché au début) */
-        .action-area { display: none; opacity: 0; transition: opacity 1s; }
-        .btn-go {
-            background: white; color: #0f172a;
-            font-weight: 800; padding: 15px 40px; border-radius: 50px;
-            text-decoration: none; display: inline-block;
-            transition: transform 0.2s; border: none; width: 100%;
-        }
-        .btn-go:hover { transform: scale(1.05); background: #f8fafc; color: #0f172a; }
-
-        .timer {
-            font-family: monospace;
-            color: #64748b;
-            margin-top: 20px;
+        /* TIMER BADGE */
+        .timer-badge {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--primary);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            padding: 5px 15px;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
             font-size: 0.9rem;
+            display: inline-block;
+            margin-top: 10px;
         }
 
-        /* DOWNLOAD KEY BOX */
+        /* BOUTONS */
+        .action-area { display: none; opacity: 0; transition: opacity 1s; }
+        
+        .btn-go {
+            background: var(--primary); color: white;
+            font-weight: 500; padding: 12px 30px; border-radius: 4px;
+            text-decoration: none; display: inline-block; width: 100%;
+            border: none; transition: 0.2s;
+            text-transform: uppercase; letter-spacing: 1px; font-size: 0.9rem;
+        }
+        .btn-go:hover { background: #2563eb; transform: translateY(-2px); color: white; box-shadow: 0 0 15px rgba(59, 130, 246, 0.4); }
+
         .key-box {
             background: rgba(245, 158, 11, 0.1);
             border: 1px solid rgba(245, 158, 11, 0.3);
-            color: #fbbf24;
-            padding: 15px; border-radius: 12px; margin-bottom: 20px;
+            color: var(--warning);
+            padding: 15px; border-radius: 6px; margin-bottom: 20px;
             text-align: left; font-size: 0.9rem;
             display: flex; align-items: center; justify-content: space-between;
         }
+        
+        .error-msg { color: var(--danger); font-weight: bold; margin-top: 15px; display: none; }
     </style>
 </head>
 <body>
 
     <div class="focus-container">
         
-        <div class="status-card">
+        <div class="status-card" id="main-card">
             
-            <div id="loader">
+            <!-- LOADER -->
+            <div id="loader" class="spinner-container">
                 <div class="spinner-ring"></div>
             </div>
 
-            <i class="fas fa-check-circle check-icon" id="success-icon"></i>
+            <!-- SUCCESS ICON -->
+            <div id="success-icon-container" style="text-align: center;">
+                <i class="fas fa-check-circle check-icon" id="success-icon"></i>
+            </div>
 
-            <h2 id="title-text">Initialisation...</h2>
-            <p id="sub-text">Configuration du système et du réseau en cours.</p>
+            <h2 id="title-text">Provisioning...</h2>
+            <p id="sub-text">Configuration du système et attente réseau.</p>
 
+            <!-- RESULTAT IP -->
             <div class="ip-reveal" id="ip-box"></div>
 
+            <!-- KEY DOWNLOAD (Si nécessaire) -->
             {% if key_download %}
             <div class="action-area" id="key-area">
                 <div class="key-box">
-                    <div><i class="fas fa-key me-2"></i>Clé générée</div>
-                    <a href="/download_key/{{ key_download }}" class="btn btn-sm btn-warning fw-bold text-dark">Télécharger</a>
+                    <div><i class="fas fa-key me-2"></i>Clé privée générée</div>
+                    <a href="/download_key/{{ key_download }}" class="btn btn-sm btn-outline-warning fw-bold">Télécharger</a>
                 </div>
             </div>
             {% endif %}
 
+            <!-- BOUTON DE SORTIE -->
             <div class="action-area" id="final-actions">
-                <a href="/" class="btn-go">Accéder au Dashboard</a>
+                <a href="/" class="btn-go"><i class="fas fa-columns me-2"></i> Accéder au Dashboard</a>
             </div>
 
-            <div class="timer"><i class="fas fa-stopwatch me-2"></i><span id="timer">0.0</span>s</div>
-            <div id="timeout-msg" class="text-danger mt-3 fw-bold" style="display:none;">Délai dépassé. <a href="/" class="text-white">Forcer le retour</a></div>
+            <div class="timer-badge">
+                <i class="fas fa-stopwatch me-2"></i><span id="timer">0.0</span>s
+            </div>
+
+            <div id="timeout-msg" class="error-msg">
+                <i class="fas fa-exclamation-triangle me-2"></i> Délai dépassé. <a href="/" class="text-white text-decoration-underline">Forcer le retour</a>
+            </div>
 
         </div>
 
@@ -144,7 +191,6 @@
         const statusEndpoint = `/api/monitor`; 
         let startTime = Date.now();
         let timerInterval;
-        let attempts = 0;
 
         // 1. Chronomètre
         function startTimer() {
@@ -155,7 +201,9 @@
                 // Timeout Sécurité 60s
                 if(elapsed > 60 && document.getElementById('ip-box').style.display === 'none') {
                     document.getElementById('timeout-msg').style.display = 'block';
-                    document.getElementById('sub-text').innerText = "La VM met trop de temps à répondre.";
+                    document.getElementById('sub-text').innerText = "La VM ne répond pas dans les temps.";
+                    document.getElementById('sub-text').style.color = "var(--danger)";
+                    document.getElementById('loader').style.display = 'none';
                 }
             }, 100);
         }
@@ -182,16 +230,19 @@
             clearInterval(timerInterval);
             let finalTime = ((Date.now() - startTime) / 1000).toFixed(1);
 
-            // Changement visuel
+            // Changement visuel : Carte devient verte en haut
+            document.getElementById('main-card').classList.add('success');
+            
             document.getElementById('loader').style.display = 'none';
             document.getElementById('success-icon').style.display = 'block';
             
-            document.getElementById('title-text').innerText = "VM Prête !";
+            document.getElementById('title-text').innerText = "Instance Prête";
+            document.getElementById('title-text').style.color = "var(--success)";
             document.getElementById('sub-text').innerText = `Déploiement terminé en ${finalTime} secondes.`;
             
-            // Affichage IP
+            // Affichage IP style Terminal
             const ipBox = document.getElementById('ip-box');
-            ipBox.innerText = ip;
+            ipBox.innerText = ip; // Pas besoin de "IP: " car le design le suggère
             ipBox.style.display = 'block';
 
             // Affichage Boutons
