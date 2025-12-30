@@ -1,129 +1,138 @@
-☁️ NEXUS CLOUD - Orchestrateur IaaS
+# ☁️ NEXUS CLOUD - Orchestrateur IaaS
 
 Un mini-cloud privé complet permettant de déployer, gérer et monitorer des instances virtuelles (Ubuntu/Debian) en quelques secondes.
 
-✨ Points Forts
+---
 
-🚀 Provisioning Turbo : Déploiement en ~30 secondes (Optimisation Cloud-init & Netplan).
+## ✨ Points Forts
 
-🔒 Sécurité Avancée : Gestion automatique des clés SSH et expiration forcée des mots de passe.
+* 🚀 **Provisioning Turbo** : Déploiement en ~30 secondes (Optimisation Cloud-init & Netplan).
+* 🔒 **Sécurité Avancée** : Gestion automatique des clés SSH et expiration forcée des mots de passe.
+* 📊 **Monitoring Réel** : Tableau de bord temps réel (CPU Différentiel, RAM RSS).
+* 🎨 **Interface Moderne** : Design Glassmorphism, entièrement responsive.
+* 🔌 **Mode Offline** : Toutes les librairies (Bootstrap, Chart.js) sont incluses. Aucune connexion internet requise pour l'interface.
 
-📊 Monitoring Réel : Tableau de bord temps réel (CPU Différentiel, RAM RSS).
+---
 
-🎨 Interface Moderne : Design Glassmorphism, entièrement responsive.
-
-🔌 Mode Offline : Toutes les librairies (Bootstrap, Chart.js) sont incluses. Aucune connexion internet requise pour l'interface.
-
-🛠️ Installation
+## 🛠️ Installation
 
 Ce projet nécessite une machine Linux (Ubuntu/Debian) avec l'hyperviseur KVM.
 
-1. Cloner le dépôt
+### 1. Cloner le dépôt
 
-git clone [https://github.com/schawil/nexus-cloud.git](https://github.com/schawil/nexus-cloud.git)
+```bash
+git clone https://github.com/schawil/nexus-cloud.git
 cd nexus-cloud
+```
 
-
-2. Lancer l'installation automatique
+### 2. Lancer l'installation automatique
 
 Ce script installe KVM, configure le réseau et télécharge les images Cloud officielles (Ubuntu & Debian).
 
+```bash
 chmod +x setup.sh  
 sudo ./setup.sh
+```
 
+> **Note** : Une fois l'installation terminée, il est conseillé de redémarrer votre session pour appliquer les droits de groupe.
 
-Note : Une fois l'installation terminée, il est conseillé de redémarrer votre session pour appliquer les droits de groupe.
+### 3. Démarrer le serveur
 
-3. Démarrer le serveur
-
+```bash
 sudo python3 app.py
+```
 
+L'application est accessible localement sur : **`http://localhost:5000`**
 
-L'application est accessible localement sur : http://localhost:5000
+---
 
-📱 Accès Distant & Démonstration
+## 📱 Accès Distant & Démonstration
 
 Pour présenter le projet au jury ou accéder à l'interface depuis un autre appareil (Smartphone, Laptop), suivez cette procédure :
 
-Prérequis Réseau : Connectez votre PC serveur et l'appareil du jury sur le même réseau Wi-Fi (ou via un partage de connexion).
+### 1. Connecte ton PC au réseau de la salle
 
-Récupérer l'IP Locale :
-Ouvrez un terminal et identifiez votre adresse IPv4 (ex: 192.168.x.x) :
+Wifi ou Câble.
 
+### 2. Trouve ton IP locale
+
+Ouvrez un terminal et identifiez votre adresse IPv4 (ex: `192.168.x.x`) :
+
+```bash
 hostname -I
+```
 
+> Note l'adresse qui ressemble à `192.168.x.x` ou `10.x.x.x`.
 
-Lancer le Serveur (Si ce n'est pas déjà fait) :
+### 3. Lance le serveur
 
+```bash
 sudo python3 app.py
+```
 
+### 4. Invite le jury à se connecter depuis leur propre PC
 
-Connexion Client :
-Sur l'appareil distant, ouvrez le navigateur et tapez :
-http://<VOTRE_IP_LOCALE>:5000
+Sur l'appareil distant, ouvrez le navigateur et tapez : **`http://<TON_IP>:5000`**
 
-Showtime ! 🚀
-L'interface est entièrement responsive. Une VM créée depuis le téléphone apparaîtra instantanément sur le serveur.
+### 5. Fais le show ! 🚀
 
-🔑 Guide de Connexion SSH
+Ils cliquent sur leur écran, et la VM apparaît sur le tien (et dans leur liste). C'est simple, efficace, et ça marche à tous les coups.
+
+---
+
+## 🔑 Guide de Connexion SSH
 
 NEXUS Cloud génère les clés SSH côté serveur pour garantir la sécurité.
 
-Lors de la création d'une VM, choisissez "Générer une clé".
+1. Lors de la création d'une VM, choisissez **"Générer une clé"**.
+2. Votre navigateur va télécharger un fichier (ex: `ma-cle-projet`).
+3. Ce fichier se trouve dans votre dossier **Téléchargements** (`~/Downloads`).
 
-Votre navigateur va télécharger un fichier (ex: ma-cle-projet).
-
-Ce fichier se trouve dans votre dossier Téléchargements (~/Downloads).
-
-Pour vous connecter :
+### Pour vous connecter :
 
 Ouvrez un terminal et tapez :
 
-1. Sécuriser la clé (Obligatoire)
+#### 1. Sécuriser la clé (Obligatoire)
 
 SSH refusera la clé si les permissions sont trop ouvertes.
 
+```bash
 chmod 600 ~/Downloads/ma-cle-projet
+```
 
+#### 2. Connexion
 
-2. Connexion
-
+```bash
 ssh -i ~/Downloads/ma-cle-projet admin@ADRESSE_IP
+```
 
+> L'adresse IP est affichée sur le Dashboard une fois la VM démarrée. Remplacez `admin` par le nom d'utilisateur que vous avez défini.
 
-L'adresse IP est affichée sur le Dashboard une fois la VM démarrée.
-Remplacez admin par le nom d'utilisateur que vous avez défini.
+---
 
-Composant
+## 🏗️ Architecture Technique
 
-Technologie
+| Composant         | Technologie        | Description                                                    |
+|------------------ |--------------------|----------------------------------------------------------------|
+| **Backend**       | Python Flask       | API REST et bindings `libvirt-python`                          |
+| **Hyperviseur**   | KVM / QEMU         | Virtualisation matérielle, disques `qcow2` (Backing Files)     |
+| **Frontend**      | HTML5 / JS         | Bootstrap 5 & Chart.js (Mode Local)                            |
+| **Orchestration** | Cloud-init         | Injection dynamique User Data & Meta Data via ISO              |
 
-Description
+---
 
-Backend
+## 👤 Auteur
 
-Python Flask
+* **@schawil** - Initial work & Maintainer
 
-API REST et bindings libvirt-python
+---
 
-Hyperviseur
+## 📄 Licence
 
-KVM / QEMU
+Ce projet est sous licence libre. N'hésitez pas à contribuer !
 
-Virtualisation matérielle, disques qcow2 (Backing Files)
+---
 
-Frontend
+## 🙏 Remerciements
 
-HTML5 / JS
-
-Bootstrap 5 & Chart.js (Mode Local)
-
-Orchestration
-
-Cloud-init
-
-Injection dynamique User Data & Meta Data via ISO
-
-👤 Auteur
-
-@schawil - Initial work & Maintainer
+Merci à la communauté open-source pour les outils formidables (KVM, Cloud-init, Flask) qui rendent ce projet possible.
