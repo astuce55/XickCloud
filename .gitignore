@@ -24,7 +24,10 @@ generated/
 *.img
 *.iso
 *.pub
+
 --- FICHIERS SYSTÈME ---
+
+*.json
 
 .DS_Store
 Thumbs.db

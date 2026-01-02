@@ -6,48 +6,60 @@ import time
 import re
 import io
 import shutil
+import sys
+import json
 from flask import Flask, render_template, request, jsonify, send_file
 
 app = Flask(__name__)
 
-# --- CONFIGURATION (MODE LOCAL / TOUT-EN-UN) ---
-# Chemins vers le stockage KVM de ton PC
+# --- CONFIGURATION ---
 VM_STORAGE_DIR = "/var/lib/libvirt/images"
 BASE_IMG_DIR = "/var/lib/libvirt/images/base-images"
-
-# Chemins des fichiers temporaires (Générés par le script)
 GEN_DIR = os.path.join(os.getcwd(), 'generated')
 KEYS_DIR = os.path.join(os.getcwd(), 'keys')
+METADATA_FILE = os.path.join(os.getcwd(), 'vm_metadata.json') # Base de données légère
 
-# Création des dossiers si absents
 os.makedirs(GEN_DIR, exist_ok=True)
 os.makedirs(KEYS_DIR, exist_ok=True)
 
-# Dictionnaire des images (Doivent être présentes sur ton PC via setup.sh)
 OS_IMAGES = {
     'ubuntu': os.path.join(BASE_IMG_DIR, "ubuntu-22.04-server-cloudimg-amd64.img"),
     'debian': os.path.join(BASE_IMG_DIR, "debian-12-generic-amd64.qcow2")
 }
 
+# --- GESTION PERSISTANCE (Username) ---
+def load_metadata():
+    if os.path.exists(METADATA_FILE):
+        try:
+            with open(METADATA_FILE, 'r') as f: return json.load(f)
+        except: return {}
+    return {}
+
+def save_metadata(data):
+    with open(METADATA_FILE, 'w') as f: json.dump(data, f)
+
 def get_libvirt_conn():
-    """Ouvre une connexion locale au démon système KVM"""
-    # qemu:///system = Droits root, accès réseau complet
-    return libvirt.open('qemu:///system')
+    try:
+        return libvirt.open('qemu:///system')
+    except libvirt.libvirtError as e:
+        print(f"ERREUR CRITIQUE LIBVIRT: {e}", file=sys.stderr)
+        return None
 
 @app.route('/')
 def index():
     return render_template('index.html')
 
-# --- API MONITORING (TEMPS RÉEL) ---
+# --- API MONITORING ---
 @app.route('/api/monitor')
 def monitor_api():
-    conn = None
-    vms_stats = []
-    try:
-        conn = get_libvirt_conn()
-        # On récupère TOUTES les VMs (actives et inactives)
-        domains = conn.listAllDomains()
+    conn = get_libvirt_conn()
+    if not conn: return jsonify({"error": "No KVM connection"}), 500
         
+    vms_stats = []
+    metadata = load_metadata() # On charge les infos utilisateurs
+
+    try:
+        domains = conn.listAllDomains()
         for dom in domains:
             try:
                 name = dom.name()
@@ -58,10 +70,13 @@ def monitor_api():
                 elif state == libvirt.VIR_DOMAIN_PAUSED: status_text = "Paused"
                 
                 ip_addr = "N/A"
-                used_mem_mb = mem / 1024 # Valeur par défaut
+                used_mem_mb = mem / 1024
+                
+                # Récupération du vrai username (sinon 'root' par défaut)
+                vm_user = metadata.get(name, {}).get('user', 'root')
 
                 if state == libvirt.VIR_DOMAIN_RUNNING:
-                    # 1. Récupération IP via les baux DHCP (Leases)
+                    # IP via Leases
                     try:
                         ifaces = dom.interfaceAddresses(libvirt.VIR_DOMAIN_INTERFACE_ADDRESSES_SRC_LEASE)
                         for _, val in ifaces.items():
@@ -72,67 +87,65 @@ def monitor_api():
                                         break
                     except: pass
                     
-                    # 2. Récupération RAM Réelle (RSS via Guest Agent)
+                    # RAM RSS
                     try:
                         mem_stats = dom.memoryStats()
-                        if 'rss' in mem_stats:
-                            used_mem_mb = mem_stats['rss'] / 1024
+                        if 'rss' in mem_stats: used_mem_mb = mem_stats['rss'] / 1024
                     except: pass
 
                 vms_stats.append({
                     'name': name,
                     'status': status_text,
                     'ip': ip_addr,
-                    'cpu_time': cputime, # Nanosecondes brutes pour calcul différentiel JS
+                    'username': vm_user, # On envoie le vrai user au frontend
+                    'cpu_time': cputime,
                     'vcpu': ncpu,
                     'max_mem': maxmem / 1024,
                     'used_mem': used_mem_mb,
                     'timestamp': time.time()
                 })
-            except libvirt.libvirtError:
-                continue # La VM a peut-être été supprimée pendant la boucle
+            except libvirt.libvirtError: continue
                 
         return jsonify(vms_stats)
     except Exception as e:
-        return jsonify([])
+        return jsonify({"error": str(e)}), 500
     finally:
         if conn: conn.close()
 
-# --- API CONTROL (START/STOP/DELETE) ---
+# --- API CONTROL ---
 @app.route('/api/vm/<name>/<action>', methods=['POST'])
 def vm_action(name, action):
     conn = get_libvirt_conn()
+    if not conn: return jsonify({'success': False, 'msg': 'KVM Down'}), 500
+    
     try:
         dom = conn.lookupByName(name)
-        
-        if action == 'start' and not dom.isActive():
-            dom.create()
-            
+        if action == 'start' and not dom.isActive(): dom.create()
         elif action == 'stop' and dom.isActive():
-            try:
-                dom.destroy() # Arrêt forcé (plus fiable pour un lab)
+            try: dom.destroy()
             except: pass
-            
         elif action == 'delete':
-            if dom.isActive():
-                dom.destroy()
+            if dom.isActive(): dom.destroy()
             dom.undefine()
-            # Nettoyage optionnel du disque local
             try: os.remove(f"{VM_STORAGE_DIR}/{name}.qcow2")
             except: pass
             
+            # Nettoyage métadonnées
+            meta = load_metadata()
+            if name in meta:
+                del meta[name]
+                save_metadata(meta)
+            
         return jsonify({'success': True})
-    except Exception as e:
-        return jsonify({'success': False, 'msg': str(e)}), 500
+    except Exception as e: return jsonify({'success': False, 'msg': str(e)}), 500
     finally:
-        conn.close()
+        if conn: conn.close()
 
-# --- DEPLOY (PIPELINE DE CRÉATION) ---
+# --- DEPLOY ---
 @app.route('/deploy', methods=['POST'])
 def deploy():
     conn = None
     try:
-        # 1. Récupération & Validation
         hostname = request.form['hostname']
         username = request.form['username']
         password = request.form['password']
@@ -141,46 +154,40 @@ def deploy():
         disk_size = int(request.form['disk'])
         os_type = request.form.get('os_type', 'ubuntu')
 
-        # Sécurité (Sanitization)
         if not re.match(r'^[a-zA-Z0-9-]+$', hostname): return "Hostname invalide", 400
         if not re.match(r'^[a-z0-9-]+$', username): return "Username invalide", 400
 
-        # Vérification espace disque
-        total, used, free = shutil.disk_usage(VM_STORAGE_DIR)
-        needed = disk_size * 1024**3
-        if free < needed: return "Espace disque insuffisant sur le serveur", 507
+        # Sauvegarde du propriétaire pour plus tard
+        meta = load_metadata()
+        meta[hostname] = {'user': username, 'created_at': time.time()}
+        save_metadata(meta)
 
         base_image_path = OS_IMAGES.get(os_type, OS_IMAGES['ubuntu'])
 
-        # 2. Gestion SSH (AWS Style)
+        # SSH Logic
         ssh_method = request.form.get('ssh_method')
         final_ssh_pub_key = ""
         generated_key_path = None
 
         if ssh_method == 'paste':
             final_ssh_pub_key = request.form.get('ssh_key_paste', '').strip()
-            
         elif ssh_method == 'generate':
             key_name = request.form.get('ssh_key_name', '').strip()
-            if not key_name: return "Nom de clé manquant", 400
+            if not key_name: return "Nom clé manquant", 400
             
             priv_path = os.path.join(KEYS_DIR, key_name)
             pub_path = priv_path + ".pub"
-            
-            # Génération
             subprocess.run(['ssh-keygen', '-q', '-t', 'rsa', '-b', '2048', '-N', '', '-f', priv_path], check=True)
             
-            # Correction des droits (pour que l'utilisateur non-root puisse télécharger plus tard)
             real_user = int(os.environ.get('SUDO_UID', os.getuid()))
             real_group = int(os.environ.get('SUDO_GID', os.getgid()))
             os.chown(priv_path, real_user, real_group)
             os.chown(pub_path, real_user, real_group)
-            os.chmod(priv_path, 0o600) # Sécurité SSH
+            os.chmod(priv_path, 0o600)
             
             with open(pub_path, 'r') as f: final_ssh_pub_key = f.read().strip()
-            generated_key_path = key_name # Signal pour le frontend
+            generated_key_path = key_name
 
-        # 3. Check Anti-Conflit
         conn = get_libvirt_conn()
         try:
             conn.lookupByName(hostname)
@@ -190,40 +197,34 @@ def deploy():
         finally: 
             if conn: conn.close()
 
-        # 4. Cloud-init & Fichiers
         request_id = str(uuid.uuid4())[:8]
         vm_disk = f"{VM_STORAGE_DIR}/{hostname}.qcow2"
         seed_iso = f"{GEN_DIR}/{hostname}-seed.iso"
         user_data = f"{GEN_DIR}/{hostname}-user-data"
         meta_data = f"{GEN_DIR}/{hostname}-meta-data"
         
-        # Création du disque (Copy-On-Write)
         subprocess.run(["qemu-img", "create", "-f", "qcow2", "-F", "qcow2", "-b", base_image_path, vm_disk, f"{disk_size}G"], check=True)
         
         ssh_block = f"\n      - {final_ssh_pub_key}" if final_ssh_pub_key else ""
         
-        # Configuration Cloud-init TURBO
         ud_content = f"""#cloud-config
 hostname: {hostname}
 manage_etc_hosts: true
 users:
   - default
   - name: {username}
-    passwd: {password}
     groups: sudo
     shell: /bin/bash
     lock_passwd: false
+    sudo: ALL=(ALL) NOPASSWD:ALL
     ssh_authorized_keys:{ssh_block}
-
-# Sécurité & Accès
+chpasswd:
+  list: |
+    {username}:{password}
+  expire: true
 ssh_pwauth: true
-chpasswd: {{ expire: true }}
-
-# OPTIMISATIONS (Mode Turbo)
 package_update: false
 package_upgrade: false
-
-# Forçage Réseau (Netplan V2)
 write_files:
   - path: /etc/netplan/99-custom.yaml
     content: |
@@ -232,7 +233,6 @@ write_files:
         ethernets:
           main: {{match: {{name: "e*"}}, dhcp4: true}}
     permissions: '0600'
-
 runcmd:
   - netplan apply
   - systemctl start qemu-guest-agent
@@ -240,10 +240,8 @@ runcmd:
         with open(user_data, 'w') as f: f.write(ud_content)
         with open(meta_data, 'w') as f: f.write(f"instance-id: {hostname}\nlocal-hostname: {hostname}")
         
-        # Création de l'ISO Seed
         subprocess.run(["cloud-localds", seed_iso, user_data, meta_data], check=True)
 
-        # 5. Lancement VM
         variant = "ubuntu22.04" if os_type == 'ubuntu' else "debian11"
         subprocess.run([
             "virt-install", f"--name={hostname}", f"--vcpus={vcpu}", f"--memory={ram}",
@@ -253,55 +251,23 @@ runcmd:
             "--network", "network=default,model=virtio"
         ], check=True)
 
-        return render_template('success.html', hostname=hostname, key_download=generated_key_path)
+        return jsonify({'success': True, 'msg': 'Déploiement initié', 'key_file': generated_key_path})
 
     except Exception as e: return str(e), 500
 
-# --- TÉLÉCHARGEMENT CLÉ (AWS STYLE : SUPPRESSION APRÈS ENVOI) ---
 @app.route('/download_key/<filename>')
 def download_key(filename):
     file_path = os.path.join(KEYS_DIR, filename)
+    if not os.path.exists(file_path): return "Erreur", 404
     
-    if not os.path.exists(file_path):
-        return "Erreur : La clé a déjà été téléchargée (Sécurité One-Shot) ou n'existe pas.", 404
-
-    # Lecture en RAM
     return_data = io.BytesIO()
-    with open(file_path, 'rb') as fo:
-        return_data.write(fo.read())
+    with open(file_path, 'rb') as fo: return_data.write(fo.read())
     return_data.seek(0)
-
-    # Suppression du disque (C'est ici qu'on respecte le modèle AWS)
+    
     os.remove(file_path)
-    try: os.remove(file_path + ".pub") # On nettoie aussi la publique
+    try: os.remove(file_path + ".pub")
     except: pass
-
-    return send_file(
-        return_data,
-        as_attachment=True,
-        download_name=filename,
-        mimetype='application/x-pem-file'
-    )
+    return send_file(return_data, as_attachment=True, download_name=filename, mimetype='application/x-pem-file')
 
 if __name__ == '__main__':
-    # 0.0.0.0 = Accessible par tout le monde sur le réseau
     app.run(host='0.0.0.0', port=5000, debug=True)
-
-### Comment préparer ta Démo en Classe :
-"""
-1.  **Connecte ton PC** au réseau de la salle (Wifi ou Câble).
-2.  **Trouve ton IP locale** :
-    ```bash
-    ip a | grep inet
-    ```
-    *(Note l'adresse qui ressemble à 192.168.x.x ou 10.x.x.x)*.
-3.  **Lance le serveur** :
-    ```bash
-    sudo python3 app.py
-    ```
-4.  **Invite le jury** à se connecter depuis leur propre PC :
-    * URL : `http://<TON_IP>:5000`
-5.  **Fais le show !** Ils cliquent sur leur écran, et la VM apparaît sur le tien (et dans leur liste).
-
-C'est simple, efficace, et ça marche à tous les coups. Bonne chance ! 🚀
-""" 
