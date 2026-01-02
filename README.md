@@ -1,138 +1,79 @@
-# ☁️ NEXUS CLOUD - Orchestrateur IaaS
+ # ☁️ XICK CLOUD - Orchestrateur IaaS Premium
 
-Un mini-cloud privé complet permettant de déployer, gérer et monitorer des instances virtuelles (Ubuntu/Debian) en quelques secondes.
+XICK Cloud est un orchestrateur de datacenter privé permettant de déployer, gérer et monitorer des instances virtuelles (Ubuntu/Debian) avec une expérience utilisateur fluide et moderne.
+# ✨ Points Forts
 
----
+    🚀 Provisioning Ultra-Rapide : Déploiement d'instances prêtes à l'emploi en ~30 secondes grâce à l'optimisation Cloud-init & disques COW (Copy-On-Write).
 
-## ✨ Points Forts
+    🔒 Sécurité Native : Gestion granulaire des clés SSH, injection de configurations réseau via Netplan et isolation par hyperviseur.
 
-* 🚀 **Provisioning Turbo** : Déploiement en ~30 secondes (Optimisation Cloud-init & Netplan).
-* 🔒 **Sécurité Avancée** : Gestion automatique des clés SSH et expiration forcée des mots de passe.
-* 📊 **Monitoring Réel** : Tableau de bord temps réel (CPU Différentiel, RAM RSS).
-* 🎨 **Interface Moderne** : Design Glassmorphism, entièrement responsive.
-* 🔌 **Mode Offline** : Toutes les librairies (Bootstrap, Chart.js) sont incluses. Aucune connexion internet requise pour l'interface.
+    📊 Monitoring Temps Réel : Dashboard dynamique affichant la charge CPU réelle (calcul différentiel) et l'utilisation RAM RSS précise.
 
----
+    🎨 Interface Next-Gen : Design "Dark Mode" haute fidélité, responsive et conçu pour la clarté opérationnelle.
 
-## 🛠️ Installation
+    🔌 Zéro Dépendance Web : Entièrement autonome. Toutes les librairies (Bootstrap, FontAwesome, Chart.js) sont embarquées localement pour fonctionner en réseau isolé.
 
-Ce projet nécessite une machine Linux (Ubuntu/Debian) avec l'hyperviseur KVM.
+# 🛠️ Pré-requis & Installation
 
-### 1. Cloner le dépôt
+Ce projet nécessite une machine Linux (Ubuntu/Debian conseillé) avec le support de la virtualisation matérielle (VT-x/AMD-V).
+1. Clonage du projet
+Bash
 
-```bash
-git clone https://github.com/schawil/nexus-cloud.git
-cd nexus-cloud
-```
+git clone https://github.com/astuce55/XickCloud.git
+cd xick-cloud
 
-### 2. Lancer l'installation automatique
+2. Configuration automatique du système
 
-Ce script installe KVM, configure le réseau et télécharge les images Cloud officielles (Ubuntu & Debian).
+Le script de setup configure l'environnement KVM, crée les ponts réseaux et prépare les images de base (Gold Images).
+Bash
 
-```bash
 chmod +x setup.sh  
 sudo ./setup.sh
-```
 
-> **Note** : Une fois l'installation terminée, il est conseillé de redémarrer votre session pour appliquer les droits de groupe.
+    Important : Redémarrez votre session utilisateur après le script pour valider l'appartenance au groupe libvirt.
 
-### 3. Démarrer le serveur
+3. Lancement de l'orchestrateur
+Bash
 
-```bash
 sudo python3 app.py
-```
 
-L'application est accessible localement sur : **`http://localhost:5000`**
+Accès à l'interface : http://localhost:5000
+# 📱 Démonstration & Présentation 
 
----
+XICK Cloud est conçu pour être présenté facilement sur un réseau local.
 
-## 📱 Accès Distant & Démonstration
+    Connectez le PC serveur au réseau local (Wifi ou Ethernet).
 
-Pour présenter le projet au jury ou accéder à l'interface depuis un autre appareil (Smartphone, Laptop), suivez cette procédure :
+    Récupérez l'IP du serveur avec la commande hostname -I.
 
-### 1. Connecte ton PC au réseau de la salle
+    Connectez-vous depuis n'importe quel autre appareil (tablette, laptop) via : http://<IP_SERVEUR>:5000.
 
-Wifi ou Câble.
+# 🏗️ Architecture Technique
+Composant	Technologie	Rôle
+Core Engine	Python Flask	Gestion des routes API et pilotage de la libvirt.
+Virtualisation	KVM / QEMU	Virtualisation de type 1 pour des performances natives.
+Storage	QCOW2	Gestion intelligente du stockage (Snapshots & Backing files).
+Monitoring	Libvirt-python	Collecte des métriques CPU (Nanosecondes) et RAM (RSS).
+Frontend	HTML5 / CSS / JS	Interface moderne sans dépendances externes (Full local).
+# 🔑 Accès aux Instances
 
-### 2. Trouve ton IP locale
+Toutes les instances sont créées avec l'utilisateur défini lors du déploiement.
 
-Ouvrez un terminal et identifiez votre adresse IPv4 (ex: `192.168.x.x`) :
+Exemple de connexion avec clé SSH générée :
 
-```bash
-hostname -I
-```
+    Téléchargez la clé depuis l'interface après création.
 
-> Note l'adresse qui ressemble à `192.168.x.x` ou `10.x.x.x`.
+    Appliquez les permissions de sécurité : chmod 600 la-cle.pem
 
-### 3. Lance le serveur
+    Connectez-vous : ssh -i la-cle.pem utilisateur@ip_de_la_vm
 
-```bash
-sudo python3 app.py
-```
+# 👤 Auteur
 
-### 4. Invite le jury à se connecter depuis leur propre PC
+    @Xponentiel- Lead Developer & Architecte Cloud
 
-Sur l'appareil distant, ouvrez le navigateur et tapez : **`http://<TON_IP>:5000`**
+# 📄 Licence
 
-### 5. Fais le show ! 🚀
+Projet distribué sous licence MIT. Libre pour toute modification ou contribution.
+# Une question ?
 
-Ils cliquent sur leur écran, et la VM apparaît sur le tien (et dans leur liste). C'est simple, efficace, et ça marche à tous les coups.
-
----
-
-## 🔑 Guide de Connexion SSH
-
-NEXUS Cloud génère les clés SSH côté serveur pour garantir la sécurité.
-
-1. Lors de la création d'une VM, choisissez **"Générer une clé"**.
-2. Votre navigateur va télécharger un fichier (ex: `ma-cle-projet`).
-3. Ce fichier se trouve dans votre dossier **Téléchargements** (`~/Downloads`).
-
-### Pour vous connecter :
-
-Ouvrez un terminal et tapez :
-
-#### 1. Sécuriser la clé (Obligatoire)
-
-SSH refusera la clé si les permissions sont trop ouvertes.
-
-```bash
-chmod 600 ~/Downloads/ma-cle-projet
-```
-
-#### 2. Connexion
-
-```bash
-ssh -i ~/Downloads/ma-cle-projet admin@ADRESSE_IP
-```
-
-> L'adresse IP est affichée sur le Dashboard une fois la VM démarrée. Remplacez `admin` par le nom d'utilisateur que vous avez défini.
-
----
-
-## 🏗️ Architecture Technique
-
-| Composant         | Technologie        | Description                                                    |
-|------------------ |--------------------|----------------------------------------------------------------|
-| **Backend**       | Python Flask       | API REST et bindings `libvirt-python`                          |
-| **Hyperviseur**   | KVM / QEMU         | Virtualisation matérielle, disques `qcow2` (Backing Files)     |
-| **Frontend**      | HTML5 / JS         | Bootstrap 5 & Chart.js (Mode Local)                            |
-| **Orchestration** | Cloud-init         | Injection dynamique User Data & Meta Data via ISO              |
-
----
-
-## 👤 Auteur
-
-* **@schawil** - Initial work & Maintainer
-
----
-
-## 📄 Licence
-
-Ce projet est sous licence libre. N'hésitez pas à contribuer !
-
----
-
-## 🙏 Remerciements
-
-Merci à la communauté open-source pour les outils formidables (KVM, Cloud-init, Flask) qui rendent ce projet possible.
+N'hésite pas à me solliciter pour ajouter une section spécifique ou détailler un point technique particulier !
