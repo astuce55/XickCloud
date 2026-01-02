@@ -2,487 +2,139 @@
 <html lang="fr" data-bs-theme="dark">
 <head>
     <meta charset="UTF-8">
-    <title>NEXUS | Datacenter</title>
+    <title>XICK | Cloud Datacenter</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
-    <!-- FAVICON -->
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cpath fill='%23E67E22' d='M64 32C28.7 32 0 60.7 0 96v64c0 35.3 28.7 64 64 64H448c35.3 0 64-28.7 64-64V96c0-35.3-28.7-64-64-64H64zM96 96a32 32 0 1 1 0 64 32 32 0 1 1 0-64zm320 32c17.7 0 32 14.3 32 32s-14.3 32-32 32-32-14.3-32-32 14.3-32 32-32zM64 288c-35.3 0-64 28.7-64 64v64c0 35.3 28.7 64 64 64H448c35.3 0 64-28.7 64-64V352c0-35.3-28.7-64-64-64H64zM96 352a32 32 0 1 1 0 64 32 32 0 1 1 0-64zm320 32c17.7 0 32 14.3 32 32s-14.3 32-32 32-32-14.3-32-32 14.3-32 32-32z'/%3E%3C/svg%3E">
-    
-    <!-- RESSOURCES -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
-    <!-- Mode Offline (Décommenter pour le rendu final) -->
-    <!--
-    <link href="{{ url_for('static', filename='css/all.min.css') }}" rel="stylesheet">
-    <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
-    <script src="{{ url_for('static', filename='js/chart.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
-    -->
-    
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap');
-        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
-
-        :root {
-            --prox-header: #333646; --prox-sidebar: #272935; --prox-body: #131419;
-            --prox-panel: #1c1e26; --prox-border: #383b4a; --prox-orange: #E67E22;
-            --prox-blue: #3892F3; --prox-green: #21BF4B; --prox-red: #FF6B6B;
-            --prox-text: #d4d4d4; --prox-text-muted: #84868d;
-        }
-
-        body { font-family: 'Open Sans', sans-serif; background-color: var(--prox-body); color: var(--prox-text); height: 100vh; overflow: hidden; font-size: 0.85rem; }
-        .app-container { display: grid; grid-template-columns: 240px 1fr; grid-template-rows: 50px 1fr; height: 100vh; }
-        
-        /* HEADER & SIDEBAR */
-        .app-header { grid-column: 1 / -1; background-color: var(--prox-header); border-bottom: 1px solid var(--prox-border); display: flex; align-items: center; justify-content: space-between; padding: 0 15px; }
-        .brand { font-weight: 700; font-size: 1.1rem; color: #fff; display: flex; align-items: center; gap: 10px; }
-        .app-sidebar { background-color: var(--prox-sidebar); border-right: 1px solid var(--prox-border); overflow-y: auto; padding: 10px 0; }
-        .tree-item { padding: 6px 15px; display: flex; align-items: center; gap: 8px; cursor: pointer; color: var(--prox-text); border-left: 3px solid transparent; transition: background 0.1s; }
-        .tree-item:hover { background-color: rgba(255,255,255,0.05); }
-        .tree-item.vm-running { color: #fff; }
-        .tree-item.vm-running .vm-icon { color: var(--prox-green); text-shadow: 0 0 5px rgba(33, 191, 75, 0.4); }
-        
-        /* MAIN & PANELS */
-        .app-main { background-color: var(--prox-body); overflow-y: auto; padding: 20px; position: relative; }
-        .pve-panel { background-color: var(--prox-panel); border: 1px solid var(--prox-border); border-radius: 3px; margin-bottom: 20px; }
-        .pve-header { background-color: #23252d; border-bottom: 1px solid var(--prox-border); padding: 8px 15px; font-weight: 600; font-size: 0.9rem; display: flex; justify-content: space-between; align-items: center; }
-        .pve-body { padding: 15px; }
-
-        /* PROGRESS BAR TOP */
-        #global-progress {
-            position: absolute; top: 0; left: 0; width: 100%; height: 3px;
-            background: transparent; z-index: 999; display: none;
-        }
-        #global-progress .bar {
-            height: 100%; width: 100%;
-            background: linear-gradient(90deg, transparent, var(--prox-blue), transparent);
-            animation: loading-scan 1.5s infinite linear;
-        }
-        @keyframes loading-scan { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
-
-        /* STATS & TABLE */
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
-        .stat-box { background: rgba(0,0,0,0.2); border: 1px solid var(--prox-border); padding: 10px; border-radius: 3px; }
-        .pve-table { width: 100%; border-collapse: collapse; }
-        .pve-table th { text-align: left; color: var(--prox-text-muted); font-size: 0.75rem; text-transform: uppercase; padding: 8px 10px; border-bottom: 2px solid var(--prox-border); }
-        .pve-table td { padding: 8px 10px; border-bottom: 1px solid var(--prox-border); vertical-align: middle; }
-        .pve-table tr:hover td { background-color: rgba(255,255,255,0.03); }
-        .clickable-row { cursor: pointer; color: var(--prox-blue); font-weight: bold; transition: color 0.2s; }
-        .clickable-row:hover { color: #fff; text-decoration: underline; }
-
-        /* BUTTONS & BADGES */
-        .status-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 0.75rem; font-weight: 600; width: 90px; }
-        .dot { width: 8px; height: 8px; border-radius: 50%; }
-        .running .dot { background-color: var(--prox-green); box-shadow: 0 0 5px var(--prox-green); }
-        .stopped .dot { background-color: #666; }
-        
-        .btn-pve { background: var(--prox-blue); color: white; border: none; padding: 6px 15px; border-radius: 3px; font-weight: 600; font-size: 0.8rem; display: inline-flex; align-items: center; gap: 6px; transition: 0.2s; }
-        .btn-pve:hover { background: #2b7de0; color: white; }
-        
-        .btn-icon { background: transparent; border: 1px solid var(--prox-border); color: var(--prox-text); width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; border-radius: 3px; cursor: pointer; transition: 0.2s; }
-        .btn-icon:hover { background: #fff; color: #000; }
-        .btn-icon.start:hover { color: black; background: var(--prox-green); }
-        .btn-icon.stop:hover { color: white; background: var(--prox-orange); }
-        .btn-icon.delete:hover { color: white; background: var(--prox-red); }
-        .btn-icon.console:hover { color: black; background: #facc15; }
-
-        /* UTILS */
-        .progress-slim { height: 6px; background: #111; border-radius: 2px; overflow: hidden; width: 100px; }
-        .progress-bar { transition: width 0.5s; }
-        .modal-content { background-color: var(--prox-panel); border: 1px solid var(--prox-border); }
-        .form-control, .form-select { background-color: #111; border: 1px solid var(--prox-border); color: var(--prox-text); font-size: 0.85rem; }
-        .form-control:focus { background-color: #111; border-color: var(--prox-blue); color: white; box-shadow: none; }
-        #error-banner { display:none; background: var(--prox-red); color:white; padding:10px; text-align:center; margin-bottom:15px; border-radius:3px; }
-        .toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 9999; }
-        
-        /* GRAPHS */
-        .detail-graph-box { background: #0b0c10; border: 1px solid #333; padding: 10px; border-radius: 4px; height: 180px; }
-        .graph-label { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--prox-green); margin-bottom: 5px; display:block; }
-    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../static/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../static/css/style.css">
 </head>
 <body>
 
 <div class="app-container">
-    <header class="app-header">
-        <div class="brand">
-            <i class="fas fa-server fa-lg" style="color: var(--prox-orange);"></i> NEXUS <span>CLOUD</span>
-        </div>
-        <div class="d-flex align-items-center gap-3">
-            <div class="text-muted small"><i class="fas fa-user-shield me-2"></i>Admin</div>
-            <button class="btn-pve" data-bs-toggle="modal" data-bs-target="#createVMModal"><i class="fas fa-plus"></i> Créer VM</button>
-        </div>
-    </header>
-
     <aside class="app-sidebar">
-        <div class="tree-header">Datacenter</div>
-        <div class="tree-item active"><i class="fas fa-hdd"></i> <span>Cluster Local</span></div>
-        <div class="tree-header mt-2">Instances</div>
-        <div id="sidebar-vm-list"></div>
+        <div class="brand-logo"><i class="fas fa-bolt"></i></div>
+        <nav class="side-nav">
+            <a href="#" class="side-icon active"><i class="fas fa-th-large"></i></a>
+            <a href="#" class="side-icon"><i class="fas fa-server"></i></a>
+            <a href="#" class="side-icon"><i class="fas fa-cog"></i></a>
+        </nav>
     </aside>
 
     <main class="app-main">
-        <!-- BARRE DE CHARGEMENT DISCRETE (TOP) -->
-        <div id="global-progress"><div class="bar"></div></div>
-
-        <div id="error-banner"></div>
-        
-        <div class="pve-panel">
-            <div class="pve-header">
-                <span><i class="fas fa-tachometer-alt me-2"></i>Ressources Globales</span>
+        <header class="top-bar">
+            <div class="brand-text">XICK<span>CLOUD</span></div>
+            <div class="header-actions d-flex align-items-center gap-3">
+                <div class="search-wrapper">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchInput" onkeyup="filterVMs()" placeholder="Rechercher...">
+                </div>
+                <button class="btn-xick" data-bs-toggle="modal" data-bs-target="#deployModal">
+                    <i class="fas fa-rocket me-2"></i> Déployer
+                </button>
             </div>
-            <div class="pve-body">
-                <div class="stats-grid">
-                    <div class="stat-box">
-                        <div class="stat-title">CPU</div>
-                        <div class="stat-value" id="global-cpu">0%</div>
-                        <div class="progress mt-2" style="height: 4px; background: #333;"><div class="progress-bar bg-primary" id="bar-cpu" style="width: 0%"></div></div>
-                    </div>
-                    <div class="stat-box">
-                        <div class="stat-title">RAM</div>
-                        <div class="stat-value" id="global-ram">0 GiB</div>
-                        <div class="progress mt-2" style="height: 4px; background: #333;"><div class="progress-bar bg-warning" id="bar-ram" style="width: 0%"></div></div>
-                    </div>
-                    <div class="stat-box">
-                        <div class="stat-title">VMs Actives</div>
-                        <div class="stat-value text-success" id="global-running">0</div>
-                    </div>
+        </header>
+
+        <div class="row g-4 mb-4">
+            <div class="col-md-4">
+                <div class="stat-card">
+                    <span class="label">CHARGE CPU CLUSTER</span>
+                    <h2 id="global-cpu">0%</h2>
+                    <div class="progress-xick"><div id="bar-cpu" class="bar primary" style="width: 0%"></div></div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-card">
+                    <span class="label">RAM UTILISÉE</span>
+                    <h2 id="global-ram">0 GiB</h2>
+                    <div id="loader" class="spinner-border spinner-border-sm text-primary float-end" style="visibility:hidden"></div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-card">
+                    <span class="label text-success">VMs EN LIGNE</span>
+                    <h2 id="global-running" class="text-success">0</h2>
                 </div>
             </div>
         </div>
 
-        <div class="pve-panel">
-            <div class="pve-header">
-                <span><i class="fas fa-list me-2"></i>Gestion des Instances</span>
-                <input type="text" id="searchInput" placeholder="Filtrer..." style="background: #111; border: 1px solid #444; color: white; padding: 2px 8px; border-radius: 3px; font-size: 0.8rem; width: 200px;">
-            </div>
-            <div id="empty-state" class="text-center py-5 text-muted" style="display:none;"><i class="fas fa-cubes fa-3x mb-3"></i><br>Aucune VM déployée.</div>
-            <table class="pve-table" id="vm-table">
-                <thead><tr><th style="width: 50px;">ID</th><th>Nom</th><th>État</th><th>IP (LAN)</th><th>CPU</th><th>RAM</th><th style="text-align: right;">Actions</th></tr></thead>
+        <section class="vm-section">
+            <table class="xick-table">
+                <thead>
+                    <tr>
+                        <th>INSTANCE</th>
+                        <th>UTILISATEUR</th>
+                        <th>ADRESSE IP</th>
+                        <th>RESSOURCES</th>
+                        <th>STATUT</th>
+                        <th class="text-end">ACTIONS</th>
+                    </tr>
+                </thead>
                 <tbody id="vm-table-body"></tbody>
             </table>
-        </div>
+        </section>
     </main>
 </div>
 
-<!-- TOASTS -->
-<div class="toast-container"></div>
-
-<!-- MODALS -->
-<!-- DETAILS -->
-<div class="modal fade" id="detailsModal" tabindex="-1">
+<div class="modal fade" id="deployModal" tabindex="-1">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
-            <div class="modal-header"><h6 class="modal-title m-0 font-monospace text-primary" id="detail-title">MONITORING</h6><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
-            <div class="modal-body bg-dark">
-                <div class="row g-3">
-                    <div class="col-12"><span class="graph-label">CPU % - <span id="det-cpu-val" class="text-white">0%</span></span><div class="detail-graph-box"><canvas id="detailCpuChart"></canvas></div></div>
-                    <div class="col-12"><span class="graph-label" style="color: var(--prox-orange)">RAM (RSS) - <span id="det-ram-val" class="text-white">0 MiB</span></span><div class="detail-graph-box"><canvas id="detailRamChart"></canvas></div></div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- CREATE -->
-<div class="modal fade" id="createVMModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header"><h6 class="modal-title m-0">Nouvelle Machine Virtuelle</h6><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
-            <div class="modal-body">
-                <form id="createForm">
+            <form id="deployForm" onsubmit="handleDeploy(event)">
+                <div class="modal-body p-4">
+                    <h5 class="mb-4 text-white"><i class="fas fa-plus-circle me-2"></i>Nouveau Serveur Cloud</h5>
                     <div class="row g-3">
-                        <div class="col-md-6"><label class="form-label">Hostname</label><input type="text" name="hostname" class="form-control" required placeholder="srv-web-01"></div>
-                        <div class="col-md-6"><label class="form-label">Image ISO</label><select name="os_type" class="form-select"><option value="ubuntu">Ubuntu 22.04 LTS</option><option value="debian">Debian 12</option></select></div>
-                        <div class="col-md-6"><label class="form-label">Utilisateur</label><input type="text" name="username" class="form-control" value="admin" required></div>
-                        <div class="col-md-6"><label class="form-label">Mot de Passe</label><input type="password" name="password" class="form-control" required placeholder="Temporaire..."><div class="form-text text-warning" style="font-size: 0.7rem;">Expire à la 1ère connexion</div></div>
-                        <div class="col-12"><hr class="border-secondary"></div>
-                        <div class="col-4"><label class="form-label">vCPU</label><input type="number" name="vcpu" class="form-control" value="2" max="3"></div>
-                        <div class="col-4"><label class="form-label">RAM (MB)</label><input type="number" name="ram" class="form-control" value="2048" max="4096"></div>
-                        <div class="col-4"><label class="form-label">Disk (GB)</label><input type="number" name="disk" class="form-control" value="10" max="50"></div>
-                        
-                        <div class="col-12 mt-3 p-2 border border-secondary rounded bg-dark">
-                            <label class="form-label mb-2">Clé SSH</label>
-                            <div class="d-flex gap-3">
-                                <div class="form-check"><input type="radio" name="ssh_method" value="generate" id="ssh_gen" checked onclick="toggleSSH('gen')"><label for="ssh_gen">Générer</label></div>
-                                <div class="form-check"><input type="radio" name="ssh_method" value="paste" id="ssh_paste" onclick="toggleSSH('paste')"><label for="ssh_paste">Coller</label></div>
-                                <div class="form-check"><input type="radio" name="ssh_method" value="none" id="ssh_none" onclick="toggleSSH('none')"><label for="ssh_none">Aucune</label></div>
-                            </div>
-                            <div id="ssh-gen-area" class="mt-2"><input name="ssh_key_name" class="form-control form-control-sm" placeholder="Nom fichier clé"></div>
-                            <div id="ssh-paste-area" class="mt-2" style="display:none"><input name="ssh_key_paste" class="form-control form-control-sm" placeholder="ssh-rsa ..."></div>
+                        <div class="col-md-6">
+                            <label class="small text-muted">Hostname</label>
+                            <input type="text" name="hostname" class="form-control" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="small text-muted">Image OS</label>
+                            <select name="os_type" class="form-select">
+                                <option value="ubuntu">Ubuntu 22.04 LTS</option>
+                                <option value="debian">Debian 12</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="small text-muted">Utilisateur</label>
+                            <input type="text" name="username" class="form-control" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="small text-muted">Mot de passe</label>
+                            <input type="password" name="password" class="form-control" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="small text-muted">vCPUs</label>
+                            <input type="number" name="vcpu" value="1" min="1" class="form-control">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="small text-muted">RAM (MiB)</label>
+                            <input type="number" name="ram" value="1024" min="512" class="form-control">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="small text-muted">Disque (GB)</label>
+                            <input type="number" name="disk" value="10" min="5" class="form-control">
+                        </div>
+                        <div class="col-12">
+                            <label class="small text-muted">Clé SSH</label>
+                            <select name="ssh_method" class="form-select" onchange="document.getElementById('ssh-area').style.display = (this.value === 'paste') ? 'block' : 'none';">
+                                <option value="none">Aucune (Mot de passe)</option>
+                                <option value="paste">Coller une clé publique</option>
+                            </select>
+                        </div>
+                        <div class="col-12" id="ssh-area" style="display:none;">
+                            <textarea name="ssh_key_paste" class="form-control mt-2" rows="3"></textarea>
                         </div>
                     </div>
-                    <div class="mt-4 text-end"><button type="submit" class="btn-pve" id="btn-deploy">Créer</button></div>
-                </form>
-            </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-dark" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" id="deployBtn" class="btn-xick">Démarrer le déploiement</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
 
-<!-- CONSOLE -->
-<div class="modal fade" id="consoleModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header bg-black"><h6 class="modal-title font-monospace text-success">_TERMINAL</h6><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
-            <div class="modal-body bg-black font-monospace text-light">
-                <div class="mb-3"><label class="text-secondary small">SSH</label><div class="input-group input-group-sm"><input id="ssh-cmd" class="form-control bg-dark text-success border-secondary" readonly><button class="btn btn-outline-secondary" onclick="copyToClip('ssh-cmd', this)"><i class="far fa-copy"></i></button></div></div>
-                <div class="text-muted small">> sudo virsh console <span id="virsh-vm-name" class="text-warning"></span></div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- JAVASCRIPT INTÉGRÉ -->
-<script>
-    // --- UTILS ---
-    function toggleSSH(m) {
-        document.getElementById('ssh-paste-area').style.display = (m === 'paste') ? 'block' : 'none';
-        document.getElementById('ssh-gen-area').style.display = (m === 'gen') ? 'block' : 'none';
-    }
-
-    // --- CORRECTION COPIE PRESSE-PAPIER (ROBUSTE) ---
-    function copyToClip(id, btn) {
-        const copyText = document.getElementById(id);
-        copyText.select();
-        copyText.setSelectionRange(0, 99999); // Mobile
-        
-        try {
-            // Méthode Legacy (Marche en HTTP)
-            const successful = document.execCommand('copy');
-            if(successful) {
-                const originalHtml = btn.innerHTML;
-                btn.innerHTML = '<i class="fas fa-check text-success"></i>';
-                setTimeout(() => btn.innerHTML = originalHtml, 1500);
-            } else {
-                alert("Erreur copie. Faites Ctrl+C");
-            }
-        } catch (err) {
-            alert("Erreur copie. Faites Ctrl+C");
-        }
-    }
-    
-    // --- TOAST SYSTEM (Notifications) ---
-    function showToast(message, type='success') {
-        const container = document.querySelector('.toast-container');
-        const color = type === 'error' ? 'bg-danger' : 'bg-success';
-        const icon = type === 'error' ? 'fa-exclamation-circle' : 'fa-check-circle';
-        
-        const html = `
-        <div class="toast align-items-center text-white ${color} border-0" role="alert" aria-live="assertive" aria-atomic="true">
-          <div class="d-flex">
-            <div class="toast-body">
-              <i class="fas ${icon} me-2"></i> ${message}
-            </div>
-            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-          </div>
-        </div>`;
-        
-        const el = document.createElement('div');
-        el.innerHTML = html;
-        const toastEl = el.firstElementChild;
-        container.appendChild(toastEl);
-        const toast = new bootstrap.Toast(toastEl, { delay: 5000 });
-        toast.show();
-        toastEl.addEventListener('hidden.bs.toast', () => toastEl.remove());
-    }
-
-    // --- FORM HANDLING (AJAX DEPLOY) ---
-    document.getElementById('createForm').addEventListener('submit', function(e) {
-        e.preventDefault(); 
-        bootstrap.Modal.getInstance(document.getElementById('createVMModal')).hide();
-        const progress = document.getElementById('global-progress');
-        progress.style.display = 'block';
-        showToast("Création de la VM en cours...", 'success');
-
-        const formData = new FormData(this);
-        fetch('/deploy', { method: 'POST', body: formData })
-        .then(r => r.json())
-        .then(data => {
-            if (data.success) {
-                showToast(`VM déployée ! Démarrage...`, 'success');
-                if (data.key_file) window.location.href = `/download_key/${data.key_file}`;
-                this.reset();
-                fetchStats();
-            } else {
-                showToast("Erreur: " + data.msg, 'error');
-            }
-        })
-        .catch(err => showToast("Erreur de connexion serveur", 'error'))
-        .finally(() => { progress.style.display = 'none'; });
-    });
-
-    // --- CONSOLE & CONTROL ---
-    function showConsole(n, ip, user) {
-        document.getElementById('virsh-vm-name').innerText = n;
-        const userPart = user && user !== 'root' ? user : 'user';
-        const sshVal = (ip && ip !== 'N/A') ? `ssh ${userPart}@${ip}` : 'Waiting IP...';
-        document.getElementById('ssh-cmd').value = sshVal;
-        new bootstrap.Modal(document.getElementById('consoleModal')).show();
-    }
-    
-    function controlVM(name, action, btnElement) {
-        if (action === 'delete' && !confirm(`⚠ SUPPRESSION DÉFINITIVE ⚠\n\nSupprimer "${name}" ?`)) return;
-
-        const originalContent = btnElement.innerHTML;
-        btnElement.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i>';
-        btnElement.disabled = true;
-
-        fetch(`/api/vm/${name}/${action}`, { method: 'POST' })
-            .then(r => r.json())
-            .then(data => {
-                if (data.success) {
-                    const msg = action==='delete' ? 'VM supprimée' : (action==='start'?'VM démarrée':'VM arrêtée');
-                    showToast(msg);
-                    fetchStats();
-                } else {
-                    showToast(data.msg, 'error');
-                }
-            })
-            .catch(err => showToast("Erreur API", 'error'))
-            .finally(() => {
-                setTimeout(() => {
-                    if(btnElement) {
-                        btnElement.innerHTML = originalContent;
-                        btnElement.disabled = false;
-                    }
-                }, 500);
-            });
-    }
-
-    // --- GRAPHS & CORE ---
-    let charts = {}, prevData = {}, vmHistory = {}, detailChartCpu=null, detailChartRam=null, curDetailVM=null;
-    const MAX_HISTORY = 60;
-
-    function openDetails(vmName) {
-        curDetailVM = vmName;
-        document.getElementById('detail-title').innerText = "MONITORING : " + vmName.toUpperCase();
-        const modalEl = document.getElementById('detailsModal');
-        new bootstrap.Modal(modalEl).show();
-        modalEl.addEventListener('shown.bs.modal', () => { initDetailCharts(); updateDetailCharts(); }, { once: true });
-    }
-
-    function initDetailCharts() {
-        if (detailChartCpu) detailChartCpu.destroy();
-        if (detailChartRam) detailChartRam.destroy();
-        const opts = { responsive: true, maintainAspectRatio: false, animation: false, elements: { line: { tension: 0.4 }, point: { radius: 0 } }, scales: { x: { display: false }, y: { beginAtZero: true, grid: { color: '#334155' }, ticks: { color: '#94a3b8' } } }, plugins: { legend: { display: false } } };
-        detailChartCpu = new Chart(document.getElementById('detailCpuChart').getContext('2d'), { type: 'line', data: { labels: [], datasets: [{ data: [], borderColor: '#10b981', backgroundColor: 'rgba(16, 185, 129, 0.2)', fill: true }] }, options: { ...opts, scales: { ...opts.scales, y: { ...opts.scales.y, max: 100 } } } });
-        detailChartRam = new Chart(document.getElementById('detailRamChart').getContext('2d'), { type: 'line', data: { labels: [], datasets: [{ data: [], borderColor: '#f97316', backgroundColor: 'rgba(249, 115, 22, 0.2)', fill: true }] }, options: opts });
-    }
-
-    function updateDetailCharts() {
-        if (!curDetailVM || !vmHistory[curDetailVM] || !detailChartCpu) return;
-        const hist = vmHistory[curDetailVM];
-        detailChartCpu.data.labels = hist.labels; detailChartCpu.data.datasets[0].data = hist.cpu; detailChartCpu.update('none');
-        detailChartRam.data.labels = hist.labels; detailChartRam.data.datasets[0].data = hist.ram; detailChartRam.update('none');
-        if(hist.cpu.length > 0) {
-            document.getElementById('det-cpu-val').innerText = hist.cpu[hist.cpu.length-1] + "%";
-            document.getElementById('det-ram-val').innerText = hist.ram[hist.ram.length-1] + " MiB";
-        }
-    }
-
-    function renderVMs(vms) {
-        let running = vms.filter(v => v.status === 'Running').length;
-        let ramTotal = vms.reduce((acc, v) => acc + (v.status === 'Running' ? v.used_mem : 0), 0) / 1024;
-        let cpuClusterTotal = 0;
-
-        document.getElementById('global-running').innerText = running + " / " + vms.length;
-        document.getElementById('global-ram').innerText = ramTotal.toFixed(2) + " GiB";
-        document.getElementById('empty-state').style.display = vms.length === 0 ? 'block' : 'none';
-
-        const tbody = document.getElementById('vm-table-body');
-        const sidebar = document.getElementById('sidebar-vm-list');
-        tbody.innerHTML = ''; sidebar.innerHTML = '';
-
-        vms.forEach((vm, index) => {
-            let cpu = 0;
-            if (prevData[vm.name]) {
-                const dC = vm.cpu_time - prevData[vm.name].cpu_time;
-                const dT = vm.timestamp - prevData[vm.name].timestamp;
-                if (dT > 0) cpu = ((dC / 1e9) / dT / vm.vcpu) * 100;
-            }
-            prevData[vm.name] = vm;
-            cpu = parseFloat(Math.min(Math.max(cpu, 0), 100).toFixed(1));
-            if(vm.status === 'Running') cpuClusterTotal += cpu;
-
-            if (!vmHistory[vm.name]) vmHistory[vm.name] = { cpu: [], ram: [], labels: [] };
-            const hist = vmHistory[vm.name];
-            hist.labels.push(new Date().toLocaleTimeString());
-            hist.cpu.push(cpu); hist.ram.push(vm.used_mem.toFixed(0));
-            if (hist.labels.length > MAX_HISTORY) { hist.labels.shift(); hist.cpu.shift(); hist.ram.shift(); }
-
-            const isRun = vm.status === 'Running';
-            const statusClass = isRun ? 'running' : 'stopped';
-            const ramPct = vm.max_mem > 0 ? ((vm.used_mem / vm.max_mem) * 100) : 0;
-            
-            const btnPlay = isRun 
-                ? `<button class="btn-icon stop" onclick="controlVM('${vm.name}','stop', this)" title="Arrêter"><i class="fas fa-stop"></i></button>`
-                : `<button class="btn-icon start" onclick="controlVM('${vm.name}','start', this)" title="Démarrer"><i class="fas fa-play"></i></button>`;
-
-            const sideItem = document.createElement('div');
-            sideItem.className = `tree-item vm-${statusClass}`;
-            sideItem.onclick = () => openDetails(vm.name);
-            sideItem.innerHTML = `<i class="fas fa-desktop vm-icon"></i> <span>${100+index} (${vm.name})</span>`;
-            sidebar.appendChild(sideItem);
-
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${100+index}</td>
-                <td class="clickable-row vm-name-cell" onclick="openDetails('${vm.name}')"><i class="fas fa-search me-2 text-muted"></i>${vm.name}</td>
-                <td><div class="status-badge ${statusClass}"><div class="dot"></div> ${vm.status}</div></td>
-                <td class="font-monospace text-muted">${vm.ip || '-'}</td>
-                <td><div class="d-flex gap-2 align-items-center"><div class="progress-slim"><div class="progress-bar bg-primary" style="width:${cpu}%"></div></div><span class="small text-white">${cpu}%</span></div></td>
-                <td><div class="d-flex gap-2 align-items-center"><div class="progress-slim"><div class="progress-bar bg-warning" style="width:${ramPct}%"></div></div><span class="small text-white">${ramPct.toFixed(0)}%</span></div></td>
-                <td class="text-end">${btnPlay}<button class="btn-icon console" onclick="showConsole('${vm.name}','${vm.ip}','${vm.username}')"><i class="fas fa-terminal"></i></button><button class="btn-icon delete" onclick="controlVM('${vm.name}','delete', this)"><i class="fas fa-trash-alt"></i></button></td>
-            `;
-            tbody.appendChild(row);
-        });
-
-        let avgClusterCpu = (vms.length > 0) ? (cpuClusterTotal / vms.length).toFixed(1) : 0;
-        document.getElementById('global-cpu').innerText = avgClusterCpu + "%";
-        document.getElementById('bar-cpu').style.width = Math.min(avgClusterCpu, 100) + "%";
-
-        if(curDetailVM) updateDetailCharts();
-        
-        const term = document.getElementById('searchInput').value.toLowerCase();
-        if(term) {
-            document.querySelectorAll('#vm-table-body tr').forEach(r => {
-                r.style.display = r.querySelector('.vm-name-cell').innerText.toLowerCase().includes(term) ? '' : 'none';
-            });
-        }
-    }
-
-    function fetchStats() {
-        const isLocal = window.location.protocol === 'file:' || window.location.href.startsWith('blob:');
-        if (isLocal) { 
-             renderVMs([
-                 { name: "web-srv", status: "Running", ip: "192.168.122.10", vcpu: 2, max_mem: 2048, used_mem: 1024, cpu_time: Date.now()*1000, timestamp: Date.now()/1000 },
-                 { name: "db-prod", status: "Stopped", ip: "N/A", vcpu: 4, max_mem: 4096, used_mem: 0, cpu_time: 0, timestamp: Date.now()/1000 }
-             ]); return;
-        }
-
-        const loader = document.getElementById('loader');
-        const errorBanner = document.getElementById('error-banner');
-        if(loader) loader.style.visibility = 'visible';
-
-        fetch('/api/monitor')
-            .then(r => { if(!r.ok) throw new Error("HTTP "+r.status); return r.json(); })
-            .then(vms => {
-                if(vms.error) throw new Error(vms.error);
-                if(errorBanner) errorBanner.style.display = 'none';
-                renderVMs(vms);
-            })
-            .catch(e => {
-                console.error("Sync Error:", e);
-                if(errorBanner) { errorBanner.style.display='block'; errorBanner.innerText="Erreur connexion KVM: "+e.message; }
-            })
-            .finally(() => { if(loader) loader.style.visibility = 'hidden'; });
-    }
-
-    setInterval(fetchStats, 2000);
-    fetchStats();
-</script>
-
+<script src="../static/js/bootstrap.bundle.min.js"></script>
+<script src="../static/js/dashbord.js"></script>
 </body>
-</html> 
+</html>

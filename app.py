@@ -23,8 +23,8 @@ os.makedirs(GEN_DIR, exist_ok=True)
 os.makedirs(KEYS_DIR, exist_ok=True)
 
 OS_IMAGES = {
-    'ubuntu': os.path.join(BASE_IMG_DIR, "ubuntu-22.04-server-cloudimg-amd64.img"),
-    'debian': os.path.join(BASE_IMG_DIR, "debian-12-generic-amd64.qcow2")
+    'ubuntu': os.path.join(BASE_IMG_DIR, "base-ubuntu-22.04.qcow2"),
+    'debian': os.path.join(BASE_IMG_DIR, "base-debian-12.qcow2")
 }
 
 # --- GESTION PERSISTANCE (Username) ---
