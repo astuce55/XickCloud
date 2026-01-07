@@ -17,12 +17,16 @@
             <a href="#" class="side-icon active"><i class="fas fa-th-large"></i></a>
             <a href="#" class="side-icon"><i class="fas fa-server"></i></a>
             <a href="#" class="side-icon"><i class="fas fa-cog"></i></a>
+            <a href="/logout" class="side-icon" style="margin-top: auto;"><i class="fas fa-sign-out-alt"></i></a>
         </nav>
     </aside>
 
     <main class="app-main">
         <header class="top-bar">
-            <div class="brand-text">XICK<span>CLOUD</span></div>
+            <div>
+                <div class="brand-text">XICK<span>CLOUD</span></div>
+                <small class="text-muted">Connecté en tant que: <strong>{{ username }}</strong></small>
+            </div>
             <div class="header-actions d-flex align-items-center gap-3">
                 <div class="search-wrapper">
                     <i class="fas fa-search"></i>
@@ -35,24 +39,28 @@
         </header>
 
         <div class="row g-4 mb-4">
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <div class="stat-card">
-                    <span class="label">CHARGE CPU CLUSTER</span>
-                    <h2 id="global-cpu">0%</h2>
-                    <div class="progress-xick"><div id="bar-cpu" class="bar primary" style="width: 0%"></div></div>
+                    <span class="label">MES VMs</span>
+                    <h2 id="total-vms">0</h2>
                 </div>
             </div>
-            <div class="col-md-4">
-                <div class="stat-card">
-                    <span class="label">RAM UTILISÉE</span>
-                    <h2 id="global-ram">0 GiB</h2>
-                    <div id="loader" class="spinner-border spinner-border-sm text-primary float-end" style="visibility:hidden"></div>
-                </div>
-            </div>
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <div class="stat-card">
                     <span class="label text-success">VMs EN LIGNE</span>
                     <h2 id="global-running" class="text-success">0</h2>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <span class="label">RAM UTILISÉE</span>
+                    <h2 id="global-ram">0 GiB</h2>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <span class="label">COÛT MENSUEL</span>
+                    <h2 id="monthly-cost">0 FCFA</h2>
                 </div>
             </div>
         </div>
@@ -62,7 +70,8 @@
                 <thead>
                     <tr>
                         <th>INSTANCE</th>
-                        <th>UTILISATEUR</th>
+                        <th>FLAVOR</th>
+                        <th>HÔTE</th>
                         <th>ADRESSE IP</th>
                         <th>RESSOURCES</th>
                         <th>STATUT</th>
@@ -93,35 +102,39 @@
                                 <option value="debian">Debian 12</option>
                             </select>
                         </div>
-                        <div class="col-md-6">
-                            <label class="small text-muted">Utilisateur</label>
-                            <input type="text" name="username" class="form-control" required>
+                        <div class="col-md-12">
+                            <label class="small text-muted">Flavor (Offre)</label>
+                            <select name="flavor" class="form-select" id="flavorSelect" onchange="updateFlavorInfo()">
+                                {% for flavor_id, flavor in flavors.items() %}
+                                <option value="{{ flavor_id }}" 
+                                        data-vcpu="{{ flavor.vcpu }}" 
+                                        data-ram="{{ flavor.ram }}" 
+                                        data-disk="{{ flavor.disk }}"
+                                        data-price="{{ flavor.price }}">
+                                    {{ flavor.name }} - {{ flavor.vcpu }} vCPU, {{ (flavor.ram / 1024) | int }} GB RAM, {{ flavor.disk }} GB Disk - {{ flavor.price }} FCFA/mois
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <div id="flavorInfo" class="mt-2 p-2" style="background: #1c1c24; border-radius: 8px; display: none;">
+                                <small class="text-muted">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    <span id="flavorDetails"></span>
+                                </small>
+                            </div>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-12">
                             <label class="small text-muted">Mot de passe</label>
                             <input type="password" name="password" class="form-control" required>
                         </div>
-                        <div class="col-md-4">
-                            <label class="small text-muted">vCPUs</label>
-                            <input type="number" name="vcpu" value="1" min="1" class="form-control">
-                        </div>
-                        <div class="col-md-4">
-                            <label class="small text-muted">RAM (MiB)</label>
-                            <input type="number" name="ram" value="1024" min="512" class="form-control">
-                        </div>
-                        <div class="col-md-4">
-                            <label class="small text-muted">Disque (GB)</label>
-                            <input type="number" name="disk" value="10" min="5" class="form-control">
-                        </div>
                         <div class="col-12">
-                            <label class="small text-muted">Clé SSH</label>
+                            <label class="small text-muted">Clé SSH (optionnel)</label>
                             <select name="ssh_method" class="form-select" onchange="document.getElementById('ssh-area').style.display = (this.value === 'paste') ? 'block' : 'none';">
-                                <option value="none">Aucune (Mot de passe)</option>
+                                <option value="none">Aucune (Mot de passe uniquement)</option>
                                 <option value="paste">Coller une clé publique</option>
                             </select>
                         </div>
                         <div class="col-12" id="ssh-area" style="display:none;">
-                            <textarea name="ssh_key_paste" class="form-control mt-2" rows="3"></textarea>
+                            <textarea name="ssh_key_paste" class="form-control mt-2" rows="3" placeholder="ssh-rsa AAAA..."></textarea>
                         </div>
                     </div>
                 </div>
@@ -135,6 +148,152 @@
 </div>
 
 <script src="../static/js/bootstrap.bundle.min.js"></script>
-<script src="../static/js/dashbord.js"></script>
+<script>
+let prevStats = {};
+const flavorPrices = {{ flavors | tojson }};
+
+function updateFlavorInfo() {
+    const select = document.getElementById('flavorSelect');
+    const option = select.options[select.selectedIndex];
+    const info = document.getElementById('flavorInfo');
+    const details = document.getElementById('flavorDetails');
+    
+    details.innerHTML = `
+        Ressources: <strong>${option.dataset.vcpu} vCPU</strong>, 
+        <strong>${(option.dataset.ram / 1024).toFixed(0)} GB RAM</strong>, 
+        <strong>${option.dataset.disk} GB Disk</strong> | 
+        Coût: <strong>${option.dataset.price} FCFA/mois</strong>
+    `;
+    info.style.display = 'block';
+}
+
+function renderVMs(vms) {
+    const tbody = document.getElementById('vm-table-body');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+
+    let totalRunning = 0;
+    let totalRamUsedMiB = 0;
+    let monthlyCost = 0;
+
+    vms.forEach(vm => {
+        const isRun = vm.status.toLowerCase() === 'running';
+        if (isRun) totalRunning++;
+
+        let cpuUsage = 0;
+        if (isRun && prevStats[vm.name]) {
+            const timeDiff = vm.timestamp - prevStats[vm.name].timestamp;
+            const cpuDiff = vm.cpu_time - prevStats[vm.name].cpu_time;
+            if (timeDiff > 0) {
+                cpuUsage = (cpuDiff / timeDiff) / 10000000; 
+                cpuUsage = Math.min(Math.max(cpuUsage, 0), 100);
+            }
+        }
+        prevStats[vm.name] = { cpu_time: vm.cpu_time, timestamp: vm.timestamp };
+        
+        if (isRun && vm.max_mem > 0) {
+            totalRamUsedMiB += vm.used_mem;
+        }
+
+        // Calculer le coût
+        const flavorId = vm.flavor || 'small';
+        if (flavorPrices[flavorId]) {
+            monthlyCost += flavorPrices[flavorId].price;
+        }
+
+        let ramPct = 0;
+        if (isRun && vm.max_mem > 0) {
+            ramPct = (vm.used_mem / vm.max_mem) * 100;
+        }
+
+        const flavorBadge = vm.flavor ? `<span class="badge bg-secondary">${vm.flavor}</span>` : '<span class="badge bg-dark">unknown</span>';
+
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td><div class="fw-bold">${vm.name}</div></td>
+            <td>${flavorBadge}</td>
+            <td><small class="text-muted">${vm.host || 'N/A'}</small></td>
+            <td><code>${vm.ip !== "N/A" ? vm.ip : '---'}</code></td>
+            <td style="width: 180px">
+                <div class="d-flex justify-content-between small mb-1">
+                    <span>CPU: ${isRun ? cpuUsage.toFixed(1) + '%' : '0%'}</span>
+                    <span>RAM: ${ramPct.toFixed(0)}%</span>
+                </div>
+                <div class="progress-xick">
+                    <div class="bar" style="width: ${ramPct}%"></div>
+                </div>
+            </td>
+            <td>
+                <span class="${isRun ? 'text-success' : 'text-muted'} small fw-bold">
+                    <i class="fas fa-circle me-1" style="font-size: 8px"></i> ${vm.status.toUpperCase()}
+                </span>
+            </td>
+            <td class="text-end">
+                ${isRun ? 
+                    `<button class="btn btn-sm btn-dark text-warning me-1" onclick="controlVM('${vm.name}', 'stop', this)"><i class="fas fa-stop"></i></button>` : 
+                    `<button class="btn btn-sm btn-dark text-success me-1" onclick="controlVM('${vm.name}', 'start', this)"><i class="fas fa-play"></i></button>`
+                }
+                <button class="btn btn-sm btn-dark text-danger" onclick="controlVM('${vm.name}', 'delete', this)"><i class="fas fa-trash"></i></button>
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
+
+    document.getElementById('total-vms').innerText = vms.length;
+    document.getElementById('global-running').innerText = totalRunning;
+    document.getElementById('global-ram').innerText = (totalRamUsedMiB / 1024).toFixed(1) + " GiB";
+    document.getElementById('monthly-cost').innerText = monthlyCost.toLocaleString() + " FCFA";
+}
+
+async function controlVM(name, action, btn) {
+    if (action === 'delete' && !confirm(`Supprimer ${name} ?`)) return;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    try {
+        await fetch(`/api/vm/${name}/${action}`, { method: 'POST' });
+    } finally { fetchStats(); }
+}
+
+async function handleDeploy(event) {
+    event.preventDefault();
+    const btn = document.getElementById('deployBtn');
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Déploiement...';
+    btn.disabled = true;
+    try {
+        const response = await fetch('/deploy', { method: 'POST', body: new FormData(event.target) });
+        if (response.ok) {
+            const result = await response.json();
+            alert(`VM déployée sur l'hôte: ${result.host} avec flavor: ${result.flavor}`);
+            bootstrap.Modal.getInstance(document.getElementById('deployModal')).hide();
+            fetchStats();
+        } else { 
+            const error = await response.text();
+            alert("Erreur: " + error); 
+        }
+    } finally {
+        btn.innerHTML = 'Démarrer le déploiement';
+        btn.disabled = false;
+    }
+}
+
+function fetchStats() {
+    fetch('/api/monitor')
+        .then(r => r.json())
+        .then(data => renderVMs(data))
+        .catch(e => console.error("Update failed", e));
+}
+
+function filterVMs() {
+    const term = document.getElementById('searchInput').value.toLowerCase();
+    document.querySelectorAll('#vm-table-body tr').forEach(row => {
+        row.style.display = row.innerText.toLowerCase().includes(term) ? '' : 'none';
+    });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    updateFlavorInfo();
+    fetchStats();
+    setInterval(fetchStats, 3000);
+});
+</script>
 </body>
 </html>
