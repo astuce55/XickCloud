@@ -57,6 +57,31 @@ OS_IMAGES = {
     'debian': os.path.join(BASE_IMG_DIR, "base-debian.qcow2")
 }
 
+# --- HELPER FUNCTIONS POUR NOMS DE VMs ---
+def get_full_vm_name(username, hostname):
+    """
+    Génère le nom complet de la VM avec préfixe utilisateur
+    Format: username_hostname
+    """
+    return f"{username}_{hostname}"
+
+def get_user_vm_name(full_vm_name):
+    """
+    Extrait le nom court (sans préfixe utilisateur) d'un nom complet de VM
+    """
+    if '_' in full_vm_name:
+        parts = full_vm_name.split('_', 1)
+        return parts[1] if len(parts) > 1 else full_vm_name
+    return full_vm_name
+
+def get_vm_owner(full_vm_name):
+    """
+    Extrait le propriétaire d'une VM depuis son nom complet
+    """
+    if '_' in full_vm_name:
+        return full_vm_name.split('_', 1)[0]
+    return None
+
 # --- GESTION UTILISATEURS ---
 def load_users():
     if os.path.exists(USERS_FILE):
@@ -115,7 +140,7 @@ def get_default_hosts():
         {
             'id': 'remote-kvm-1',
             'name': 'KVM Distant Principal',
-            'uri': 'qemu+ssh://kvmadmin@192.168.1.134/system',  # À ADAPTER
+            'uri': 'qemu+ssh://kvmadmin@192.168.1.132/system',  # À ADAPTER
             'enabled': True,
             'priority': 1,  # Priorité haute (1 = première machine à utiliser)
             'storage_path': '/var/lib/libvirt/images',
@@ -493,10 +518,15 @@ def monitor_api():
             domains = conn.listAllDomains()
             for dom in domains:
                 try:
-                    name = dom.name()
+                    full_name = dom.name()
+                    
+                    # Extraire le propriétaire depuis le nom de la VM
+                    vm_owner = get_vm_owner(full_name)
+                    if not vm_owner:
+                        # Fallback: chercher dans les métadonnées
+                        vm_owner = metadata.get(full_name, {}).get('user', 'unknown')
                     
                     # Filtrer par utilisateur (sauf admin qui voit tout)
-                    vm_owner = metadata.get(name, {}).get('user', 'root')
                     if session['role'] != 'admin' and vm_owner != username:
                         continue
                     
@@ -530,10 +560,13 @@ def monitor_api():
                         except:
                             pass
                     
-                    vm_meta = metadata.get(name, {})
+                    vm_meta = metadata.get(full_name, {})
+                    # Afficher le nom court (sans préfixe utilisateur)
+                    display_name = get_user_vm_name(full_name)
                     
                     vms_stats.append({
-                        'name': name,
+                        'name': full_name,  # Nom complet pour les actions
+                        'display_name': display_name,  # Nom court pour l'affichage
                         'status': status_text,
                         'ip': ip_addr,
                         'username': vm_owner,
@@ -562,8 +595,13 @@ def vm_action(name, action):
     username = session['username']
     metadata = load_metadata()
     
+    # Extraire le propriétaire depuis le nom complet
+    vm_owner = get_vm_owner(name)
+    if not vm_owner:
+        # Fallback: chercher dans les métadonnées
+        vm_owner = metadata.get(name, {}).get('user')
+    
     # Vérifier que l'utilisateur est propriétaire (sauf admin)
-    vm_owner = metadata.get(name, {}).get('user')
     if session['role'] != 'admin' and vm_owner != username:
         return jsonify({'success': False, 'msg': 'Non autorisé'}), 403
     
@@ -624,6 +662,9 @@ def deploy():
         ram = flavor['ram']
         disk_size = flavor['disk']
         
+        # Générer le nom complet unique avec préfixe utilisateur
+        full_vm_name = get_full_vm_name(username, hostname)
+        
         # Sélectionner l'hôte optimal selon priorité et ressources
         best_host = select_best_host(vcpu, ram, disk_size)
         if not best_host:
@@ -632,35 +673,39 @@ def deploy():
                 'msg': 'Ressources insuffisantes sur tous les hôtes KVM'
             }), 503
         
-        print(f"Déploiement sur {best_host['name']} (URI: {best_host['uri']})")
+        print(f"Déploiement de '{full_vm_name}' sur {best_host['name']} (URI: {best_host['uri']})")
         
         # Créer le réseau utilisateur si nécessaire
         if not create_user_network(username, best_host['uri']):
             return jsonify({'success': False, 'msg': 'Erreur création réseau utilisateur'}), 500
         
-        # Vérifier si VM existe déjà
+        # Vérifier si VM existe déjà (avec le nom complet)
         conn = get_libvirt_conn(best_host['uri'])
         if not conn:
             return jsonify({'success': False, 'msg': 'Impossible de se connecter à l\'hôte'}), 500
         
         try:
-            conn.lookupByName(hostname)
+            conn.lookupByName(full_vm_name)
             conn.close()
-            return jsonify({'success': False, 'msg': f'La VM {hostname} existe déjà'}), 409
+            return jsonify({
+                'success': False, 
+                'msg': f'Une VM nommée "{hostname}" existe déjà dans votre espace'
+            }), 409
         except:
             pass
         finally:
             if conn:
                 conn.close()
         
-        # Sauvegarder les métadonnées
+        # Sauvegarder les métadonnées avec le nom complet
         meta = load_metadata()
-        meta[hostname] = {
+        meta[full_vm_name] = {
             'user': username,
             'created_at': time.time(),
             'flavor': flavor_id,
             'host': best_host['uri'],
-            'host_name': best_host['name']
+            'host_name': best_host['name'],
+            'display_name': hostname  # Nom court original
         }
         save_metadata(meta)
         
@@ -675,11 +720,11 @@ def deploy():
         if ssh_method == 'paste':
             final_ssh_pub_key = request.form.get('ssh_key_paste', '').strip()
         
-        # Création VM
-        vm_disk = f"{storage_path}/{hostname}.qcow2"
-        seed_iso = f"{GEN_DIR}/{hostname}-seed.iso"
-        user_data = f"{GEN_DIR}/{hostname}-user-data"
-        meta_data = f"{GEN_DIR}/{hostname}-meta-data"
+        # Création VM avec nom complet unique
+        vm_disk = f"{storage_path}/{full_vm_name}.qcow2"
+        seed_iso = f"{GEN_DIR}/{full_vm_name}-seed.iso"
+        user_data = f"{GEN_DIR}/{full_vm_name}-user-data"
+        meta_data = f"{GEN_DIR}/{full_vm_name}-meta-data"
         
         # Créer le disque (sur l'hôte distant si nécessaire)
         if best_host['uri'].startswith('qemu+ssh://'):
@@ -701,6 +746,7 @@ def deploy():
         
         ssh_block = f"\n      - {final_ssh_pub_key}" if final_ssh_pub_key else ""
         
+        # Utiliser le hostname original (sans préfixe) pour le hostname interne de la VM
         ud_content = f"""#cloud-config
 hostname: {hostname}
 manage_etc_hosts: true
@@ -734,7 +780,7 @@ runcmd:
         with open(user_data, 'w') as f:
             f.write(ud_content)
         with open(meta_data, 'w') as f:
-            f.write(f"instance-id: {hostname}\nlocal-hostname: {hostname}")
+            f.write(f"instance-id: {full_vm_name}\nlocal-hostname: {hostname}")
         
         subprocess.run(["cloud-localds", seed_iso, user_data, meta_data], check=True)
         
@@ -742,7 +788,7 @@ runcmd:
         if best_host['uri'].startswith('qemu+ssh://'):
             ssh_host = best_host['uri'].split('@')[1].split('/')[0]
             ssh_user = best_host['uri'].split('//')[1].split('@')[0]
-            remote_seed = f"{storage_path}/{hostname}-seed.iso"
+            remote_seed = f"{storage_path}/{full_vm_name}-seed.iso"
             
             subprocess.run([
                 "scp", seed_iso, f"{ssh_user}@{ssh_host}:{remote_seed}"
@@ -753,9 +799,10 @@ runcmd:
         variant = "ubuntu22.04" if os_type == 'ubuntu' else "debian11"
         network_name = get_user_network_name(username)
         
+        # Déployer avec le nom complet unique
         subprocess.run([
             "virt-install",
-            f"--name={hostname}",
+            f"--name={full_vm_name}",
             f"--vcpus={vcpu}",
             f"--memory={ram}",
             f"--disk=path={vm_disk},device=disk,bus=virtio",
@@ -770,9 +817,10 @@ runcmd:
         
         return jsonify({
             'success': True,
-            'msg': f'VM déployée avec succès sur {best_host["name"]}',
+            'msg': f'VM "{hostname}" déployée avec succès sur {best_host["name"]}',
             'host': best_host['name'],
-            'flavor': flavor['name']
+            'flavor': flavor['name'],
+            'vm_name': full_vm_name
         })
     
     except Exception as e:
