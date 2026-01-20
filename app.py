@@ -23,6 +23,7 @@ KEYS_DIR = os.path.join(os.getcwd(), 'keys')
 METADATA_FILE = os.path.join(os.getcwd(), 'vm_metadata.json')
 USERS_FILE = os.path.join(os.getcwd(), 'users.json')
 HOSTS_FILE = os.path.join(os.getcwd(), 'kvm_hosts.json')
+SWARM_CLUSTERS_FILE = os.path.join(os.getcwd(), 'swarm_clusters.json')
 
 os.makedirs(GEN_DIR, exist_ok=True)
 os.makedirs(KEYS_DIR, exist_ok=True)
@@ -52,10 +53,29 @@ FLAVORS = {
     }
 }
 
+# Flavors speciales pour docker swarm
+FLAVORS['swarm'] = {'name': 'Docker Swarm Node', 'vcpu': 2, 'ram': 4096, 'disk': 30, 'price': 4000}
+
 OS_IMAGES = {
     'ubuntu': os.path.join(BASE_IMG_DIR, "base-ubuntu.qcow2"),
     'debian': os.path.join(BASE_IMG_DIR, "base-debian.qcow2")
 }
+
+# --- GESTION SWARM CLUSTERS ---
+def load_swarm_clusters():
+    if os.path.exists(SWARM_CLUSTERS_FILE):
+        try:
+            with open(SWARM_CLUSTERS_FILE, 'r') as f:
+                return json.load(f)
+        except:
+            return {}
+    return {}
+
+def save_swarm_clusters(clusters):
+    with open(SWARM_CLUSTERS_FILE, 'w') as f:
+        json.dump(clusters, f, indent=2)
+
+
 
 # --- HELPER FUNCTIONS POUR NOMS DE VMs ---
 def get_full_vm_name(username, hostname):
@@ -826,6 +846,399 @@ runcmd:
     except Exception as e:
         print(f"Erreur déploiement: {e}", file=sys.stderr)
         return jsonify({'success': False, 'msg': str(e)}), 500
+
+
+##  Modification pour docker swarm
+
+@app.route('/swarm')
+@login_required
+def swarm_page():
+    return render_template('swarm.html', username=session['username'])
+
+@app.route('/api/swarm/clusters', methods=['GET'])
+@login_required
+def get_user_clusters():
+    """Récupère les clusters Swarm de l'utilisateur"""
+    username = session['username']
+    clusters = load_swarm_clusters()
+    user_clusters = {k: v for k, v in clusters.items() if v['owner'] == username}
+    return jsonify(user_clusters)
+
+
+def create_swarm_network(network_name, host_uri='qemu:///system'):
+    """Crée un réseau dédié pour un cluster Swarm"""
+    conn = get_libvirt_conn(host_uri)
+    if not conn:
+        print(f"Impossible de se connecter à {host_uri}", file=sys.stderr)
+        return False
+    
+    try:
+        # Vérifier si le réseau existe déjà
+        try:
+            net = conn.networkLookupByName(network_name)
+            if net.isActive():
+                print(f"Réseau {network_name} déjà actif")
+                return True
+            net.create()
+            print(f"Réseau {network_name} démarré")
+            return True
+        except libvirt.libvirtError:
+            pass  # Le réseau n'existe pas, on le crée
+        
+        # Générer une plage IP unique
+        ip_suffix = abs(hash(network_name)) % 240 + 10
+        network_ip = f"192.168.{ip_suffix}"
+        
+        network_xml = f"""
+<network>
+  <name>{network_name}</name>
+  <forward mode='nat'/>
+  <bridge name='virbr_{ip_suffix}' stp='on' delay='0'/>
+  <ip address='{network_ip}.1' netmask='255.255.255.0'>
+    <dhcp>
+      <range start='{network_ip}.10' end='{network_ip}.200'/>
+    </dhcp>
+  </ip>
+</network>
+"""
+        print(f"Création réseau {network_name} sur {host_uri}")
+        net = conn.networkDefineXML(network_xml)
+        net.setAutostart(1)
+        net.create()
+        print(f"Réseau {network_name} créé avec succès")
+        return True
+    except Exception as e:
+        print(f"Erreur création réseau {network_name}: {e}", file=sys.stderr)
+        import traceback
+        traceback.print_exc()
+        return False
+    finally:
+        if conn:
+            conn.close()
+
+
+@app.route('/api/swarm/deploy', methods=['POST'])
+@login_required
+def deploy_swarm_cluster():
+    """Déploie un nouveau cluster Docker Swarm"""
+    username = session['username']
+    data = request.json
+    
+    try:
+        cluster_name = data.get('cluster_name', f'swarm-{username}-{int(time.time())}')
+        num_managers = int(data.get('num_managers', 1))
+        num_workers = int(data.get('num_workers', 2))
+        
+        # Validation: nombre de managers doit être impair
+        if num_managers % 2 == 0:
+            return jsonify({'success': False, 'msg': 'Le nombre de managers doit être impair (1, 3, 5...)'}), 400
+        
+        total_nodes = num_managers + num_workers
+        if total_nodes > 10:
+            return jsonify({'success': False, 'msg': 'Maximum 10 nœuds par cluster'}), 400
+        
+        # 1. Sélectionner l'hôte optimal
+        best_host = select_best_host(2 * total_nodes, 4096 * total_nodes, 15 * total_nodes) 
+        if not best_host:
+            return jsonify({'success': False, 'msg': 'Ressources insuffisantes sur les hôtes KVM'}), 503
+        
+        # 2. CORRECTION: Créer le réseau avec un nom fixe
+        cluster_network = f"swarm_{username}_{cluster_name}"
+        
+        # 3. Créer le réseau sur l'hôte sélectionné
+        if not create_swarm_network(cluster_network, best_host['uri']):
+            return jsonify({'success': False, 'msg': f"Erreur création réseau sur {best_host['name']}"}), 500
+        
+        # Déployer les nœuds
+        nodes = []
+        cluster_ip_base = f"192.168.{abs(hash(cluster_network)) % 240 + 10}"
+        
+        # Générer le cloud-init pour Docker Swarm
+        def generate_swarm_cloudinit(node_name, node_type, ip_address):
+            return f"""#cloud-config
+hostname: {node_name}
+manage_etc_hosts: true
+users:
+  - default
+  - name: {username}
+    groups: sudo, docker
+    shell: /bin/bash
+    lock_passwd: false
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    ssh_authorized_keys:
+      - {data.get('ssh_key', '')}
+chpasswd:
+  list: |
+    {username}:{data.get('password', 'changeme')}
+  expire: false
+ssh_pwauth: true
+package_update: true
+package_upgrade: true
+packages:
+  - apt-transport-https
+  - ca-certificates
+  - curl
+  - gnupg
+  - lsb-release
+write_files:
+  - path: /etc/netplan/99-custom.yaml
+    content: |
+      network:
+        version: 2
+        ethernets:
+          main: {{match: {{name: "e*"}}, dhcp4: false, addresses: [{ip_address}/24], gateway4: {cluster_ip_base}.1, nameservers: {{addresses: [8.8.8.8, 8.8.4.4]}}}}
+    permissions: '0600'
+  - path: /usr/local/bin/setup-docker.sh
+    content: |
+      #!/bin/bash
+      # Installation Docker
+      curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+      echo "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
+      apt-get update
+      apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
+      systemctl enable docker
+      systemctl start docker
+      usermod -aG docker {username}
+      
+      # Configuration Firewall pour Swarm
+      ufw allow 2377/tcp  # Cluster management
+      ufw allow 7946/tcp  # Node communication
+      ufw allow 7946/udp  # Node communication
+      ufw allow 4789/udp  # Overlay network
+      ufw allow 22/tcp    # SSH
+      echo "y" | ufw enable
+      
+      # Marquer comme prêt
+      touch /var/lib/cloud/docker-ready
+    permissions: '0755'
+runcmd:
+  - netplan apply
+  - /usr/local/bin/setup-docker.sh
+  - systemctl start qemu-guest-agent
+"""
+        
+        # Déployer les managers
+        for i in range(num_managers):
+            node_name = f"{cluster_name}-manager-{i+1}"
+            full_vm_name = get_full_vm_name(username, node_name)
+            ip_address = f"{cluster_ip_base}.{10 + i}"
+            
+            # Créer la VM - PASSER LE HOST ET LE NETWORK
+            result = deploy_swarm_node(
+                username=username,
+                node_name=node_name,
+                full_vm_name=full_vm_name,
+                cluster_network=cluster_network,
+                cloud_init=generate_swarm_cloudinit(node_name, 'manager', ip_address),
+                ip_address=ip_address,
+                best_host=best_host  # AJOUT: passer l'hôte
+            )
+            
+            if not result['success']:
+                return jsonify({'success': False, 'msg': f'Erreur déploiement {node_name}: {result.get("msg", "")}'}), 500
+
+            nodes.append({
+                'name': node_name,
+                'full_name': full_vm_name,
+                'type': 'manager',
+                'ip': ip_address,
+                'status': 'deploying'
+            })
+        
+        # Déployer les workers
+        for i in range(num_workers):
+            node_name = f"{cluster_name}-worker-{i+1}"
+            full_vm_name = get_full_vm_name(username, node_name)
+            ip_address = f"{cluster_ip_base}.{20 + i}"
+            
+            result = deploy_swarm_node(
+                username=username,
+                node_name=node_name,
+                full_vm_name=full_vm_name,
+                cluster_network=cluster_network,
+                cloud_init=generate_swarm_cloudinit(node_name, 'worker', ip_address),
+                ip_address=ip_address,
+                best_host=best_host  # AJOUT: passer l'hôte
+            )
+            
+            if not result['success']:
+                return jsonify({'success': False, 'msg': f'Erreur déploiement {node_name}: {result.get("msg", "")}'}), 500
+            
+            nodes.append({
+                'name': node_name,
+                'full_name': full_vm_name,
+                'type': 'worker',
+                'ip': ip_address,
+                'status': 'deploying'
+            })
+        
+        # Sauvegarder les informations du cluster
+        clusters = load_swarm_clusters()
+        manager_ip = nodes[0]['ip']
+        
+        clusters[cluster_name] = {
+            'owner': username,
+            'created_at': time.time(),
+            'network': cluster_network,
+            'nodes': nodes,
+            'status': 'deploying',
+            'manager_ip': manager_ip,
+            'host': best_host['uri'],  # AJOUT: sauvegarder l'hôte
+            'init_commands': {
+                'init_swarm': f"ssh {username}@{manager_ip} 'sudo docker swarm init --advertise-addr {manager_ip}'",
+                'get_manager_token': f"ssh {username}@{manager_ip} 'sudo docker swarm join-token manager -q'",
+                'get_worker_token': f"ssh {username}@{manager_ip} 'sudo docker swarm join-token worker -q'"
+            }
+        }
+        
+        save_swarm_clusters(clusters)
+        
+        return jsonify({
+            'success': True,
+            'cluster_name': cluster_name,
+            'nodes': nodes,
+            'manager_ip': manager_ip,
+            'message': f'Cluster {cluster_name} en cours de déploiement'
+        })
+        
+    except Exception as e:
+        print(f"Erreur déploiement Swarm: {e}", file=sys.stderr)
+        import traceback
+        traceback.print_exc()
+        return jsonify({'success': False, 'msg': str(e)}), 500
+
+def deploy_swarm_node(username, node_name, full_vm_name, cluster_network, cloud_init, ip_address, best_host):
+    """Déploie un nœud individuel du cluster Swarm"""
+    try:
+        # NE PAS resélectionner l'hôte, utiliser celui passé en paramètre
+        storage_path = best_host.get('storage_path', VM_STORAGE_DIR)
+        base_image_path = OS_IMAGES['ubuntu']
+        
+        # Créer le disque
+        vm_disk = f"{storage_path}/{full_vm_name}.qcow2"
+        seed_iso = f"{GEN_DIR}/{full_vm_name}-seed.iso"
+        user_data = f"{GEN_DIR}/{full_vm_name}-user-data"
+        meta_data = f"{GEN_DIR}/{full_vm_name}-meta-data"
+        
+        # Créer le disque (local ou distant)
+        if best_host['uri'].startswith('qemu+ssh://'):
+            ssh_host = best_host['uri'].split('@')[1].split('/')[0]
+            ssh_user = best_host['uri'].split('//')[1].split('@')[0]
+            subprocess.run([
+                "ssh", f"{ssh_user}@{ssh_host}",
+                f"qemu-img create -f qcow2 -F qcow2 -b {base_image_path} {vm_disk} 30G"
+            ], check=True)
+        else:
+            subprocess.run([
+                "qemu-img", "create", "-f", "qcow2", "-F", "qcow2",
+                "-b", base_image_path, vm_disk, "30G"
+            ], check=True)
+        
+        # Écrire cloud-init
+        with open(user_data, 'w') as f:
+            f.write(cloud_init)
+        with open(meta_data, 'w') as f:
+            f.write(f"instance-id: {full_vm_name}\nlocal-hostname: {node_name}")
+        
+        subprocess.run(["cloud-localds", seed_iso, user_data, meta_data], check=True)
+        
+        # Copier seed.iso si distant
+        if best_host['uri'].startswith('qemu+ssh://'):
+            ssh_host = best_host['uri'].split('@')[1].split('/')[0]
+            ssh_user = best_host['uri'].split('//')[1].split('@')[0]
+            remote_seed = f"{storage_path}/{full_vm_name}-seed.iso"
+            subprocess.run(["scp", seed_iso, f"{ssh_user}@{ssh_host}:{remote_seed}"], check=True)
+            seed_iso = remote_seed
+        
+        # Déployer la VM
+        print(f"Déploiement de {full_vm_name} sur réseau {cluster_network}")
+        subprocess.run([
+            "virt-install",
+            f"--name={full_vm_name}",
+            f"--vcpus=2",
+            f"--memory=4096",
+            f"--disk=path={vm_disk},device=disk,bus=virtio",
+            f"--disk=path={seed_iso},device=cdrom",
+            f"--os-variant=ubuntu22.04",
+            "--import",
+            "--noautoconsole",
+            "--graphics=none",
+            "--network", f"network={cluster_network},model=virtio",
+            "--connect", best_host['uri']
+        ], check=True)
+        
+        # Sauvegarder métadonnées
+        meta = load_metadata()
+        meta[full_vm_name] = {
+            'user': username,
+            'created_at': time.time(),
+            'flavor': 'swarm',
+            'host': best_host['uri'],
+            'host_name': best_host['name'],
+            'display_name': node_name,
+            'cluster_node': True,
+            'node_ip': ip_address,
+            'network': cluster_network
+        }
+        save_metadata(meta)
+        
+        return {'success': True}
+        
+    except Exception as e:
+        print(f"Erreur déploiement nœud: {e}", file=sys.stderr)
+        import traceback
+        traceback.print_exc()
+        return {'success': False, 'msg': str(e)}
+
+@app.route('/api/swarm/cluster/<cluster_name>/status', methods=['GET'])
+@login_required
+def get_cluster_status(cluster_name):
+    """Récupère le statut d'un cluster"""
+    username = session['username']
+    clusters = load_swarm_clusters()
+    
+    if cluster_name not in clusters or clusters[cluster_name]['owner'] != username:
+        return jsonify({'success': False, 'msg': 'Cluster non trouvé'}), 404
+    
+    cluster = clusters[cluster_name]
+    
+    # Vérifier si les nœuds sont prêts
+    all_ready = True
+    for node in cluster['nodes']:
+        # Ici vous pouvez vérifier si Docker est installé via SSH
+        pass
+    
+    return jsonify({
+        'success': True,
+        'cluster': cluster,
+        'ready': all_ready
+    })
+
+@app.route('/api/swarm/cluster/<cluster_name>', methods=['DELETE'])
+@login_required
+def delete_cluster(cluster_name):
+    """Supprime un cluster complet"""
+    username = session['username']
+    clusters = load_swarm_clusters()
+    
+    if cluster_name not in clusters or clusters[cluster_name]['owner'] != username:
+        return jsonify({'success': False, 'msg': 'Cluster non trouvé'}), 404
+    
+    cluster = clusters[cluster_name]
+    
+    # Supprimer toutes les VMs du cluster
+    for node in cluster['nodes']:
+        # Code de suppression VM existant
+        pass
+    
+    # Supprimer le cluster de la base
+    del clusters[cluster_name]
+    save_swarm_clusters(clusters)
+    
+    return jsonify({'success': True, 'msg': f'Cluster {cluster_name} supprimé'})
+
+
+##  Fin modification pour docker swarm
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
