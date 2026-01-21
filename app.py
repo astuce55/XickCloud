@@ -26,6 +26,7 @@ app.register_blueprint(paas_bp)
 
 # Route dashboard unifié - CORRECTION ICI
 @app.route('/')
+@login_required
 def index():
     """Redirige vers le dashboard approprié"""
     from flask import session, redirect, url_for
