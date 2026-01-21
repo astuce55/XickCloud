@@ -1,0 +1,794 @@
+<!-- templates/iaas.html -->
+{% extends "base.html" %}
+
+{% block title %}IaaS - Gestion des VMs{% endblock %}
+
+{% block head_extra %}
+<style>
+    .vm-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 20px;
+        transition: all 0.3s;
+    }
+    
+    .vm-card:hover {
+        transform: translateY(-5px);
+        border-color: var(--accent);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    }
+    
+    .vm-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 15px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid var(--border);
+    }
+    
+    .vm-name {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: white;
+        margin-bottom: 5px;
+    }
+    
+    .vm-host {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+    }
+    
+    .vm-status {
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+    
+    .status-running {
+        background: rgba(25, 135, 84, 0.2);
+        color: #75b798;
+        border: 1px solid rgba(25, 135, 84, 0.3);
+    }
+    
+    .status-stopped {
+        background: rgba(108, 117, 125, 0.2);
+        color: var(--text-muted);
+        border: 1px solid rgba(108, 117, 125, 0.3);
+    }
+    
+    .vm-info {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+        margin-bottom: 15px;
+    }
+    
+    .info-item {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .info-label {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        margin-bottom: 5px;
+    }
+    
+    .info-value {
+        font-weight: 600;
+        color: white;
+        font-size: 0.95rem;
+    }
+    
+    .vm-actions {
+        display: flex;
+        gap: 10px;
+        padding-top: 15px;
+        border-top: 1px solid var(--border);
+    }
+    
+    .btn-vm-action {
+        flex: 1;
+        padding: 8px;
+        border-radius: 10px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+    
+    .resource-bar {
+        height: 6px;
+        background: #1e1e26;
+        border-radius: 3px;
+        margin-top: 5px;
+        overflow: hidden;
+    }
+    
+    .resource-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--accent), #6366F1);
+        border-radius: 3px;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+    }
+    
+    .empty-icon {
+        font-size: 4rem;
+        color: var(--border);
+        margin-bottom: 20px;
+        opacity: 0.5;
+    }
+    
+    .flavor-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 15px;
+        padding: 20px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+    
+    .flavor-card:hover {
+        border-color: var(--accent);
+        transform: translateY(-5px);
+    }
+    
+    .flavor-card.selected {
+        border-color: var(--accent);
+        background: rgba(139, 92, 246, 0.1);
+    }
+    
+    .flavor-name {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: white;
+        margin-bottom: 10px;
+    }
+    
+    .flavor-price {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: var(--accent);
+        margin-bottom: 15px;
+    }
+    
+    .flavor-specs {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+    
+    .spec-item {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .spec-value {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: white;
+    }
+    
+    .spec-label {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header avec bouton déploiement -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h2 text-white mb-1">
+                <i class="fas fa-server me-2"></i>Infrastructure as a Service
+            </h1>
+            <p class="text-muted mb-0">Gérez vos machines virtuelles cloud</p>
+        </div>
+        <div>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#deployModal">
+                <i class="fas fa-plus-circle me-2"></i>Nouvelle VM
+            </button>
+        </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="d-flex align-items-center">
+                    <div class="stat-icon bg-primary">
+                        <i class="fas fa-server"></i>
+                    </div>
+                    <div class="ms-3">
+                        <span class="label">TOTAL VMs</span>
+                        <h2 class="mb-0" id="totalVMs">0</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="d-flex align-items-center">
+                    <div class="stat-icon bg-success">
+                        <i class="fas fa-play-circle"></i>
+                    </div>
+                    <div class="ms-3">
+                        <span class="label">EN LIGNE</span>
+                        <h2 class="mb-0" id="runningVMs">0</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="d-flex align-items-center">
+                    <div class="stat-icon bg-warning">
+                        <i class="fas fa-microchip"></i>
+                    </div>
+                    <div class="ms-3">
+                        <span class="label">vCPU TOTAL</span>
+                        <h2 class="mb-0" id="totalCPU">0</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="d-flex align-items-center">
+                    <div class="stat-icon bg-info">
+                        <i class="fas fa-money-bill-wave"></i>
+                    </div>
+                    <div class="ms-3">
+                        <span class="label">COÛT MENSUEL</span>
+                        <h2 class="mb-0" id="monthlyCost">0 FCFA</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtres -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Filtrer par statut</label>
+                    <select class="form-select" id="filterStatus">
+                        <option value="all">Tous les statuts</option>
+                        <option value="running">En cours d'exécution</option>
+                        <option value="stopped">Arrêté</option>
+                        <option value="deploying">En déploiement</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Filtrer par flavor</label>
+                    <select class="form-select" id="filterFlavor">
+                        <option value="all">Tous les flavors</option>
+                        <option value="small">Small</option>
+                        <option value="medium">Medium</option>
+                        <option value="large">Large</option>
+                        <option value="swarm">Swarm Node</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Rechercher</label>
+                    <input type="text" class="form-control" id="searchVMs" placeholder="Nom de la VM...">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Liste des VMs -->
+    <div class="row" id="vmList">
+        <!-- Les VMs seront chargées dynamiquement ici -->
+    </div>
+
+    <!-- État vide -->
+    <div id="emptyState" class="d-none">
+        <div class="empty-state">
+            <div class="empty-icon">
+                <i class="fas fa-server"></i>
+            </div>
+            <h4 class="text-white mb-3">Aucune VM déployée</h4>
+            <p class="text-muted mb-4">Commencez par déployer votre première machine virtuelle</p>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#deployModal">
+                <i class="fas fa-plus-circle me-2"></i>Déployer une VM
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Déploiement -->
+<div class="modal fade" id="deployModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-rocket me-2"></i>Déployer une nouvelle VM
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="deployForm">
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <!-- Étape 1: Configuration de base -->
+                        <div class="col-md-12">
+                            <h6 class="text-white mb-3">
+                                <i class="fas fa-cog me-2"></i>Configuration de base
+                            </h6>
+                            <div class="mb-3">
+                                <label class="form-label">Nom de la VM *</label>
+                                <input type="text" class="form-control" name="hostname" required
+                                       placeholder="ex: webserver-prod">
+                                <small class="text-muted">Utilisez uniquement des lettres, chiffres et tirets</small>
+                            </div>
+                        </div>
+
+                        <!-- Étape 2: Sélection du flavor -->
+                        <div class="col-md-12">
+                            <h6 class="text-white mb-3">
+                                <i class="fas fa-layer-group me-2"></i>Sélectionnez un flavor
+                            </h6>
+                            <div class="row g-3" id="flavorSelection">
+                                {% for flavor_id, flavor in flavors.items() %}
+                                    {% if flavor_id != 'swarm' %}
+                                    <div class="col-md-4">
+                                        <div class="flavor-card" data-flavor="{{ flavor_id }}">
+                                            <div class="flavor-name">{{ flavor.name }}</div>
+                                            <div class="flavor-price">{{ flavor.price }} FCFA/mois</div>
+                                            <div class="flavor-specs">
+                                                <div class="spec-item">
+                                                    <div class="spec-value">{{ flavor.vcpu }}</div>
+                                                    <div class="spec-label">vCPU</div>
+                                                </div>
+                                                <div class="spec-item">
+                                                    <div class="spec-value">{{ flavor.ram // 1024 }}</div>
+                                                    <div class="spec-label">GB RAM</div>
+                                                </div>
+                                                <div class="spec-item">
+                                                    <div class="spec-value">{{ flavor.disk }}</div>
+                                                    <div class="spec-label">GB Disque</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                            <input type="hidden" name="flavor" id="selectedFlavor" required>
+                        </div>
+
+                        <!-- Étape 3: Configuration système -->
+                        <div class="col-md-12">
+                            <h6 class="text-white mb-3">
+                                <i class="fas fa-desktop me-2"></i>Configuration système
+                            </h6>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Système d'exploitation</label>
+                                    <select class="form-select" name="os_type">
+                                        <option value="ubuntu">Ubuntu 22.04 LTS</option>
+                                        <option value="debian">Debian 12</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Mot de passe *</label>
+                                    <input type="password" class="form-control" name="password" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Étape 4: Sécurité (optionnel) -->
+                        <div class="col-md-12">
+                            <h6 class="text-white mb-3">
+                                <i class="fas fa-shield-alt me-2"></i>Sécurité (optionnel)
+                            </h6>
+                            <div class="mb-3">
+                                <label class="form-label">Clé SSH publique</label>
+                                <textarea class="form-control" name="ssh_key" rows="3" 
+                                          placeholder="ssh-rsa AAAA... (optionnel)"></textarea>
+                                <small class="text-muted">Si fournie, l'authentification par mot de passe sera désactivée</small>
+                            </div>
+                        </div>
+
+                        <!-- Résumé -->
+                        <div class="col-md-12">
+                            <div class="alert alert-info">
+                                <h6 class="text-white mb-2">
+                                    <i class="fas fa-info-circle me-2"></i>Résumé du déploiement
+                                </h6>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <small class="text-muted">Flavor:</small>
+                                        <div id="summaryFlavor" class="text-white">-</div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <small class="text-muted">Coût mensuel:</small>
+                                        <div id="summaryCost" class="text-white">- FCFA</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-primary" id="deployButton">
+                        <i class="fas fa-rocket me-2"></i>Démarrer le déploiement
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Infos VM -->
+<div class="modal fade" id="vmDetailsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="vmModalTitle"></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="vmModalBody">
+                <!-- Contenu dynamique -->
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Variables globales
+let vms = [];
+let selectedFlavor = null;
+
+// Initialisation
+document.addEventListener('DOMContentLoaded', function() {
+    loadVMs();
+    setupEventListeners();
+    updateSummary();
+    
+    // Auto-refresh toutes les 10 secondes
+    setInterval(loadVMs, 10000);
+});
+
+// Charger les VMs
+async function loadVMs() {
+    try {
+        const response = await fetch('/api/monitor');  // Utiliser /api/monitor
+        const vms = await response.json();
+        
+        console.log('VMs récupérées:', vms);  // Debug
+        
+        if (Array.isArray(vms)) {
+            window.vms = vms;
+            renderVMs();
+            updateStats();
+        } else {
+            console.error('Format de données invalide:', vms);
+            showToast('Format de données invalide', 'danger');
+        }
+    } catch (error) {
+        console.error('Erreur chargement VMs:', error);
+        showToast('Erreur lors du chargement des VMs', 'danger');
+    }
+}
+
+// Afficher les VMs
+function renderVMs() {
+    const vmList = document.getElementById('vmList');
+    const emptyState = document.getElementById('emptyState');
+    
+    if (vms.length === 0) {
+        vmList.innerHTML = '';
+        emptyState.classList.remove('d-none');
+        return;
+    }
+    
+    emptyState.classList.add('d-none');
+    
+    // Appliquer les filtres
+    const statusFilter = document.getElementById('filterStatus').value;
+    const flavorFilter = document.getElementById('filterFlavor').value;
+    const searchTerm = document.getElementById('searchVMs').value.toLowerCase();
+    
+    let filteredVMs = vms;
+    
+    if (statusFilter !== 'all') {
+        filteredVMs = filteredVMs.filter(vm => {
+            const status = vm.status ? vm.status.toLowerCase() : 'stopped';
+            return status === statusFilter;
+        });
+    }
+    
+    if (flavorFilter !== 'all') {
+        filteredVMs = filteredVMs.filter(vm => vm.flavor === flavorFilter);
+    }
+    
+    if (searchTerm) {
+        filteredVMs = filteredVMs.filter(vm => 
+            vm.display_name.toLowerCase().includes(searchTerm) ||
+            vm.name.toLowerCase().includes(searchTerm)
+        );
+    }
+    
+    // Générer le HTML
+    let html = '';
+    
+    filteredVMs.forEach(vm => {
+        const isRunning = vm.status === 'Running';
+        const flavor = window.flavorPrices[vm.flavor] || { name: 'Unknown', price: 0 };
+        
+        html += `
+            <div class="col-md-6 col-lg-4">
+                <div class="vm-card">
+                    <div class="vm-header">
+                        <div>
+                            <div class="vm-name">${vm.display_name}</div>
+                            <div class="vm-host">
+                                <i class="fas fa-server me-1"></i>${vm.host_name || 'N/A'}
+                            </div>
+                        </div>
+                        <div class="vm-status ${isRunning ? 'status-running' : 'status-stopped'}">
+                            ${isRunning ? '● En ligne' : '○ Hors ligne'}
+                        </div>
+                    </div>
+                    
+                    <div class="vm-info">
+                        <div class="info-item">
+                            <span class="info-label">FLAVOR</span>
+                            <span class="info-value">${flavor.name}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">vCPU</span>
+                            <span class="info-value">${flavor.vcpu || 'N/A'}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">RAM</span>
+                            <span class="info-value">${flavor.ram ? (flavor.ram / 1024) + ' GB' : 'N/A'}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">DISQUE</span>
+                            <span class="info-value">${flavor.disk || 'N/A'} GB</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">ADRESSE IP</span>
+                            <span class="info-value"><code>${vm.ip || '---'}</code></span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">COÛT MENSUEL</span>
+                            <span class="info-value">${flavor.price || 0} FCFA</span>
+                        </div>
+                    </div>
+                    
+                    <div class="vm-actions">
+                        <button class="btn ${isRunning ? 'btn-warning' : 'btn-success'} btn-vm-action" 
+                                onclick="controlVM('${vm.name}', '${isRunning ? 'stop' : 'start'}')">
+                            <i class="fas fa-${isRunning ? 'stop' : 'play'} me-1"></i>
+                            ${isRunning ? 'Arrêter' : 'Démarrer'}
+                        </button>
+                        <button class="btn btn-info btn-vm-action" onclick="showVMDetails('${vm.name}')">
+                            <i class="fas fa-info-circle me-1"></i>Détails
+                        </button>
+                        <button class="btn btn-danger btn-vm-action" onclick="deleteVM('${vm.name}')">
+                            <i class="fas fa-trash me-1"></i>Supprimer
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+    
+    vmList.innerHTML = html;
+}
+
+// Mettre à jour les statistiques
+function updateStats() {
+    const totalVMs = vms.length;
+    const runningVMs = vms.filter(vm => vm.status === 'Running').length;
+    const totalCPU = vms.reduce((sum, vm) => {
+        const flavor = window.flavorPrices[vm.flavor] || { vcpu: 0 };
+        return sum + flavor.vcpu;
+    }, 0);
+    const monthlyCost = vms.reduce((sum, vm) => {
+        const flavor = window.flavorPrices[vm.flavor] || { price: 0 };
+        return sum + flavor.price;
+    }, 0);
+    
+    document.getElementById('totalVMs').textContent = totalVMs;
+    document.getElementById('runningVMs').textContent = runningVMs;
+    document.getElementById('totalCPU').textContent = totalCPU;
+    document.getElementById('monthlyCost').textContent = monthlyCost.toLocaleString() + ' FCFA';
+}
+
+// Configurer les événements
+function setupEventListeners() {
+    // Sélection des flavors
+    document.querySelectorAll('.flavor-card').forEach(card => {
+        card.addEventListener('click', function() {
+            document.querySelectorAll('.flavor-card').forEach(c => c.classList.remove('selected'));
+            this.classList.add('selected');
+            selectedFlavor = this.dataset.flavor;
+            document.getElementById('selectedFlavor').value = selectedFlavor;
+            updateSummary();
+        });
+    });
+    
+    // Filtres
+    document.getElementById('filterStatus').addEventListener('change', renderVMs);
+    document.getElementById('filterFlavor').addEventListener('change', renderVMs);
+    document.getElementById('searchVMs').addEventListener('input', renderVMs);
+    
+    // Formulaire de déploiement
+    document.getElementById('deployForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const button = document.getElementById('deployButton');
+        const originalHTML = button.innerHTML;
+        button.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Déploiement en cours...';
+        button.disabled = true;
+        
+        try {
+            const formData = new FormData(this);
+            const response = await fetch('/api/vm/deploy', {
+                method: 'POST',
+                body: formData
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                showToast(`VM "${result.msg.split('"')[1]}" déployée avec succès`, 'success');
+                bootstrap.Modal.getInstance(document.getElementById('deployModal')).hide();
+                loadVMs();
+                this.reset();
+                document.querySelectorAll('.flavor-card').forEach(c => c.classList.remove('selected'));
+                selectedFlavor = null;
+                document.getElementById('selectedFlavor').value = '';
+                updateSummary();
+            } else {
+                showToast(`Erreur: ${result.msg}`, 'danger');
+            }
+        } catch (error) {
+            showToast('Erreur réseau', 'danger');
+        } finally {
+            button.innerHTML = originalHTML;
+            button.disabled = false;
+        }
+    });
+}
+
+// Mettre à jour le résumé
+function updateSummary() {
+    if (selectedFlavor && window.flavorPrices[selectedFlavor]) {
+        const flavor = window.flavorPrices[selectedFlavor];
+        document.getElementById('summaryFlavor').textContent = `${flavor.name} (${flavor.vcpu} vCPU, ${flavor.ram/1024}GB RAM, ${flavor.disk}GB Disque)`;
+        document.getElementById('summaryCost').textContent = `${flavor.price} FCFA/mois`;
+    } else {
+        document.getElementById('summaryFlavor').textContent = '-';
+        document.getElementById('summaryCost').textContent = '- FCFA';
+    }
+}
+
+// Afficher les détails d'une VM
+async function showVMDetails(vmName) {
+    const vm = vms.find(v => v.name === vmName);
+    if (!vm) return;
+    
+    const flavor = window.flavorPrices[vm.flavor] || { name: 'Unknown', price: 0 };
+    const isRunning = vm.status === 'Running';
+    
+    document.getElementById('vmModalTitle').textContent = `VM: ${vm.display_name}`;
+    
+    document.getElementById('vmModalBody').innerHTML = `
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label class="form-label">Nom complet</label>
+                    <div class="form-control bg-dark">${vm.name}</div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label class="form-label">Statut</label>
+                    <div class="form-control bg-dark">
+                        <span class="badge ${isRunning ? 'bg-success' : 'bg-secondary'}">
+                            ${vm.status || 'Unknown'}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label class="form-label">Adresse IP</label>
+                    <div class="form-control bg-dark"><code>${vm.ip || 'Non attribuée'}</code></div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label class="form-label">Hôte KVM</label>
+                    <div class="form-control bg-dark">${vm.host_name || 'N/A'}</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-4">
+                <div class="mb-3">
+                    <label class="form-label">Flavor</label>
+                    <div class="form-control bg-dark">${flavor.name}</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="mb-3">
+                    <label class="form-label">Date de création</label>
+                    <div class="form-control bg-dark">${new Date(vm.created_at * 1000).toLocaleString()}</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="mb-3">
+                    <label class="form-label">Coût mensuel</label>
+                    <div class="form-control bg-dark">${flavor.price} FCFA</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="alert alert-info">
+            <h6 class="text-white mb-2">
+                <i class="fas fa-terminal me-2"></i>Commandes SSH
+            </h6>
+            <pre class="mb-0 bg-dark p-3 rounded"><code>ssh ${vm.user || 'user'}@${vm.ip || 'IP_ADDRESS'}</code></pre>
+        </div>
+    `;
+    
+    new bootstrap.Modal(document.getElementById('vmDetailsModal')).show();
+}
+
+// Contrôler une VM
+async function controlVM(vmName, action) {
+    if (action === 'delete' && !confirm(`Supprimer la VM ${vmName} ?`)) return;
+    
+    try {
+        const response = await fetch(`/api/vm/${vmName}/${action}`, {
+            method: 'POST'
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            showToast(`VM ${action === 'start' ? 'démarrée' : action === 'stop' ? 'arrêtée' : 'supprimée'}`, 'success');
+            setTimeout(loadVMs, 1000);
+        } else {
+            showToast(`Erreur: ${data.msg}`, 'danger');
+        }
+    } catch (error) {
+        showToast('Erreur réseau', 'danger');
+    }
+}
+
+// Supprimer une VM
+function deleteVM(vmName) {
+    if (confirm(`Êtes-vous sûr de vouloir supprimer cette VM ?\n\nCette action est irréversible.`)) {
+        controlVM(vmName, 'delete');
+    }
+}
+
+// Exporter les données de flavors
+window.flavorPrices = {{ flavors|tojson }};
+</script>
+{% endblock %}

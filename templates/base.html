@@ -1,0 +1,100 @@
+<!-- templates/base.html -->
+<!DOCTYPE html>
+<html lang="fr" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}XICK Cloud Platform{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    
+    {% block head_extra %}{% endblock %}
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="app-sidebar">
+            <div class="brand-logo">
+                <i class="fas fa-bolt"></i>
+            </div>
+            <nav class="side-nav">
+                <!-- CORRECTION: Utiliser iaas.index au lieu de dashboard.index -->
+                <a href="{{ url_for('iaas.index') }}" class="side-icon {% if request.endpoint == 'iaas.index' %}active{% endif %}">
+                    <i class="fas fa-th-large"></i>
+                </a>
+                <a href="{{ url_for('iaas.index') }}" class="side-icon {% if request.endpoint == 'iaas.index' %}active{% endif %}">
+                    <i class="fas fa-server"></i>
+                </a>
+                <a href="{{ url_for('swarm.index') }}" class="side-icon {% if request.endpoint == 'swarm.index' %}active{% endif %}">
+                    <i class="fab fa-docker"></i>
+                </a>
+                <a href="{{ url_for('paas.index') }}" class="side-icon {% if request.endpoint == 'paas.index' %}active{% endif %}">
+                    <i class="fas fa-cube"></i>
+                </a>
+                {% if session.get('role') == 'admin' %}
+                <a href="{{ url_for('admin.index') }}" class="side-icon {% if request.endpoint.startswith('admin.') %}active{% endif %}">
+                    <i class="fas fa-cog"></i>
+                </a>
+                {% endif %}
+                <a href="{{ url_for('auth.logout') }}" class="side-icon" style="margin-top: auto;">
+                    <i class="fas fa-sign-out-alt"></i>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="app-main">
+            <!-- Top Bar -->
+            <header class="top-bar">
+                <div>
+                    <div class="brand-text">XICK<span>CLOUD</span></div>
+                    <small class="text-muted">
+                        Connecté en tant que: <strong>{{ session.username }}</strong>
+                        {% if session.get('role') == 'admin' %}
+                        <span class="badge bg-danger ms-2">Admin</span>
+                        {% endif %}
+                    </small>
+                </div>
+                <div class="header-actions">
+                    <div class="search-wrapper">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="globalSearch" placeholder="Rechercher...">
+                    </div>
+                    <div class="dropdown ms-3">
+                        <button class="btn btn-dark dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user-circle me-2"></i>{{ session.username }}
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ url_for('auth.logout') }}"><i class="fas fa-sign-out-alt me-2"></i>Déconnexion</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Flash Messages -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <!-- Page Content -->
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    
+    {% block scripts %}{% endblock %}
+</body>
+</html>

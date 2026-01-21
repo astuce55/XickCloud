@@ -1,0 +1,26 @@
+<!-- templates/404.html -->
+{% extends "base.html" %}
+
+{% block title %}Page non trouvée - XICK Cloud{% endblock %}
+
+{% block content %}
+<div class="container-fluid d-flex flex-column justify-content-center align-items-center" style="min-height: 70vh;">
+    <div class="text-center">
+        <div class="error-code" style="font-size: 8rem; font-weight: 900; color: var(--accent); line-height: 1;">
+            404
+        </div>
+        <h1 class="h2 text-white mb-3">Page non trouvée</h1>
+        <p class="text-muted mb-4">
+            La page que vous recherchez n'existe pas ou a été déplacée.
+        </p>
+        <div class="d-flex gap-3 justify-content-center">
+            <a href="{{ url_for('dashboard.index') }}" class="btn btn-primary">
+                <i class="fas fa-home me-2"></i>Retour au dashboard
+            </a>
+            <button class="btn btn-outline-light" onclick="history.back()">
+                <i class="fas fa-arrow-left me-2"></i>Retour
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}

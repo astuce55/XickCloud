@@ -1,0 +1,250 @@
+<!-- templates/dashboard.html -->
+{% extends "base.html" %}
+
+{% block title %}Dashboard - XICK Cloud{% endblock %}
+
+{% block content %}
+<div class="dashboard-content">
+    <!-- Stats Cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="d-flex align-items-center">
+                    <div class="stat-icon bg-primary">
+                        <i class="fas fa-server"></i>
+                    </div>
+                    <div class="ms-3">
+                        <span class="label">MES VMs</span>
+                        <h2 class="mb-0">{{ stats.total_vms }}</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="d-flex align-items-center">
+                    <div class="stat-icon bg-success">
+                        <i class="fas fa-play-circle"></i>
+                    </div>
+                    <div class="ms-3">
+                        <span class="label">VMs EN LIGNE</span>
+                        <h2 class="mb-0">{{ stats.running_vms }}</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="d-flex align-items-center">
+                    <div class="stat-icon bg-warning">
+                        <i class="fas fa-memory"></i>
+                    </div>
+                    <div class="ms-3">
+                        <span class="label">RAM UTILISÉE</span>
+                        <h2 class="mb-0">{{ "%.1f"|format(stats.total_ram) }} GB</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="d-flex align-items-center">
+                    <div class="stat-icon bg-danger">
+                        <i class="fas fa-money-bill-wave"></i>
+                    </div>
+                    <div class="ms-3">
+                        <span class="label">COÛT MENSUEL</span>
+                        <h2 class="mb-0">{{ stats.monthly_cost }} FCFA</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-4">
+            <div class="action-card bg-primary" onclick="window.location.href='{{ url_for('iaas.index') }}'">
+                <div class="action-icon">
+                    <i class="fas fa-server"></i>
+                </div>
+                <h4>IaaS</h4>
+                <p>Gérez vos machines virtuelles</p>
+                <span class="action-badge">{{ stats.total_vms }} VMs</span>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="action-card bg-success" onclick="window.location.href='{{ url_for('swarm.index') }}'">
+                <div class="action-icon">
+                    <i class="fab fa-docker"></i>
+                </div>
+                <h4>Docker Swarm</h4>
+                <p>Orchestration de conteneurs</p>
+                <span class="action-badge">Clusters</span>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="action-card bg-warning" onclick="window.location.href='{{ url_for('paas.index') }}'">
+                <div class="action-icon">
+                    <i class="fas fa-cube"></i>
+                </div>
+                <h4>PaaS</h4>
+                <p>Applications en un clic</p>
+                <span class="action-badge">Catalogue</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent VMs -->
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="fas fa-history me-2"></i>VMs Récentes</h5>
+            <a href="{{ url_for('iaas.index') }}" class="btn btn-sm btn-outline-light">Voir tout</a>
+        </div>
+        <div class="card-body">
+            {% if vms %}
+            <div class="table-responsive">
+                <table class="table table-dark table-hover">
+                    <thead>
+                        <tr>
+                            <th>Nom</th>
+                            <th>Flavor</th>
+                            <th>IP</th>
+                            <th>Statut</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for vm in vms[:5] %}
+                        <tr>
+                            <td>{{ vm.display_name }}</td>
+                            <td>
+                                <span class="badge bg-secondary">{{ vm.flavor }}</span>
+                            </td>
+                            <td>
+                                <code>{{ vm.ip if vm.ip else '---' }}</code>
+                            </td>
+                            <td>
+                                <span class="badge {% if vm.status == 'Running' %}bg-success{% else %}bg-secondary{% endif %}">
+                                    {{ vm.status }}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    {% if vm.status == 'Running' %}
+                                    <button class="btn btn-outline-warning" onclick="controlVM('{{ vm.name }}', 'stop')">
+                                        <i class="fas fa-stop"></i>
+                                    </button>
+                                    {% else %}
+                                    <button class="btn btn-outline-success" onclick="controlVM('{{ vm.name }}', 'start')">
+                                        <i class="fas fa-play"></i>
+                                    </button>
+                                    {% endif %}
+                                    <button class="btn btn-outline-danger" onclick="deleteVM('{{ vm.name }}')">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-server fa-3x text-muted mb-3"></i>
+                <p class="text-muted">Aucune VM déployée</p>
+                <a href="{{ url_for('iaas.index') }}" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>Créer une VM
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Modal Déploiement Rapide -->
+<div class="modal fade" id="quickDeployModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Déployer une VM</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="quickDeployForm">
+                    <div class="mb-3">
+                        <label class="form-label">Nom de la VM</label>
+                        <input type="text" class="form-control" name="hostname" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Flavor</label>
+                        <select class="form-select" name="flavor">
+                            {% for flavor_id, flavor in flavors.items() %}
+                            <option value="{{ flavor_id }}">{{ flavor.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Mot de passe</label>
+                        <input type="password" class="form-control" name="password" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-primary" onclick="quickDeploy()">Déployer</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function controlVM(vmName, action) {
+    fetch(`/api/vm/${vmName}/${action}`, { method: 'POST' })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Erreur: ' + data.msg);
+            }
+        });
+}
+
+function deleteVM(vmName) {
+    if (confirm('Supprimer cette VM ?')) {
+        controlVM(vmName, 'delete');
+    }
+}
+
+function quickDeploy() {
+    const form = document.getElementById('quickDeployForm');
+    const formData = new FormData(form);
+    
+    fetch('/api/vm/deploy', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('VM déployée avec succès !');
+            location.reload();
+        } else {
+            alert('Erreur: ' + data.msg);
+        }
+    });
+}
+
+// Initialisation
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-refresh toutes les 10 secondes
+    setInterval(() => {
+        location.reload();
+    }, 10000);
+});
+</script>
+{% endblock %}
