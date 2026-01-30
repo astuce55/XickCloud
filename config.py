@@ -160,7 +160,7 @@ DEFAULT_HOSTS = [
     {
         'id': 'remote-kvm-1',
         'name': 'KVM Distant Principal',
-        'uri': 'qemu+ssh://kvmadmin@192.168.1.132/system',
+        'uri': 'qemu+ssh://heil@10.10.0.95/system',
         'enabled': True,
         'priority': 1,
         'storage_path': '/var/lib/libvirt/images',

@@ -1,0 +1,54 @@
+[2026-01-25 23:49:10] INFO [paas:52] - Récupération apps pour user1: 0 apps
+[2026-01-25 23:49:40] INFO [paas:52] - Récupération apps pour user1: 0 apps
+[2026-01-25 23:50:10] INFO [paas:52] - Récupération apps pour user1: 0 apps
+[2026-01-25 23:50:37] INFO [paas:68] - Déploiement app wordpress (my_wordpress) sur cluster test_cluster par user1
+[2026-01-25 23:50:40] INFO [paas:52] - Récupération apps pour user1: 0 apps
+[2026-01-25 23:50:57] INFO [paas:52] - Récupération apps pour user1: 0 apps
+[2026-01-25 23:51:27] INFO [paas:52] - Récupération apps pour user1: 0 apps
+[2026-01-25 23:51:51] INFO [paas:68] - Déploiement app wordpress (my_wordpress) sur cluster test_cluster par user1
+[2026-01-25 23:51:57] INFO [paas:52] - Récupération apps pour user1: 0 apps
+[2026-01-25 23:52:27] INFO [paas:52] - Récupération apps pour user1: 0 apps
+[2026-01-25 23:52:57] INFO [paas:52] - Récupération apps pour user1: 0 apps
+[2026-01-25 23:53:27] INFO [paas:52] - Récupération apps pour user1: 0 apps
+[2026-01-25 23:53:57] INFO [paas:52] - Récupération apps pour user1: 0 apps
+[2026-01-25 23:54:28] INFO [paas:52] - Récupération apps pour user1: 0 apps
+[2026-01-25 23:54:58] INFO [paas:52] - Récupération apps pour user1: 0 apps
+[2026-01-25 23:55:06] INFO [paas:52] - Récupération apps pour user1: 0 apps
+[2026-01-25 23:55:36] INFO [paas:52] - Récupération apps pour user1: 0 apps
+[2026-01-25 23:55:50] INFO [paas:68] - Déploiement app mattermost (mattermost-716811) sur cluster test_cluster par user1
+[2026-01-25 23:56:06] INFO [paas:52] - Récupération apps pour user1: 0 apps
+[2026-01-25 23:57:08] INFO [paas:52] - Récupération apps pour user1: 0 apps
+[2026-01-25 23:57:08] INFO [paas:52] - Récupération apps pour user1: 0 apps
+[2026-01-25 23:57:09] INFO [paas:52] - Récupération apps pour user1: 0 apps
+[2026-01-30 12:03:58] INFO [paas:52] - Récupération apps pour admin: 0 apps
+[2026-01-30 12:04:17] INFO [paas:68] - Déploiement app wordpress (wordpress-051822) sur cluster  par admin
+[2026-01-30 12:04:28] INFO [paas:52] - Récupération apps pour admin: 0 apps
+[2026-01-30 12:04:58] INFO [paas:52] - Récupération apps pour admin: 0 apps
+[2026-01-30 15:17:18] INFO [paas:52] - Récupération apps pour user1: 0 apps
+[2026-01-30 15:17:48] INFO [paas:52] - Récupération apps pour user1: 0 apps
+[2026-01-30 15:18:18] INFO [paas:52] - Récupération apps pour user1: 0 apps
+[2026-01-30 15:18:21] INFO [paas:68] - Déploiement app wordpress (wordpress-test) sur cluster test par user1
+[2026-01-30 15:18:21] INFO [paas:100] - Vérification Swarm sur 192.168.38.10
+[2026-01-30 15:18:48] INFO [paas:52] - Récupération apps pour user1: 0 apps
+[2026-01-30 15:19:13] INFO [paas:52] - Récupération apps pour user1: 0 apps
+[2026-01-30 15:19:43] INFO [paas:52] - Récupération apps pour user1: 0 apps
+[2026-01-30 15:20:13] INFO [paas:52] - Récupération apps pour user1: 0 apps
+[2026-01-30 15:20:43] INFO [paas:52] - Récupération apps pour user1: 0 apps
+[2026-01-30 15:21:14] INFO [paas:52] - Récupération apps pour user1: 0 apps
+[2026-01-30 15:21:44] INFO [paas:52] - Récupération apps pour user1: 0 apps
+[2026-01-30 15:22:14] INFO [paas:52] - Récupération apps pour user1: 0 apps
+[2026-01-30 15:22:44] INFO [paas:52] - Récupération apps pour user1: 0 apps
+[2026-01-30 15:23:14] INFO [paas:52] - Récupération apps pour user1: 0 apps
+[2026-01-30 15:30:56] INFO [paas:52] - Récupération apps pour user1: 0 apps
+[2026-01-30 15:31:28] INFO [paas:52] - Récupération apps pour user1: 0 apps
+[2026-01-30 15:31:57] INFO [paas:52] - Récupération apps pour user1: 0 apps
+[2026-01-30 15:32:15] INFO [paas:68] - Déploiement app wordpress (my_wordpress) sur cluster test par user1
+[2026-01-30 15:32:15] INFO [paas:100] - Vérification Swarm sur 192.168.38.10
+[2026-01-30 15:32:27] INFO [paas:52] - Récupération apps pour user1: 0 apps
+[2026-01-30 15:32:48] INFO [paas:52] - Récupération apps pour user1: 0 apps
+[2026-01-30 15:36:25] INFO [paas:52] - Récupération apps pour user1: 0 apps
+[2026-01-30 15:36:44] INFO [paas:68] - Déploiement app wordpress (wordpress-787369) sur cluster test par user1
+[2026-01-30 15:36:44] INFO [paas:100] - Vérification Swarm sur 192.168.75.55.
+[2026-01-30 15:36:55] INFO [paas:52] - Récupération apps pour user1: 0 apps
+[2026-01-30 15:37:25] INFO [paas:52] - Récupération apps pour user1: 0 apps
+[2026-01-30 15:37:55] INFO [paas:52] - Récupération apps pour user1: 0 apps

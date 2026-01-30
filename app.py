@@ -2,7 +2,7 @@
 from flask import Flask, render_template
 from config import SECRET_KEY, DEBUG
 from models.user import UserManager
-from routes.auth import auth_bp
+from routes.auth import auth_bp, login_required
 from routes.iaas import iaas_bp
 from routes.swarm import swarm_bp
 from routes.admin import admin_bp

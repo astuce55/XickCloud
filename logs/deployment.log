@@ -1,0 +1,30 @@
+[2026-01-30 15:18:21] INFO [deployment:17] - Vérification Swarm sur 192.168.38.10
+[2026-01-30 15:18:51] WARNING [deployment:47] - Swarm non prêt après 30s
+[2026-01-30 15:32:15] INFO [deployment:17] - Vérification Swarm sur 192.168.38.10
+[2026-01-30 15:36:44] INFO [deployment:17] - Vérification Swarm sur 192.168.75.55.
+[2026-01-30 15:37:16] WARNING [deployment:47] - Swarm non prêt après 30s
+[2026-01-30 15:45:08] INFO [deployment:239] - Déploiement nœud Swarm user1_test-manager-1 avec IP 192.168.224.10
+[2026-01-30 15:45:08] INFO [deployment:116] - Déploiement VM user1_test-manager-1 sur qemu+ssh://heil@10.70.247.81/system
+[2026-01-30 15:45:10] INFO [deployment:206] - Commande virt-install: virt-install --name=user1_test-manager-1 --vcpus=2 --memory=4096 --disk=path=/var/lib/libvirt/images/user1_test-manager-1.qcow2,device=disk,bus=virtio --disk=path=/var/lib/libvirt/images/user1_test-manager-1-seed.iso,device=cdrom --os-variant=ubuntu22.04 --import --noautoconsole --graphics=none --network=network=swarm_user1_test,model=virtio --connect qemu+ssh://heil@10.70.247.81/system
+[2026-01-30 15:45:21] INFO [deployment:216] - VM user1_test-manager-1 déployée avec succès
+[2026-01-30 15:45:21] INFO [deployment:335] - Nœud Swarm user1_test-manager-1 déployé avec IP 192.168.224.10
+[2026-01-30 17:37:57] INFO [deployment:239] - Déploiement nœud Swarm user1_test-manager-1 avec IP None
+[2026-01-30 17:37:57] INFO [deployment:116] - Déploiement VM user1_test-manager-1 sur qemu+ssh://heil@10.10.0.95/system
+[2026-01-30 17:37:59] INFO [deployment:206] - Commande virt-install: virt-install --name=user1_test-manager-1 --vcpus=2 --memory=4096 --disk=path=/var/lib/libvirt/images/user1_test-manager-1.qcow2,device=disk,bus=virtio --disk=path=/var/lib/libvirt/images/user1_test-manager-1-seed.iso,device=cdrom --os-variant=ubuntu22.04 --import --noautoconsole --graphics=none --network=network=swarm_user1_test,model=virtio --connect qemu+ssh://heil@10.10.0.95/system
+[2026-01-30 17:38:11] INFO [deployment:216] - VM user1_test-manager-1 déployée avec succès
+[2026-01-30 17:38:11] INFO [deployment:335] - Nœud Swarm user1_test-manager-1 déployé avec IP None
+[2026-01-30 17:38:11] INFO [deployment:239] - Déploiement nœud Swarm user1_test-worker-1 avec IP None
+[2026-01-30 17:38:11] INFO [deployment:116] - Déploiement VM user1_test-worker-1 sur qemu+ssh://heil@10.10.0.95/system
+[2026-01-30 17:38:14] INFO [deployment:206] - Commande virt-install: virt-install --name=user1_test-worker-1 --vcpus=2 --memory=4096 --disk=path=/var/lib/libvirt/images/user1_test-worker-1.qcow2,device=disk,bus=virtio --disk=path=/var/lib/libvirt/images/user1_test-worker-1-seed.iso,device=cdrom --os-variant=ubuntu22.04 --import --noautoconsole --graphics=none --network=network=swarm_user1_test,model=virtio --connect qemu+ssh://heil@10.10.0.95/system
+[2026-01-30 17:38:18] INFO [deployment:216] - VM user1_test-worker-1 déployée avec succès
+[2026-01-30 17:38:18] INFO [deployment:335] - Nœud Swarm user1_test-worker-1 déployé avec IP None
+[2026-01-30 17:47:24] INFO [deployment:239] - Déploiement nœud Swarm user1_cluster1-manager-1 avec IP None
+[2026-01-30 17:47:24] INFO [deployment:116] - Déploiement VM user1_cluster1-manager-1 sur qemu+ssh://heil@10.10.0.95/system
+[2026-01-30 17:47:28] INFO [deployment:206] - Commande virt-install: virt-install --name=user1_cluster1-manager-1 --vcpus=2 --memory=4096 --disk=path=/var/lib/libvirt/images/user1_cluster1-manager-1.qcow2,device=disk,bus=virtio --disk=path=/var/lib/libvirt/images/user1_cluster1-manager-1-seed.iso,device=cdrom --os-variant=ubuntu22.04 --import --noautoconsole --graphics=none --network=network=swarm_user1_cluster1,model=virtio --connect qemu+ssh://heil@10.10.0.95/system
+[2026-01-30 17:47:43] INFO [deployment:216] - VM user1_cluster1-manager-1 déployée avec succès
+[2026-01-30 17:47:43] INFO [deployment:335] - Nœud Swarm user1_cluster1-manager-1 déployé avec IP None
+[2026-01-30 17:47:43] INFO [deployment:239] - Déploiement nœud Swarm user1_cluster1-worker-1 avec IP None
+[2026-01-30 17:47:43] INFO [deployment:116] - Déploiement VM user1_cluster1-worker-1 sur qemu+ssh://heil@10.10.0.95/system
+[2026-01-30 17:47:45] INFO [deployment:206] - Commande virt-install: virt-install --name=user1_cluster1-worker-1 --vcpus=2 --memory=4096 --disk=path=/var/lib/libvirt/images/user1_cluster1-worker-1.qcow2,device=disk,bus=virtio --disk=path=/var/lib/libvirt/images/user1_cluster1-worker-1-seed.iso,device=cdrom --os-variant=ubuntu22.04 --import --noautoconsole --graphics=none --network=network=swarm_user1_cluster1,model=virtio --connect qemu+ssh://heil@10.10.0.95/system
+[2026-01-30 17:47:49] INFO [deployment:216] - VM user1_cluster1-worker-1 déployée avec succès
+[2026-01-30 17:47:49] INFO [deployment:335] - Nœud Swarm user1_cluster1-worker-1 déployé avec IP None

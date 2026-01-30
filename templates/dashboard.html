@@ -203,7 +203,7 @@
 {% block scripts %}
 <script>
 function controlVM(vmName, action) {
-    fetch(`/api/vm/${vmName}/${action}`, { method: 'POST' })
+    fetch(`/api/iaas/vm/${vmName}/${action}`, { method: 'POST' })
         .then(response => response.json())
         .then(data => {
             if (data.success) {
