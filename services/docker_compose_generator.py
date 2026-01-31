@@ -1,547 +1,286 @@
-# services/docker_compose_generator.py - NOUVEAU FICHIER
+# services/docker_compose_generator.py
 import os
-from typing import Dict, Optional
 from config import GEN_DIR, PaaS_CATALOG
-from config_logging import deployment_logger as logger
 
 class DockerComposeGenerator:
     """Génère des fichiers docker-compose.yml pour les applications PaaS"""
     
     def __init__(self):
-        self.compose_dir = os.path.join(GEN_DIR, 'compose')
-        os.makedirs(self.compose_dir, exist_ok=True)
+        os.makedirs(GEN_DIR, exist_ok=True)
     
-    def generate_wordpress(self, app_name: str, db_password: str = "wordpress_pass") -> str:
-        """Génère docker-compose pour WordPress"""
+    def generate_compose(self, app_id: str, stack_name: str, db_password: str) -> str:
+        """
+        Génère un fichier docker-compose.yml pour une application
         
-        compose_content = f"""version: '3.8'
-
-services:
-  db:
-    image: mysql:8.0
-    volumes:
-      - db_data:/var/lib/mysql
-    environment:
-      MYSQL_ROOT_PASSWORD: {db_password}
-      MYSQL_DATABASE: wordpress
-      MYSQL_USER: wordpress
-      MYSQL_PASSWORD: {db_password}
-    networks:
-      - app_network
-    deploy:
-      replicas: 1
-      restart_policy:
-        condition: on-failure
-
-  wordpress:
-    image: wordpress:latest
-    ports:
-      - "80:80"
-    environment:
-      WORDPRESS_DB_HOST: db:3306
-      WORDPRESS_DB_USER: wordpress
-      WORDPRESS_DB_PASSWORD: {db_password}
-      WORDPRESS_DB_NAME: wordpress
-    volumes:
-      - wp_data:/var/www/html
-    networks:
-      - app_network
-    deploy:
-      replicas: 1
-      restart_policy:
-        condition: on-failure
-    depends_on:
-      - db
-
-volumes:
-  db_data:
-  wp_data:
-
-networks:
-  app_network:
-    driver: overlay
-"""
+        CORRECTIONS APPORTÉES:
+        1. Ajout d'un réseau overlay pour Docker Swarm
+        2. Configuration correcte des services de BD avec volumes nommés
+        3. Variables d'environnement DB correctement passées aux applications
+        4. Health checks pour s'assurer que la BD démarre avant l'app
+        """
         
-        file_path = os.path.join(self.compose_dir, f"{app_name}.yml")
-        with open(file_path, 'w') as f:
+        if app_id not in PaaS_CATALOG:
+            return None
+        
+        app_info = PaaS_CATALOG[app_id]
+        db_type = app_info.get('db_type', 'none')
+        
+        compose_file = os.path.join(GEN_DIR, f"{stack_name}-compose.yml")
+        
+        # Nom du réseau overlay (attachable permet l'accès depuis l'extérieur)
+        network_name = f"{stack_name}_network"
+        
+        # Nom du service de base de données
+        db_service_name = f"{stack_name}_db" if db_type != 'none' else None
+        
+        compose_content = self._generate_compose_content(
+            app_id=app_id,
+            stack_name=stack_name,
+            db_password=db_password,
+            db_type=db_type,
+            network_name=network_name,
+            db_service_name=db_service_name
+        )
+        
+        with open(compose_file, 'w') as f:
             f.write(compose_content)
         
-        logger.info(f"Généré docker-compose pour WordPress: {file_path}")
-        return file_path
+        return compose_file
     
-    def generate_mattermost(self, app_name: str, db_password: str = "mattermost_pass") -> str:
-        """Génère docker-compose pour Mattermost"""
+    def _generate_compose_content(self, app_id: str, stack_name: str, db_password: str, 
+                                   db_type: str, network_name: str, db_service_name: str) -> str:
+        """Génère le contenu du docker-compose selon le type d'application"""
         
-        compose_content = f"""version: '3.8'
+        # En-tête commun
+        compose = f"""version: '3.8'
 
 services:
-  postgres:
-    image: postgres:13-alpine
-    environment:
-      POSTGRES_USER: mmuser
-      POSTGRES_PASSWORD: {db_password}
-      POSTGRES_DB: mattermost
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    networks:
-      - app_network
-    deploy:
-      replicas: 1
-      restart_policy:
-        condition: on-failure
-
-  mattermost:
-    image: mattermost/mattermost-team-edition:latest
-    ports:
-      - "8065:8065"
-    environment:
-      MM_SQLSETTINGS_DRIVERNAME: postgres
-      MM_SQLSETTINGS_DATASOURCE: postgres://mmuser:{db_password}@postgres:5432/mattermost?sslmode=disable&connect_timeout=10
-      MM_SERVICESETTINGS_SITEURL: http://localhost:8065
-    volumes:
-      - mattermost_config:/mattermost/config
-      - mattermost_data:/mattermost/data
-      - mattermost_logs:/mattermost/logs
-      - mattermost_plugins:/mattermost/plugins
-    networks:
-      - app_network
-    deploy:
-      replicas: 1
-      restart_policy:
-        condition: on-failure
-    depends_on:
-      - postgres
-
-volumes:
-  postgres_data:
-  mattermost_config:
-  mattermost_data:
-  mattermost_logs:
-  mattermost_plugins:
-
-networks:
-  app_network:
-    driver: overlay
 """
         
-        file_path = os.path.join(self.compose_dir, f"{app_name}.yml")
-        with open(file_path, 'w') as f:
-            f.write(compose_content)
+        # Ajouter le service de base de données si nécessaire
+        if db_type == 'mysql':
+            compose += self._generate_mysql_service(stack_name, db_password, network_name)
+        elif db_type == 'postgresql':
+            compose += self._generate_postgresql_service(stack_name, db_password, network_name)
         
-        logger.info(f"Généré docker-compose pour Mattermost: {file_path}")
-        return file_path
-    
-    def generate_odoo(self, app_name: str, db_password: str = "odoo_pass") -> str:
-        """Génère docker-compose pour Odoo"""
+        # Ajouter le service de l'application
+        compose += self._generate_app_service(app_id, stack_name, db_password, db_type, 
+                                              network_name, db_service_name)
         
-        compose_content = f"""version: '3.8'
-
-services:
-  postgres:
-    image: postgres:13
-    environment:
-      POSTGRES_DB: postgres
-      POSTGRES_PASSWORD: {db_password}
-      POSTGRES_USER: odoo
-    volumes:
-      - odoo_db:/var/lib/postgresql/data
-    networks:
-      - app_network
-    deploy:
-      replicas: 1
-      restart_policy:
-        condition: on-failure
-
-  odoo:
-    image: odoo:16.0
-    ports:
-      - "8069:8069"
-    environment:
-      HOST: postgres
-      USER: odoo
-      PASSWORD: {db_password}
-    volumes:
-      - odoo_data:/var/lib/odoo
-      - odoo_addons:/mnt/extra-addons
-    networks:
-      - app_network
-    deploy:
-      replicas: 1
-      restart_policy:
-        condition: on-failure
-    depends_on:
-      - postgres
-
+        # Ajouter la définition des volumes
+        if db_type != 'none':
+            compose += f"""
 volumes:
-  odoo_db:
-  odoo_data:
-  odoo_addons:
-
-networks:
-  app_network:
-    driver: overlay
+  {stack_name}_db_data:
+    driver: local
 """
         
-        file_path = os.path.join(self.compose_dir, f"{app_name}.yml")
-        with open(file_path, 'w') as f:
-            f.write(compose_content)
-        
-        logger.info(f"Généré docker-compose pour Odoo: {file_path}")
-        return file_path
-    
-    def generate_owncloud(self, app_name: str, db_password: str = "owncloud_pass") -> str:
-        """Génère docker-compose pour OwnCloud"""
-        
-        compose_content = f"""version: '3.8'
-
-services:
-  mariadb:
-    image: mariadb:10.11
-    environment:
-      MYSQL_ROOT_PASSWORD: {db_password}
-      MYSQL_DATABASE: owncloud
-      MYSQL_USER: owncloud
-      MYSQL_PASSWORD: {db_password}
-    volumes:
-      - mysql_data:/var/lib/mysql
-    networks:
-      - app_network
-    deploy:
-      replicas: 1
-      restart_policy:
-        condition: on-failure
-
-  redis:
-    image: redis:7-alpine
-    networks:
-      - app_network
-    deploy:
-      replicas: 1
-      restart_policy:
-        condition: on-failure
-
-  owncloud:
-    image: owncloud/server:latest
-    ports:
-      - "80:8080"
-    environment:
-      OWNCLOUD_DOMAIN: localhost
-      OWNCLOUD_DB_TYPE: mysql
-      OWNCLOUD_DB_NAME: owncloud
-      OWNCLOUD_DB_USERNAME: owncloud
-      OWNCLOUD_DB_PASSWORD: {db_password}
-      OWNCLOUD_DB_HOST: mariadb
-      OWNCLOUD_REDIS_ENABLED: "true"
-      OWNCLOUD_REDIS_HOST: redis
-      OWNCLOUD_ADMIN_USERNAME: admin
-      OWNCLOUD_ADMIN_PASSWORD: admin123
-    volumes:
-      - owncloud_data:/mnt/data
-    networks:
-      - app_network
-    deploy:
-      replicas: 1
-      restart_policy:
-        condition: on-failure
-    depends_on:
-      - mariadb
-      - redis
-
-volumes:
-  mysql_data:
-  owncloud_data:
-
+        # Ajouter la définition du réseau overlay
+        compose += f"""
 networks:
-  app_network:
+  {network_name}:
     driver: overlay
+    attachable: true
 """
         
-        file_path = os.path.join(self.compose_dir, f"{app_name}.yml")
-        with open(file_path, 'w') as f:
-            f.write(compose_content)
-        
-        logger.info(f"Généré docker-compose pour OwnCloud: {file_path}")
-        return file_path
+        return compose
     
-    def generate_moodle(self, app_name: str, db_password: str = "moodle_pass") -> str:
-        """Génère docker-compose pour Moodle"""
-        
-        compose_content = f"""version: '3.8'
-
-services:
-  mariadb:
-    image: mariadb:10.11
-    environment:
-      MYSQL_ROOT_PASSWORD: {db_password}
-      MYSQL_DATABASE: moodle
-      MYSQL_USER: moodle
-      MYSQL_PASSWORD: {db_password}
-    volumes:
-      - mariadb_data:/var/lib/mysql
-    networks:
-      - app_network
-    deploy:
-      replicas: 1
-      restart_policy:
-        condition: on-failure
-
-  moodle:
-    image: bitnami/moodle:latest
-    ports:
-      - "80:8080"
-      - "443:8443"
-    environment:
-      MOODLE_DATABASE_HOST: mariadb
-      MOODLE_DATABASE_PORT_NUMBER: 3306
-      MOODLE_DATABASE_USER: moodle
-      MOODLE_DATABASE_PASSWORD: {db_password}
-      MOODLE_DATABASE_NAME: moodle
-      MOODLE_USERNAME: admin
-      MOODLE_PASSWORD: admin123
-    volumes:
-      - moodle_data:/bitnami/moodle
-      - moodledata_data:/bitnami/moodledata
-    networks:
-      - app_network
-    deploy:
-      replicas: 1
-      restart_policy:
-        condition: on-failure
-    depends_on:
-      - mariadb
-
-volumes:
-  mariadb_data:
-  moodle_data:
-  moodledata_data:
-
-networks:
-  app_network:
-    driver: overlay
-"""
-        
-        file_path = os.path.join(self.compose_dir, f"{app_name}.yml")
-        with open(file_path, 'w') as f:
-            f.write(compose_content)
-        
-        logger.info(f"Généré docker-compose pour Moodle: {file_path}")
-        return file_path
-    
-    def generate_prestashop(self, app_name: str, db_password: str = "prestashop_pass") -> str:
-        """Génère docker-compose pour PrestaShop"""
-        
-        compose_content = f"""version: '3.8'
-
-services:
-  mysql:
+    def _generate_mysql_service(self, stack_name: str, db_password: str, network_name: str) -> str:
+        """Génère le service MySQL avec configuration correcte"""
+        return f"""  {stack_name}_db:
     image: mysql:8.0
     environment:
       MYSQL_ROOT_PASSWORD: {db_password}
-      MYSQL_DATABASE: prestashop
-      MYSQL_USER: prestashop
+      MYSQL_DATABASE: {stack_name}_db
+      MYSQL_USER: {stack_name}_user
       MYSQL_PASSWORD: {db_password}
     volumes:
-      - mysql_data:/var/lib/mysql
+      - {stack_name}_db_data:/var/lib/mysql
     networks:
-      - app_network
+      - {network_name}
     deploy:
-      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
       restart_policy:
         condition: on-failure
+        delay: 5s
+        max_attempts: 3
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p{db_password}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
-  prestashop:
-    image: prestashop/prestashop:latest
-    ports:
-      - "80:80"
-    environment:
-      DB_SERVER: mysql
-      DB_NAME: prestashop
-      DB_USER: prestashop
-      DB_PASSWD: {db_password}
-      PS_DOMAIN: localhost
-      PS_INSTALL_AUTO: 1
-    volumes:
-      - prestashop_data:/var/www/html
-    networks:
-      - app_network
-    deploy:
-      replicas: 1
-      restart_policy:
-        condition: on-failure
-    depends_on:
-      - mysql
-
-volumes:
-  mysql_data:
-  prestashop_data:
-
-networks:
-  app_network:
-    driver: overlay
 """
-        
-        file_path = os.path.join(self.compose_dir, f"{app_name}.yml")
-        with open(file_path, 'w') as f:
-            f.write(compose_content)
-        
-        logger.info(f"Généré docker-compose pour PrestaShop: {file_path}")
-        return file_path
     
-    def generate_onlyoffice(self, app_name: str, db_password: str = "onlyoffice_pass") -> str:
-        """Génère docker-compose pour OnlyOffice"""
-        
-        compose_content = f"""version: '3.8'
-
-services:
-  postgresql:
-    image: postgres:13
+    def _generate_postgresql_service(self, stack_name: str, db_password: str, network_name: str) -> str:
+        """Génère le service PostgreSQL avec configuration correcte"""
+        return f"""  {stack_name}_db:
+    image: postgres:15
     environment:
-      POSTGRES_DB: onlyoffice
-      POSTGRES_USER: onlyoffice
+      POSTGRES_DB: {stack_name}_db
+      POSTGRES_USER: {stack_name}_user
       POSTGRES_PASSWORD: {db_password}
     volumes:
-      - postgresql_data:/var/lib/postgresql/data
+      - {stack_name}_db_data:/var/lib/postgresql/data
     networks:
-      - app_network
+      - {network_name}
     deploy:
-      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
       restart_policy:
         condition: on-failure
+        delay: 5s
+        max_attempts: 3
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U {stack_name}_user"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
-  rabbitmq:
-    image: rabbitmq:3-management-alpine
-    networks:
-      - app_network
-    deploy:
-      replicas: 1
-      restart_policy:
-        condition: on-failure
-
-  onlyoffice:
-    image: onlyoffice/documentserver:latest
-    ports:
-      - "80:80"
-      - "443:443"
-    environment:
-      DB_TYPE: postgres
-      DB_HOST: postgresql
-      DB_PORT: 5432
-      DB_NAME: onlyoffice
-      DB_USER: onlyoffice
-      DB_PWD: {db_password}
-      AMQP_URI: amqp://guest:guest@rabbitmq
-    volumes:
-      - onlyoffice_data:/var/www/onlyoffice/Data
-      - onlyoffice_logs:/var/log/onlyoffice
-    networks:
-      - app_network
-    deploy:
-      replicas: 1
-      restart_policy:
-        condition: on-failure
-    depends_on:
-      - postgresql
-      - rabbitmq
-
-volumes:
-  postgresql_data:
-  onlyoffice_data:
-  onlyoffice_logs:
-
-networks:
-  app_network:
-    driver: overlay
+"""
+    
+    def _generate_app_service(self, app_id: str, stack_name: str, db_password: str, 
+                              db_type: str, network_name: str, db_service_name: str) -> str:
+        """Génère le service de l'application avec dépendances correctes"""
+        
+        app_info = PaaS_CATALOG[app_id]
+        port = app_info.get('port', 80)
+        
+        # Configuration de base
+        service = f"""  {stack_name}_app:
 """
         
-        file_path = os.path.join(self.compose_dir, f"{app_name}.yml")
-        with open(file_path, 'w') as f:
-            f.write(compose_content)
+        # Image selon l'application
+        service += self._get_app_image(app_id)
         
-        logger.info(f"Généré docker-compose pour OnlyOffice: {file_path}")
-        return file_path
-    
-    def generate_openldap(self, app_name: str, admin_password: str = "admin_pass") -> str:
-        """Génère docker-compose pour OpenLDAP"""
+        # Variables d'environnement avec connexion DB
+        if db_type != 'none':
+            service += self._get_app_environment(app_id, stack_name, db_password, db_type, db_service_name)
+        else:
+            service += "    environment:\n"
+            service += f"      - APP_NAME={stack_name}\n"
         
-        compose_content = f"""version: '3.8'
-
-services:
-  openldap:
-    image: osixia/openldap:latest
-    ports:
-      - "389:389"
-      - "636:636"
-    environment:
-      LDAP_ORGANISATION: "XickCloud"
-      LDAP_DOMAIN: "xickcloud.local"
-      LDAP_ADMIN_PASSWORD: {admin_password}
-    volumes:
-      - ldap_data:/var/lib/ldap
-      - ldap_config:/etc/ldap/slapd.d
-    networks:
-      - app_network
-    deploy:
-      replicas: 1
-      restart_policy:
-        condition: on-failure
-
-  phpldapadmin:
-    image: osixia/phpldapadmin:latest
-    ports:
-      - "80:80"
-    environment:
-      PHPLDAPADMIN_LDAP_HOSTS: openldap
-      PHPLDAPADMIN_HTTPS: "false"
-    networks:
-      - app_network
-    deploy:
-      replicas: 1
-      restart_policy:
-        condition: on-failure
-    depends_on:
-      - openldap
-
-volumes:
-  ldap_data:
-  ldap_config:
-
-networks:
-  app_network:
-    driver: overlay
+        # Port exposé
+        service += f"""    ports:
+      - "{port}:{port}"
 """
         
-        file_path = os.path.join(self.compose_dir, f"{app_name}.yml")
-        with open(file_path, 'w') as f:
-            f.write(compose_content)
+        # Réseau
+        service += f"""    networks:
+      - {network_name}
+"""
         
-        logger.info(f"Généré docker-compose pour OpenLDAP: {file_path}")
-        return file_path
+        # Dépendances et déploiement
+        if db_type != 'none':
+            service += f"""    depends_on:
+      - {stack_name}_db
+"""
+        
+        service += f"""    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 10s
+        max_attempts: 3
+"""
+        
+        return service
     
-    def generate_compose(self, app_id: str, app_name: str, password: str = None) -> Optional[str]:
-        """Génère le docker-compose approprié selon l'app_id"""
+    def _get_app_image(self, app_id: str) -> str:
+        """Retourne l'image Docker appropriée pour l'application"""
         
-        if password is None:
-            import secrets
-            password = secrets.token_urlsafe(16)
-        
-        generators = {
-            'wordpress': self.generate_wordpress,
-            'mattermost': self.generate_mattermost,
-            'odoo': self.generate_odoo,
-            'owncloud': self.generate_owncloud,
-            'moodle': self.generate_moodle,
-            'prestashop': self.generate_prestashop,
-            'onlyoffice': self.generate_onlyoffice,
-            'openldap': self.generate_openldap
+        images = {
+            'wordpress': '    image: wordpress:latest\n',
+            'onlyoffice': '    image: onlyoffice/documentserver:latest\n',
+            'odoo': '    image: odoo:17.0\n',
+            'openldap': '    image: osixia/openldap:latest\n',
+            'mattermost': '    image: mattermost/mattermost-team-edition:latest\n',
+            'moodle': '    image: bitnami/moodle:latest\n',
+            'owncloud': '    image: owncloud/server:latest\n',
+            'prestashop': '    image: prestashop/prestashop:latest\n'
         }
         
-        generator = generators.get(app_id)
-        if generator:
-            try:
-                return generator(app_name, password)
-            except Exception as e:
-                logger.error(f"Erreur génération compose pour {app_id}: {e}", exc_info=True)
-                return None
-        else:
-            logger.error(f"Pas de générateur pour l'application: {app_id}")
-            return None
+        return images.get(app_id, '    image: nginx:latest\n')
+    
+    def _get_app_environment(self, app_id: str, stack_name: str, db_password: str, 
+                            db_type: str, db_service_name: str) -> str:
+        """Génère les variables d'environnement selon l'application et le type de BD"""
+        
+        env = "    environment:\n"
+        
+        # Configuration commune selon le type de BD
+        if db_type == 'mysql':
+            db_host = db_service_name
+            db_name = f"{stack_name}_db"
+            db_user = f"{stack_name}_user"
+            
+            if app_id == 'wordpress':
+                env += f"""      - WORDPRESS_DB_HOST={db_host}
+      - WORDPRESS_DB_NAME={db_name}
+      - WORDPRESS_DB_USER={db_user}
+      - WORDPRESS_DB_PASSWORD={db_password}
+"""
+            elif app_id == 'mattermost':
+                env += f"""      - MM_SQLSETTINGS_DRIVERNAME=mysql
+      - MM_SQLSETTINGS_DATASOURCE={db_user}:{db_password}@tcp({db_host}:3306)/{db_name}?charset=utf8mb4,utf8&readTimeout=30s&writeTimeout=30s
+      - MM_SERVICESETTINGS_SITEURL=http://localhost:8065
+"""
+            elif app_id == 'moodle':
+                env += f"""      - MOODLE_DATABASE_TYPE=mysqli
+      - MOODLE_DATABASE_HOST={db_host}
+      - MOODLE_DATABASE_NAME={db_name}
+      - MOODLE_DATABASE_USER={db_user}
+      - MOODLE_DATABASE_PASSWORD={db_password}
+"""
+            elif app_id == 'owncloud':
+                env += f"""      - OWNCLOUD_DB_TYPE=mysql
+      - OWNCLOUD_DB_HOST={db_host}
+      - OWNCLOUD_DB_NAME={db_name}
+      - OWNCLOUD_DB_USERNAME={db_user}
+      - OWNCLOUD_DB_PASSWORD={db_password}
+      - OWNCLOUD_ADMIN_USERNAME=admin
+      - OWNCLOUD_ADMIN_PASSWORD={db_password}
+"""
+            elif app_id == 'prestashop':
+                env += f"""      - DB_SERVER={db_host}
+      - DB_NAME={db_name}
+      - DB_USER={db_user}
+      - DB_PASSWD={db_password}
+"""
+        
+        elif db_type == 'postgresql':
+            db_host = db_service_name
+            db_name = f"{stack_name}_db"
+            db_user = f"{stack_name}_user"
+            
+            if app_id == 'odoo':
+                env += f"""      - HOST={db_host}
+      - USER={db_user}
+      - PASSWORD={db_password}
+      - DB_NAME={db_name}
+"""
+            elif app_id == 'onlyoffice':
+                env += f"""      - DB_TYPE=postgres
+      - DB_HOST={db_host}
+      - DB_NAME={db_name}
+      - DB_USER={db_user}
+      - DB_PWD={db_password}
+"""
+        
+        return env
+    
+    def get_compose_templates(self) -> dict:
+        """Retourne la liste des templates disponibles"""
+        return {
+            app_id: {
+                'name': info['name'],
+                'db_type': info.get('db_type', 'none'),
+                'port': info.get('port', 80)
+            }
+            for app_id, info in PaaS_CATALOG.items()
+        }
