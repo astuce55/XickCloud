@@ -1,9 +1,8 @@
-# models/swarm.py
+# models/swarm.py - VERSION COMPLÈTE AVEC GESTION DES IPs
 import os
 import json
 import time
-import hashlib
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Optional
 from config import SWARM_CLUSTERS_FILE
 from models.vm import VMManager
 
@@ -36,21 +35,19 @@ class SwarmManager:
                       num_workers: int, manager_ip: str, network: str, host_uri: str) -> Dict:
         """Crée un nouveau cluster dans la base de données"""
         
-        # Générer les informations des nœuds
+        # Générer les informations des nœuds (sans IPs prédéfinies)
         nodes = []
-        cluster_ip_base = f"192.168.{abs(hash(cluster_name)) % 240 + 10}"
         
         # Créer les managers
         for i in range(num_managers):
             node_name = f"{cluster_name}-manager-{i+1}"
             full_vm_name = self.vm_manager.get_full_vm_name(username, node_name)
-            ip_address = f"{cluster_ip_base}.{10 + i}"
             
             nodes.append({
                 'name': node_name,
                 'full_name': full_vm_name,
                 'type': 'manager',
-                'ip': ip_address,
+                'ip': '',  # Sera rempli après obtention
                 'status': 'deploying'
             })
         
@@ -58,13 +55,12 @@ class SwarmManager:
         for i in range(num_workers):
             node_name = f"{cluster_name}-worker-{i+1}"
             full_vm_name = self.vm_manager.get_full_vm_name(username, node_name)
-            ip_address = f"{cluster_ip_base}.{20 + i}"
             
             nodes.append({
                 'name': node_name,
                 'full_name': full_vm_name,
                 'type': 'worker',
-                'ip': ip_address,
+                'ip': '',  # Sera rempli après obtention
                 'status': 'deploying'
             })
         
@@ -75,14 +71,14 @@ class SwarmManager:
             'network': network,
             'nodes': nodes,
             'status': 'deploying',
-            'manager_ip': manager_ip,
+            'manager_ip': '',  # Sera rempli après
             'host': host_uri,
             'num_managers': num_managers,
             'num_workers': num_workers,
             'init_commands': {
-                'init_swarm': f"ssh {username}@{manager_ip} 'sudo docker swarm init --advertise-addr {manager_ip}'",
-                'get_manager_token': f"ssh {username}@{manager_ip} 'sudo docker swarm join-token manager -q'",
-                'get_worker_token': f"ssh {username}@{manager_ip} 'sudo docker swarm join-token worker -q'"
+                'init_swarm': f"# Connectez-vous d'abord au manager puis exécutez:\nsudo docker swarm init --advertise-addr <MANAGER_IP>",
+                'get_manager_token': f"# Sur le manager principal:\nsudo docker swarm join-token manager -q",
+                'get_worker_token': f"# Sur le manager principal:\nsudo docker swarm join-token worker -q"
             }
         }
         
@@ -97,6 +93,16 @@ class SwarmManager:
         """Met à jour un cluster"""
         if cluster_name in self.clusters:
             self.clusters[cluster_name].update(updates)
+            
+            # Si on met à jour le manager_ip, mettre à jour les commandes
+            if 'manager_ip' in updates and updates['manager_ip']:
+                manager_ip = updates['manager_ip']
+                self.clusters[cluster_name]['init_commands'] = {
+                    'init_swarm': f"ssh {self.clusters[cluster_name]['owner']}@{manager_ip} 'sudo docker swarm init --advertise-addr {manager_ip}'",
+                    'get_manager_token': f"ssh {self.clusters[cluster_name]['owner']}@{manager_ip} 'sudo docker swarm join-token manager -q'",
+                    'get_worker_token': f"ssh {self.clusters[cluster_name]['owner']}@{manager_ip} 'sudo docker swarm join-token worker -q'"
+                }
+            
             self._save_clusters()
     
     def delete_cluster(self, cluster_name: str) -> bool:
@@ -106,15 +112,20 @@ class SwarmManager:
         
         cluster = self.clusters[cluster_name]
         
-        # Supprimer toutes les VMs du cluster
-        for node in cluster.get('nodes', []):
-            vm_name = node.get('full_name')
-            if vm_name and self.vm_manager.vm_exists(vm_name):
-                # Ici, vous devez implémenter la suppression des VMs
-                # via LibvirtService
-                self.vm_manager.delete_vm_metadata(vm_name)
+        # Supprimer toutes les VMs du cluster via libvirt
+        from services.libvirt_service import LibvirtService
         
-        # Supprimer le cluster
+        host_uri = cluster.get('host')
+        if host_uri:
+            for node in cluster.get('nodes', []):
+                vm_name = node.get('full_name')
+                if vm_name:
+                    # Supprimer la VM de libvirt
+                    LibvirtService.control_domain(host_uri, vm_name, 'delete')
+                    # Supprimer les métadonnées
+                    self.vm_manager.delete_vm_metadata(vm_name)
+        
+        # Supprimer le cluster de la base
         del self.clusters[cluster_name]
         self._save_clusters()
         return True
@@ -129,22 +140,56 @@ class SwarmManager:
                     self._save_clusters()
                     break
     
+    def update_node_ip(self, cluster_name: str, node_name: str, ip: str):
+        """Met à jour l'IP d'un nœud"""
+        if cluster_name in self.clusters:
+            cluster = self.clusters[cluster_name]
+            
+            for node in cluster.get('nodes', []):
+                if node.get('name') == node_name:
+                    node['ip'] = ip
+                    
+                    # Si c'est le premier manager et qu'on n'a pas encore d'IP manager
+                    if node.get('type') == 'manager' and not cluster.get('manager_ip'):
+                        cluster['manager_ip'] = ip
+                        # Mettre à jour les commandes avec l'IP
+                        self.update_cluster(cluster_name, {'manager_ip': ip})
+                    
+                    self._save_clusters()
+                    break
+    
     def get_cluster_status(self, cluster_name: str) -> Dict:
         """Récupère le statut détaillé d'un cluster"""
         cluster = self.get_cluster(cluster_name)
         if not cluster:
-            return {'error': 'Cluster not found'}
+            return {'error': 'Cluster non trouvé'}
+        
+        from services.libvirt_service import LibvirtService
         
         # Vérifier le statut des nœuds
         nodes_status = []
         all_ready = True
+        all_have_ips = True
+        
+        host_uri = cluster.get('host')
         
         for node in cluster.get('nodes', []):
-            vm_info = self.vm_manager.get_vm_info(node.get('full_name'))
+            vm_name = node.get('full_name')
+            vm_info = self.vm_manager.get_vm_info(vm_name)
+            
+            # Récupérer l'IP si elle n'est pas encore connue
+            node_ip = node.get('ip', '')
+            if not node_ip and host_uri:
+                # Essayer de récupérer l'IP
+                node_ip = LibvirtService.wait_for_vm_ip(vm_name, host_uri, timeout=5)
+                if node_ip:
+                    self.update_node_ip(cluster_name, node['name'], node_ip)
+            
             node_status = {
                 'name': node.get('name'),
+                'full_name': vm_name,
                 'type': node.get('type'),
-                'ip': node.get('ip'),
+                'ip': node_ip or 'Attente...',
                 'vm_status': vm_info.get('status', 'unknown') if vm_info else 'not_found',
                 'deployed': vm_info is not None
             }
@@ -152,14 +197,40 @@ class SwarmManager:
             
             if node_status['vm_status'] != 'ready':
                 all_ready = False
+            if not node_ip:
+                all_have_ips = False
+        
+        # Déterminer le statut global
+        if all_ready and all_have_ips:
+            status = 'ready'
+        elif all_have_ips:
+            status = 'deployed'
+        else:
+            status = 'deploying'
         
         return {
             'cluster_name': cluster_name,
             'owner': cluster.get('owner'),
-            'status': 'ready' if all_ready else 'deploying',
-            'manager_ip': cluster.get('manager_ip'),
+            'status': status,
+            'manager_ip': cluster.get('manager_ip', 'Attente...'),
             'num_managers': cluster.get('num_managers'),
             'num_workers': cluster.get('num_workers'),
             'nodes': nodes_status,
-            'init_commands': cluster.get('init_commands')
+            'network': cluster.get('network'),
+            'host': cluster.get('host'),
+            'created_at': cluster.get('created_at'),
+            'init_commands': cluster.get('init_commands', {})
         }
+    
+    def get_first_manager_ip(self, cluster_name: str) -> Optional[str]:
+        """Récupère l'IP du premier manager d'un cluster"""
+        cluster = self.get_cluster(cluster_name)
+        if not cluster:
+            return None
+        
+        # Chercher le premier manager avec une IP
+        for node in cluster.get('nodes', []):
+            if node.get('type') == 'manager' and node.get('ip'):
+                return node['ip']
+        
+        return None

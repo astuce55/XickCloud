@@ -79,7 +79,8 @@ PaaS_CATALOG = {
         'port': 80,
         'db_type': 'mysql',
         'icon': 'fab fa-wordpress',
-        'color': '#21759b'
+        'color': '#21759b',
+        'category': 'cms'
     },
     'onlyoffice': {
         'name': 'OnlyOffice',
@@ -88,7 +89,8 @@ PaaS_CATALOG = {
         'port': 80,
         'db_type': 'postgresql',
         'icon': 'fas fa-file-alt',
-        'color': '#44aaee'
+        'color': '#44aaee',
+        'category': 'collaboration'
     },
     'odoo': {
         'name': 'Odoo',
@@ -97,7 +99,8 @@ PaaS_CATALOG = {
         'port': 8069,
         'db_type': 'postgresql',
         'icon': 'fas fa-cogs',
-        'color': '#714b67'
+        'color': '#714b67',
+        'category': 'business'
     },
     'openldap': {
         'name': 'OpenLDAP',
@@ -106,7 +109,8 @@ PaaS_CATALOG = {
         'port': 389,
         'db_type': 'none',
         'icon': 'fas fa-address-book',
-        'color': '#3e7e9a'
+        'color': '#3e7e9a',
+        'category': 'development'
     },
     'mattermost': {
         'name': 'Mattermost',
@@ -115,7 +119,8 @@ PaaS_CATALOG = {
         'port': 8065,
         'db_type': 'mysql',
         'icon': 'fas fa-comments',
-        'color': '#0058cc'
+        'color': '#0058cc',
+        'category': 'collaboration'
     },
     'moodle': {
         'name': 'Moodle',
@@ -124,7 +129,8 @@ PaaS_CATALOG = {
         'port': 80,
         'db_type': 'mysql',
         'icon': 'fas fa-graduation-cap',
-        'color': '#f98012'
+        'color': '#f98012',
+        'category': 'cms'
     },
     'owncloud': {
         'name': 'OwnCloud',
@@ -133,7 +139,8 @@ PaaS_CATALOG = {
         'port': 80,
         'db_type': 'mysql',
         'icon': 'fas fa-cloud',
-        'color': '#041e42'
+        'color': '#041e42',
+        'category': 'storage'
     },
     'prestashop': {
         'name': 'PrestaShop',
@@ -142,7 +149,8 @@ PaaS_CATALOG = {
         'port': 80,
         'db_type': 'mysql',
         'icon': 'fas fa-shopping-cart',
-        'color': '#df0067'
+        'color': '#df0067',
+        'category': 'business'
     }
 }
 
@@ -155,38 +163,23 @@ BILLING_RATES = {
     'app_deployment': 50  # FCFA par déploiement d'app
 }
 
-# Configuration par défaut des hôtes KVM
+# Configuration par défaut des hôtes KVM - MODIFIER ICI POUR KVM LOCAL PAR DÉFAUT
 DEFAULT_HOSTS = [
     {
-        'id': 'remote-kvm-1',
-        'name': 'KVM Distant Principal',
-        'uri': 'qemu+ssh://heil@10.10.0.95/system',
+        'id': 'local',
+        'name': 'KVM Local',
+        'uri': 'qemu:///system',
         'enabled': True,
-        'priority': 1,
+        'priority': 1,  # Priorité 1 = utilisé en premier
         'storage_path': '/var/lib/libvirt/images',
         'quotas': {
             'max_vcpu': 8,
             'max_ram': 16384,
             'max_disk': 200
         },
-        'description': 'Serveur distant principal'
-    },
-    {
-        'id': 'local',
-        'name': 'KVM Local (Fallback)',
-        'uri': 'qemu:///system',
-        'enabled': True,
-        'priority': 2,
-        'storage_path': '/var/lib/libvirt/images',
-        'quotas': {
-            'max_vcpu': 8,
-            'max_ram': 16384,
-            'max_disk': 100
-        },
-        'description': 'Serveur local de secours'
+        'description': 'Serveur KVM local (par défaut)'
     }
 ]
-
 
 TIMEOUTS = {
     'ssh_connect': 3,
@@ -214,19 +207,3 @@ HOST_TIMEOUTS = {
         'monitor': 15
     }
 }
-
-
-for app_id in PaaS_CATALOG:
-    # Définir les catégories pour chaque application
-    if app_id in ['wordpress', 'moodle']:
-        PaaS_CATALOG[app_id]['category'] = 'cms'
-    elif app_id in ['onlyoffice', 'mattermost']:
-        PaaS_CATALOG[app_id]['category'] = 'collaboration'
-    elif app_id in ['odoo', 'prestashop']:
-        PaaS_CATALOG[app_id]['category'] = 'business'
-    elif app_id == 'openldap':
-        PaaS_CATALOG[app_id]['category'] = 'development'
-    elif app_id == 'owncloud':
-        PaaS_CATALOG[app_id]['category'] = 'storage'
-    else:
-        PaaS_CATALOG[app_id]['category'] = 'other'

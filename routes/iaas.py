@@ -1,4 +1,4 @@
-# routes/iaas.py - VERSION SANS PRINT + CONTRÔLE VMS AMÉLIORÉ
+# routes/iaas.py - VERSION CORRIGÉE
 from flask import Blueprint, render_template, request, jsonify, session
 from functools import wraps
 import time
@@ -71,7 +71,7 @@ def get_vms():
                         'name': full_name,
                         'display_name': vm_manager.get_user_vm_name(full_name),
                         'status': domain['status'],
-                        'ip': domain.get('ip', 'N/A'),
+                        'ip': domain.get('ip', 'En attente DHCP'),
                         'vcpu': domain.get('vcpu', 1),
                         'max_mem': domain.get('max_mem', 0),
                         'used_mem': domain.get('used_mem', 0),
@@ -90,18 +90,105 @@ def get_vms():
     logger.info(f"Total VMs trouvées: {len(all_vms)}")
     return jsonify(all_vms)
 
+
+@iaas_bp.route('/api/vm/<vm_name>/ip', methods=['GET'])
+@login_required
+def get_vm_ip(vm_name):
+    """API pour récupérer l'IP d'une VM spécifique"""
+    username = session['username']
+    role = session.get('role', 'user')
+    
+    logger.info(f"Récupération IP pour {vm_name}")
+    
+    # Vérifier permissions
+    vm_owner = vm_manager.get_vm_owner(vm_name)
+    if role != 'admin' and vm_owner != username:
+        return jsonify({'success': False, 'msg': 'Non autorisé'}), 403
+    
+    # Chercher l'hôte de la VM
+    vm_info = vm_manager.get_vm_info(vm_name)
+    host_uri = None
+    
+    if vm_info:
+        host_uri = vm_info.get('host')
+    else:
+        # Chercher sur tous les hôtes
+        hosts = host_manager.get_enabled_hosts()
+        host_uris = [h['uri'] for h in hosts]
+        host_uri = LibvirtService.get_domain_host_uri(vm_name, host_uris)
+    
+    if not host_uri:
+        return jsonify({'success': False, 'msg': 'VM non trouvée'}), 404
+    
+    # Récupérer l'IP
+    ip_address = LibvirtService.wait_for_vm_ip(vm_name, host_uri, timeout=30)
+    
+    if ip_address:
+        # Mettre à jour les métadonnées
+        if vm_manager.vm_exists(vm_name):
+            vm_manager.update_vm_metadata(vm_name, {'ip_address': ip_address})
+        
+        return jsonify({
+            'success': True,
+            'ip': ip_address,
+            'vm_name': vm_name
+        })
+    else:
+        return jsonify({
+            'success': False,
+            'msg': 'IP non disponible',
+            'vm_name': vm_name
+        })
+
+@iaas_bp.route('/api/vms/refresh-ips', methods=['POST'])
+@login_required
+def refresh_vms_ips():
+    """API pour rafraîchir toutes les IPs des VMs"""
+    username = session['username']
+    role = session.get('role', 'user')
+    
+    logger.info(f"Rafraîchissement IPs pour {username}")
+    
+    updated_ips = []
+    
+    # Récupérer toutes les VMs de l'utilisateur
+    vms = vm_manager.get_user_vms(username)
+    
+    for vm in vms:
+        vm_name = vm['name']
+        host_uri = vm.get('host')
+        
+        if host_uri:
+            # Récupérer l'IP
+            ip_address = LibvirtService.wait_for_vm_ip(vm_name, host_uri, timeout=15)
+            
+            if ip_address:
+                vm_manager.update_vm_metadata(vm_name, {'ip_address': ip_address})
+                updated_ips.append({
+                    'vm_name': vm_name,
+                    'ip': ip_address
+                })
+    
+    return jsonify({
+        'success': True,
+        'updated': len(updated_ips),
+        'ips': updated_ips
+    })
+
+
 @iaas_bp.route('/api/vm/deploy', methods=['POST'])
 @login_required
 def deploy_vm():
-    """API pour déployer une VM"""
+    """API pour déployer une VM - VERSION CORRIGÉE AVEC DHCP"""
     username = session['username']
     
     try:
-        hostname = request.form.get('hostname', '').strip()
-        password = request.form.get('password', '')
-        flavor_id = request.form.get('flavor', 'small')
-        os_type = request.form.get('os_type', 'ubuntu')
-        ssh_key = request.form.get('ssh_key', '').strip()
+        data = request.json
+        hostname = data.get('hostname', '').strip()
+        password = data.get('password', '')
+        flavor_id = data.get('flavor', 'small')
+        os_type = data.get('os_type', 'ubuntu')
+        ssh_key = data.get('ssh_key', '').strip()
         
         # Validation
         if not hostname:
@@ -173,7 +260,7 @@ def deploy_vm():
                 if conn:
                     conn.close()
         
-        # Cloud-init
+        # Cloud-init avec DHCP
         cloudinit_data = DeploymentService.generate_cloudinit(
             vm_name=full_vm_name,
             hostname=hostname,
@@ -198,10 +285,39 @@ def deploy_vm():
         )
         
         if success:
+            # Récupérer l'IP via DHCP (avec délai plus long)
+            def get_vm_ip_async():
+                try:
+                    # Attendre plus longtemps pour que l'agent démarre
+                    time.sleep(30)  # Attendre 30s que l'agent démarre
+                    ip_address = LibvirtService.wait_for_vm_ip(full_vm_name, best_host['uri'], timeout=300)  # 5 minutes
+                    
+                    if ip_address:
+                        vm_manager.update_vm_metadata(full_vm_name, {
+                            'ip_address': ip_address,
+                            'qemu_agent': 'active'
+                        })
+                        logger.info(f"IP attribuée à {full_vm_name}: {ip_address}")
+                    else:
+                        # Si pas d'IP, marquer comme sans agent mais fonctionnel
+                        logger.warning(f"Impossible de récupérer IP pour {full_vm_name}, l'agent QEMU peut être indisponible")
+                        vm_manager.update_vm_metadata(full_vm_name, {
+                            'ip_address': 'DHCP (agent indisponible)',
+                            'qemu_agent': 'unavailable'
+                        })
+                except Exception as e:
+                    logger.error(f"Erreur récupération IP: {e}")
+            
+            # Lancer la récupération d'IP en arrière-plan
+            ip_thread = threading.Thread(target=get_vm_ip_async)
+            ip_thread.daemon = True
+            ip_thread.start()
+            
             vm_manager.update_vm_metadata(full_vm_name, {
                 'status': 'Running',
                 'os_type': os_type,
-                'deployed_at': time.time()
+                'deployed_at': time.time(),
+                'note': 'L\'agent QEMU peut prendre quelques minutes pour démarrer'
             })
             
             logger.info(f"VM {full_vm_name} déployée avec succès")
@@ -211,7 +327,9 @@ def deploy_vm():
                 'msg': f'VM "{hostname}" déployée avec succès',
                 'vm_name': full_vm_name,
                 'host': best_host['name'],
-                'flavor': flavor['name']
+                'flavor': flavor['name'],
+                'message': 'Attribution IP en cours via DHCP... L\'agent QEMU peut prendre 1-2 minutes pour démarrer',
+                'warning': 'L\'agent QEMU Guest peut prendre quelques minutes pour être pleinement opérationnel'
             })
         else:
             vm_manager.delete_vm_metadata(full_vm_name)
@@ -224,10 +342,7 @@ def deploy_vm():
 @iaas_bp.route('/api/vm/<vm_name>/<action>', methods=['POST'])
 @login_required
 def control_vm(vm_name, action):
-    """
-    API pour contrôler une VM (start/stop/delete/restart)
-    AMÉLIORATION: Fonctionne même si la VM n'est pas dans les métadonnées
-    """
+    """API pour contrôler une VM (start/stop/delete/restart)"""
     username = session['username']
     role = session.get('role', 'user')
     
@@ -330,7 +445,7 @@ def monitor_api():
                         'name': full_name,
                         'display_name': vm_manager.get_user_vm_name(full_name),
                         'status': domain['status'],
-                        'ip': domain.get('ip', 'N/A'),
+                        'ip': domain.get('ip', 'En attente DHCP'),
                         'username': vm_owner or 'unknown',
                         'vcpu': domain.get('vcpu', flavor['vcpu']),
                         'max_mem': domain.get('max_mem', flavor['ram'] / 1024),

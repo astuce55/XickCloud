@@ -1,5 +1,5 @@
 # models/__init__.py
-from .vm import VMManager
+# from .vm import VMManager
 from .swarm import SwarmManager
 from .storage import StorageManager
 from .user import UserManager

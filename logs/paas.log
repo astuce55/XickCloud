@@ -52,3 +52,140 @@
 [2026-01-30 15:36:55] INFO [paas:52] - Récupération apps pour user1: 0 apps
 [2026-01-30 15:37:25] INFO [paas:52] - Récupération apps pour user1: 0 apps
 [2026-01-30 15:37:55] INFO [paas:52] - Récupération apps pour user1: 0 apps
+[2026-01-31 01:00:31] INFO [paas:52] - Récupération apps pour user1: 0 apps
+[2026-01-31 01:01:01] INFO [paas:52] - Récupération apps pour user1: 0 apps
+[2026-01-31 01:01:12] INFO [paas:68] - Déploiement app wordpress (wordpress-xpo) sur cluster test_cluster par user1
+[2026-01-31 01:01:31] INFO [paas:52] - Récupération apps pour user1: 0 apps
+[2026-01-31 01:01:34] INFO [paas:68] - Déploiement app wordpress (wordpress-xpo) sur cluster test_cluster par user1
+[2026-01-31 01:02:01] INFO [paas:52] - Récupération apps pour user1: 0 apps
+[2026-01-31 01:02:31] INFO [paas:52] - Récupération apps pour user1: 0 apps
+[2026-01-31 01:03:01] INFO [paas:52] - Récupération apps pour user1: 0 apps
+[2026-01-31 01:03:31] INFO [paas:52] - Récupération apps pour user1: 0 apps
+[2026-01-31 01:04:01] INFO [paas:52] - Récupération apps pour user1: 0 apps
+[2026-01-31 01:04:31] INFO [paas:52] - Récupération apps pour user1: 0 apps
+[2026-01-31 01:05:01] INFO [paas:52] - Récupération apps pour user1: 0 apps
+[2026-01-31 01:05:31] INFO [paas:52] - Récupération apps pour user1: 0 apps
+[2026-01-31 01:06:02] INFO [paas:52] - Récupération apps pour user1: 0 apps
+[2026-01-31 01:06:32] INFO [paas:52] - Récupération apps pour user1: 0 apps
+[2026-01-31 01:07:02] INFO [paas:52] - Récupération apps pour user1: 0 apps
+[2026-01-31 01:07:32] INFO [paas:52] - Récupération apps pour user1: 0 apps
+[2026-01-31 01:08:02] INFO [paas:52] - Récupération apps pour user1: 0 apps
+[2026-01-31 01:08:35] INFO [paas:52] - Récupération apps pour user1: 0 apps
+[2026-01-31 01:09:05] INFO [paas:52] - Récupération apps pour user1: 0 apps
+[2026-01-31 01:09:35] INFO [paas:52] - Récupération apps pour user1: 0 apps
+[2026-01-31 01:10:05] INFO [paas:52] - Récupération apps pour user1: 0 apps
+[2026-01-31 01:10:35] INFO [paas:52] - Récupération apps pour user1: 0 apps
+[2026-01-31 01:11:05] INFO [paas:52] - Récupération apps pour user1: 0 apps
+[2026-01-31 01:11:35] INFO [paas:52] - Récupération apps pour user1: 0 apps
+[2026-01-31 01:12:05] INFO [paas:52] - Récupération apps pour user1: 0 apps
+[2026-01-31 01:13:41] INFO [paas:52] - Récupération apps pour user1: 0 apps
+[2026-01-31 01:14:12] INFO [paas:52] - Récupération apps pour user1: 0 apps
+[2026-01-31 01:14:39] INFO [paas:52] - Récupération apps pour user1: 0 apps
+[2026-01-31 01:15:09] INFO [paas:52] - Récupération apps pour user1: 0 apps
+[2026-01-31 01:15:34] INFO [paas:68] - Déploiement app wordpress (wordpress-xpo) sur cluster test_cluster par user1
+[2026-01-31 01:15:34] INFO [paas:100] - Vérification Swarm sur 192.168.113.178
+[2026-01-31 01:15:39] INFO [paas:52] - Récupération apps pour user1: 0 apps
+[2026-01-31 01:16:09] INFO [paas:52] - Récupération apps pour user1: 0 apps
+[2026-01-31 01:16:39] INFO [paas:52] - Récupération apps pour user1: 0 apps
+[2026-01-31 01:17:09] INFO [paas:52] - Récupération apps pour user1: 0 apps
+[2026-01-31 01:17:39] INFO [paas:52] - Récupération apps pour user1: 0 apps
+[2026-01-31 01:17:49] INFO [paas:68] - Déploiement app wordpress (wordpress-xpo2) sur cluster test_cluster par user1
+[2026-01-31 01:17:49] INFO [paas:100] - Vérification Swarm sur 192.168.113.178
+[2026-01-31 01:18:05] INFO [paas:105] - Génération docker-compose pour wordpress
+[2026-01-31 01:18:05] INFO [paas:112] - Déploiement stack wordpress-xpo2 sur Swarm
+[2026-01-31 01:18:09] INFO [paas:52] - Récupération apps pour user1: 0 apps
+[2026-01-31 01:18:39] INFO [paas:52] - Récupération apps pour user1: 0 apps
+[2026-01-31 01:18:45] INFO [paas:52] - Récupération apps pour user1: 0 apps
+[2026-01-31 01:19:05] INFO [paas:52] - Récupération apps pour user1: 0 apps
+[2026-01-31 01:19:35] INFO [paas:52] - Récupération apps pour user1: 0 apps
+[2026-01-31 01:19:37] INFO [paas:68] - Déploiement app wordpress (wordpress-xpo3) sur cluster test_cluster par user1
+[2026-01-31 01:19:37] INFO [paas:100] - Vérification Swarm sur 192.168.113.178
+[2026-01-31 01:19:46] INFO [paas:105] - Génération docker-compose pour wordpress
+[2026-01-31 01:19:46] INFO [paas:112] - Déploiement stack wordpress-xpo3 sur Swarm
+[2026-01-31 01:20:18] INFO [paas:52] - Récupération apps pour user1: 0 apps
+[2026-01-31 01:20:41] INFO [paas:68] - Déploiement app wordpress (wordpress-xpo5) sur cluster  par user1
+[2026-01-31 01:20:48] INFO [paas:52] - Récupération apps pour user1: 0 apps
+[2026-01-31 01:20:55] INFO [paas:68] - Déploiement app wordpress (wordpress-xpo5) sur cluster test_cluster par user1
+[2026-01-31 01:20:55] INFO [paas:100] - Vérification Swarm sur 192.168.113.178
+[2026-01-31 01:20:57] INFO [paas:105] - Génération docker-compose pour wordpress
+[2026-01-31 01:20:57] INFO [paas:112] - Déploiement stack wordpress-xpo5 sur Swarm
+[2026-01-31 01:21:18] INFO [paas:52] - Récupération apps pour user1: 0 apps
+[2026-01-31 01:21:31] INFO [paas:161] - Application wordpress-xpo5 déployée avec succès
+[2026-01-31 01:21:33] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 01:21:48] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 01:22:47] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 01:23:18] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 01:23:47] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 01:24:16] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 01:25:11] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 01:25:16] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 01:25:47] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 01:26:16] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 01:26:47] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 04:11:26] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 04:11:26] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 04:11:26] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 04:11:26] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 04:11:26] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 04:11:26] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 04:11:26] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 04:11:43] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 04:12:13] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 04:12:43] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 04:13:13] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 04:13:43] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 04:14:13] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 04:14:43] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 04:15:13] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 04:15:43] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 04:16:13] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 04:16:43] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 04:17:13] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 04:17:43] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 04:18:13] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 04:18:43] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 04:19:13] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 04:19:43] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 04:20:13] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 04:20:43] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 04:21:14] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 04:21:44] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 04:22:14] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 04:22:44] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 04:23:14] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 04:23:44] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 04:24:14] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 04:24:44] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 04:25:15] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 04:25:45] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 06:27:17] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 06:27:47] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 06:28:03] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 06:35:01] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 06:35:31] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 06:36:01] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 06:36:31] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 06:37:01] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 06:37:31] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 06:38:01] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 06:38:31] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 06:39:01] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 06:39:15] INFO [paas:68] - Déploiement app onlyoffice (onlyoffice-950626) sur cluster  par user1
+[2026-01-31 06:39:31] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 06:40:01] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 06:40:31] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 06:41:01] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 06:41:31] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 06:42:01] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 06:42:31] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 06:43:01] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 06:43:31] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 06:44:01] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 06:44:31] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 06:45:01] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 06:45:31] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 06:46:01] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 06:46:31] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 06:47:01] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 08:02:08] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 08:02:08] INFO [paas:52] - Récupération apps pour user1: 1 apps

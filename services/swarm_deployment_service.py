@@ -1,4 +1,4 @@
-# services/swarm_deployment_service.py - NOUVEAU FICHIER
+# services/swarm_deployment_service.py - VERSION AMÉLIORÉE AVEC AUTO-INIT
 import subprocess
 import time
 import os
@@ -12,14 +12,96 @@ class SwarmDeploymentService:
         pass
     
     @staticmethod
+    def init_swarm_if_needed(manager_ip: str, username: str) -> Tuple[bool, str]:
+        """
+        Initialise Docker Swarm si nécessaire
+        Retourne (success, message)
+        """
+        logger.info(f"Vérification/Initialisation Swarm sur {manager_ip}")
+        
+        try:
+            # Vérifier si Swarm est déjà actif
+            check_cmd = [
+                "ssh", "-o", "StrictHostKeyChecking=no",
+                "-o", "ConnectTimeout=5",
+                f"{username}@{manager_ip}",
+                "docker info --format '{{.Swarm.LocalNodeState}}'"
+            ]
+            
+            result = subprocess.run(
+                check_cmd,
+                capture_output=True,
+                text=True,
+                timeout=10
+            )
+            
+            if result.returncode == 0:
+                state = result.stdout.strip()
+                logger.debug(f"État Swarm actuel: {state}")
+                
+                if state == "active":
+                    logger.info("✓ Swarm déjà actif")
+                    return True, "Swarm actif"
+                
+                # Swarm pas actif, initialiser
+                logger.info("Initialisation de Docker Swarm...")
+                init_cmd = [
+                    "ssh", "-o", "StrictHostKeyChecking=no",
+                    f"{username}@{manager_ip}",
+                    f"sudo docker swarm init --advertise-addr {manager_ip}"
+                ]
+                
+                result = subprocess.run(
+                    init_cmd,
+                    capture_output=True,
+                    text=True,
+                    timeout=30
+                )
+                
+                if result.returncode == 0:
+                    logger.info("✓ Swarm initialisé avec succès")
+                    return True, "Swarm initialisé"
+                else:
+                    # Peut-être déjà dans un swarm
+                    if "already part of a swarm" in result.stderr.lower():
+                        logger.info("Swarm déjà configuré (était dans un cluster)")
+                        return True, "Swarm déjà configuré"
+                    
+                    error = f"Erreur init Swarm: {result.stderr}"
+                    logger.error(error)
+                    return False, error
+            else:
+                error = f"Impossible de vérifier l'état Docker: {result.stderr}"
+                logger.error(error)
+                return False, error
+        
+        except subprocess.TimeoutExpired:
+            error = "Timeout lors de l'initialisation Swarm"
+            logger.error(error)
+            return False, error
+        except Exception as e:
+            error = f"Erreur inattendue: {str(e)}"
+            logger.error(error, exc_info=True)
+            return False, error
+    
+    @staticmethod
     def check_swarm_ready(manager_ip: str, username: str, timeout: int = 30) -> bool:
-        """Vérifie que le cluster Swarm est prêt"""
+        """
+        Vérifie que Docker Swarm est prêt - avec auto-initialisation
+        """
         logger.info(f"Vérification Swarm sur {manager_ip}")
         
+        # ÉTAPE 1: Initialiser si nécessaire
+        success, msg = SwarmDeploymentService.init_swarm_if_needed(manager_ip, username)
+        
+        if not success:
+            logger.error(f"Impossible d'initialiser Swarm: {msg}")
+            return False
+        
+        # ÉTAPE 2: Vérifier que c'est bien actif
         start_time = time.time()
         while time.time() - start_time < timeout:
             try:
-                # Vérifier si Docker est accessible
                 cmd = f"ssh -o StrictHostKeyChecking=no -o ConnectTimeout=5 {username}@{manager_ip} 'docker info --format \"{{{{.Swarm.LocalNodeState}}}}\"'"
                 result = subprocess.run(
                     cmd,
@@ -32,7 +114,7 @@ class SwarmDeploymentService:
                 if result.returncode == 0:
                     state = result.stdout.strip()
                     if state == "active":
-                        logger.info(f"Swarm actif sur {manager_ip}")
+                        logger.info(f"✓ Swarm actif sur {manager_ip}")
                         return True
                     else:
                         logger.debug(f"Swarm state: {state}, attente...")
@@ -54,23 +136,29 @@ class SwarmDeploymentService:
         Déploie une stack Docker Swarm
         Retourne (success, message/error)
         """
-        logger.info(f"Déploiement stack {stack_name} sur {manager_ip}")
+        logger.info(f"═══════════════════════════════════════════")
+        logger.info(f"DÉPLOIEMENT STACK: {stack_name}")
+        logger.info(f"Manager: {manager_ip}")
+        logger.info(f"Compose: {compose_file_path}")
+        logger.info(f"═══════════════════════════════════════════")
         
         try:
-            # Vérifier que le fichier compose existe
+            # ÉTAPE 1: Vérifier que le fichier compose existe
             if not os.path.exists(compose_file_path):
                 error = f"Fichier compose introuvable: {compose_file_path}"
                 logger.error(error)
                 return False, error
             
-            # Lire le contenu du compose
+            logger.info(f"[1/4] ✓ Fichier compose existe")
+            
+            # Lire et afficher le contenu pour debug
             with open(compose_file_path, 'r') as f:
                 compose_content = f.read()
+                logger.debug(f"Contenu du compose:\n{compose_content}")
             
-            # Copier le compose sur le manager
+            # ÉTAPE 2: Copier le compose sur le manager
             remote_compose = f"/tmp/{stack_name}-compose.yml"
             
-            # Utiliser scp pour copier le fichier
             scp_cmd = [
                 "scp",
                 "-o", "StrictHostKeyChecking=no",
@@ -79,7 +167,9 @@ class SwarmDeploymentService:
                 f"{username}@{manager_ip}:{remote_compose}"
             ]
             
-            logger.debug(f"Copie compose vers {manager_ip}:{remote_compose}")
+            logger.info(f"[2/4] Copie compose vers {manager_ip}:{remote_compose}")
+            logger.debug(f"Commande SCP: {' '.join(scp_cmd)}")
+            
             result = subprocess.run(
                 scp_cmd,
                 capture_output=True,
@@ -92,7 +182,31 @@ class SwarmDeploymentService:
                 logger.error(error)
                 return False, error
             
-            # Déployer la stack
+            logger.info(f"[2/4] ✓ Compose copié")
+            
+            # ÉTAPE 3: Vérifier que le fichier a bien été copié
+            verify_cmd = [
+                "ssh",
+                "-o", "StrictHostKeyChecking=no",
+                f"{username}@{manager_ip}",
+                f"test -f {remote_compose} && echo 'OK' || echo 'NOT FOUND'"
+            ]
+            
+            result = subprocess.run(
+                verify_cmd,
+                capture_output=True,
+                text=True,
+                timeout=10
+            )
+            
+            if "OK" not in result.stdout:
+                error = f"Fichier non trouvé sur le serveur distant"
+                logger.error(error)
+                return False, error
+            
+            logger.info(f"[3/4] ✓ Fichier vérifié sur le serveur")
+            
+            # ÉTAPE 4: Déployer la stack
             deploy_cmd = [
                 "ssh",
                 "-o", "StrictHostKeyChecking=no",
@@ -101,7 +215,9 @@ class SwarmDeploymentService:
                 f"docker stack deploy -c {remote_compose} {stack_name}"
             ]
             
-            logger.debug(f"Déploiement stack: {' '.join(deploy_cmd)}")
+            logger.info(f"[4/4] Déploiement de la stack...")
+            logger.debug(f"Commande deploy: {' '.join(deploy_cmd)}")
+            
             result = subprocess.run(
                 deploy_cmd,
                 capture_output=True,
@@ -110,7 +226,30 @@ class SwarmDeploymentService:
             )
             
             if result.returncode == 0:
-                logger.info(f"Stack {stack_name} déployée avec succès")
+                logger.info(f"✓ Stack {stack_name} déployée avec succès")
+                logger.debug(f"Sortie: {result.stdout}")
+                
+                # Attendre un peu que les services démarrent
+                time.sleep(2)
+                
+                # Vérifier le déploiement
+                check_cmd = [
+                    "ssh",
+                    "-o", "StrictHostKeyChecking=no",
+                    f"{username}@{manager_ip}",
+                    f"docker stack services {stack_name}"
+                ]
+                
+                check_result = subprocess.run(
+                    check_cmd,
+                    capture_output=True,
+                    text=True,
+                    timeout=15
+                )
+                
+                if check_result.returncode == 0:
+                    logger.info(f"Services de la stack:\n{check_result.stdout}")
+                
                 return True, result.stdout
             else:
                 error = f"Erreur déploiement: {result.stderr}"
@@ -125,6 +264,8 @@ class SwarmDeploymentService:
             error = f"Erreur inattendue: {str(e)}"
             logger.error(error, exc_info=True)
             return False, error
+        finally:
+            logger.info(f"═══════════════════════════════════════════")
     
     @staticmethod
     def get_stack_status(manager_ip: str, username: str, stack_name: str) -> Optional[Dict]:
@@ -203,7 +344,7 @@ class SwarmDeploymentService:
             )
             
             if result.returncode == 0:
-                logger.info(f"Stack {stack_name} supprimée")
+                logger.info(f"✓ Stack {stack_name} supprimée")
                 return True, "Stack supprimée avec succès"
             else:
                 error = f"Erreur suppression: {result.stderr}"
@@ -306,7 +447,7 @@ class SwarmDeploymentService:
             )
             
             if result.returncode == 0:
-                logger.info(f"Service {service_name} scalé à {replicas}")
+                logger.info(f"✓ Service {service_name} scalé à {replicas}")
                 return True, f"Service scalé à {replicas} replicas"
             else:
                 error = f"Erreur scale: {result.stderr}"

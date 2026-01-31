@@ -7,6 +7,8 @@ from routes.iaas import iaas_bp
 from routes.swarm import swarm_bp
 from routes.admin import admin_bp
 from routes.paas import paas_bp
+from models.vm import VMManager  # instead of from models import VMManager
+from services.deployment_service import DeploymentService
 
 # Initialisation de Flask
 app = Flask(__name__)
