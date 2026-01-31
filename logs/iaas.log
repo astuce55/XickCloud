@@ -5521,3 +5521,120 @@ PermissionError: [Errno 13] Permission denied: '/home/xponentiel/dev/cloud/Xick-
 [2026-01-31 08:43:32] INFO [iaas:51] - Récupération VMs pour admin (role: admin)
 [2026-01-31 08:43:35] INFO [iaas:90] - Total VMs trouvées: 4
 [2026-01-31 08:43:37] INFO [iaas:51] - Récupération VMs pour admin (role: admin)
+[2026-01-31 08:43:40] INFO [iaas:90] - Total VMs trouvées: 4
+[2026-01-31 08:43:42] INFO [iaas:51] - Récupération VMs pour admin (role: admin)
+[2026-01-31 08:43:43] INFO [iaas:51] - Récupération VMs pour admin (role: admin)
+[2026-01-31 08:43:45] INFO [iaas:90] - Total VMs trouvées: 4
+[2026-01-31 08:43:45] INFO [iaas:90] - Total VMs trouvées: 4
+[2026-01-31 08:43:47] INFO [iaas:51] - Récupération VMs pour admin (role: admin)
+[2026-01-31 08:43:50] INFO [iaas:90] - Total VMs trouvées: 4
+[2026-01-31 08:43:52] INFO [iaas:51] - Récupération VMs pour admin (role: admin)
+[2026-01-31 08:43:55] INFO [iaas:90] - Total VMs trouvées: 4
+[2026-01-31 08:43:57] INFO [iaas:51] - Récupération VMs pour admin (role: admin)
+[2026-01-31 08:44:00] INFO [iaas:90] - Total VMs trouvées: 4
+[2026-01-31 08:44:03] INFO [iaas:51] - Récupération VMs pour admin (role: admin)
+[2026-01-31 08:44:06] INFO [iaas:90] - Total VMs trouvées: 4
+[2026-01-31 08:44:08] INFO [iaas:51] - Récupération VMs pour admin (role: admin)
+[2026-01-31 08:44:11] INFO [iaas:90] - Total VMs trouvées: 4
+[2026-01-31 08:44:13] INFO [iaas:51] - Récupération VMs pour admin (role: admin)
+[2026-01-31 08:44:14] INFO [iaas:51] - Récupération VMs pour admin (role: admin)
+[2026-01-31 08:44:16] INFO [iaas:90] - Total VMs trouvées: 4
+[2026-01-31 08:44:16] INFO [iaas:90] - Total VMs trouvées: 4
+[2026-01-31 08:44:18] INFO [iaas:51] - Récupération VMs pour admin (role: admin)
+[2026-01-31 08:44:19] INFO [iaas:90] - Total VMs trouvées: 4
+[2026-01-31 08:44:23] INFO [iaas:51] - Récupération VMs pour admin (role: admin)
+[2026-01-31 08:44:26] INFO [iaas:90] - Total VMs trouvées: 4
+[2026-01-31 08:44:28] INFO [iaas:51] - Récupération VMs pour admin (role: admin)
+[2026-01-31 08:44:31] INFO [iaas:90] - Total VMs trouvées: 4
+[2026-01-31 08:44:33] INFO [iaas:51] - Récupération VMs pour admin (role: admin)
+[2026-01-31 08:44:36] INFO [iaas:90] - Total VMs trouvées: 4
+[2026-01-31 08:44:38] INFO [iaas:51] - Récupération VMs pour admin (role: admin)
+[2026-01-31 08:44:41] INFO [iaas:90] - Total VMs trouvées: 4
+[2026-01-31 08:44:43] INFO [iaas:51] - Récupération VMs pour admin (role: admin)
+[2026-01-31 08:44:44] INFO [iaas:51] - Récupération VMs pour admin (role: admin)
+[2026-01-31 08:44:46] INFO [iaas:90] - Total VMs trouvées: 4
+[2026-01-31 08:44:46] INFO [iaas:90] - Total VMs trouvées: 4
+[2026-01-31 08:44:48] INFO [iaas:51] - Récupération VMs pour admin (role: admin)
+[2026-01-31 08:44:51] INFO [iaas:90] - Total VMs trouvées: 4
+[2026-01-31 08:44:53] INFO [iaas:51] - Récupération VMs pour admin (role: admin)
+[2026-01-31 08:44:56] INFO [iaas:90] - Total VMs trouvées: 4
+[2026-01-31 08:44:58] INFO [iaas:51] - Récupération VMs pour admin (role: admin)
+[2026-01-31 08:45:01] INFO [iaas:90] - Total VMs trouvées: 4
+[2026-01-31 08:45:04] INFO [iaas:51] - Récupération VMs pour admin (role: admin)
+[2026-01-31 08:45:07] INFO [iaas:90] - Total VMs trouvées: 4
+[2026-01-31 08:45:09] INFO [iaas:51] - Récupération VMs pour admin (role: admin)
+[2026-01-31 08:45:12] INFO [iaas:90] - Total VMs trouvées: 4
+[2026-01-31 08:45:14] INFO [iaas:51] - Récupération VMs pour admin (role: admin)
+[2026-01-31 08:45:15] INFO [iaas:51] - Récupération VMs pour admin (role: admin)
+[2026-01-31 08:45:17] INFO [iaas:90] - Total VMs trouvées: 4
+[2026-01-31 08:45:17] INFO [iaas:90] - Total VMs trouvées: 4
+[2026-01-31 08:45:19] INFO [iaas:51] - Récupération VMs pour admin (role: admin)
+[2026-01-31 08:45:22] INFO [iaas:90] - Total VMs trouvées: 4
+[2026-01-31 08:45:24] INFO [iaas:51] - Récupération VMs pour admin (role: admin)
+[2026-01-31 08:45:27] INFO [iaas:90] - Total VMs trouvées: 4
+[2026-01-31 08:45:29] INFO [iaas:51] - Récupération VMs pour admin (role: admin)
+[2026-01-31 08:45:32] INFO [iaas:90] - Total VMs trouvées: 4
+[2026-01-31 08:45:34] INFO [iaas:51] - Récupération VMs pour admin (role: admin)
+[2026-01-31 08:45:37] INFO [iaas:90] - Total VMs trouvées: 4
+[2026-01-31 08:45:39] INFO [iaas:51] - Récupération VMs pour admin (role: admin)
+[2026-01-31 08:45:42] INFO [iaas:90] - Total VMs trouvées: 4
+[2026-01-31 08:45:44] INFO [iaas:51] - Récupération VMs pour admin (role: admin)
+[2026-01-31 08:45:45] INFO [iaas:51] - Récupération VMs pour admin (role: admin)
+[2026-01-31 08:45:47] INFO [iaas:90] - Total VMs trouvées: 4
+[2026-01-31 08:45:47] INFO [iaas:90] - Total VMs trouvées: 4
+[2026-01-31 08:45:49] INFO [iaas:51] - Récupération VMs pour admin (role: admin)
+[2026-01-31 08:45:53] INFO [iaas:90] - Total VMs trouvées: 4
+[2026-01-31 08:45:55] INFO [iaas:51] - Récupération VMs pour admin (role: admin)
+[2026-01-31 08:45:58] INFO [iaas:90] - Total VMs trouvées: 4
+[2026-01-31 08:46:00] INFO [iaas:51] - Récupération VMs pour admin (role: admin)
+[2026-01-31 08:46:03] INFO [iaas:90] - Total VMs trouvées: 4
+[2026-01-31 08:46:05] INFO [iaas:51] - Récupération VMs pour admin (role: admin)
+[2026-01-31 08:46:08] INFO [iaas:90] - Total VMs trouvées: 4
+[2026-01-31 08:46:10] INFO [iaas:51] - Récupération VMs pour admin (role: admin)
+[2026-01-31 08:46:13] INFO [iaas:90] - Total VMs trouvées: 4
+[2026-01-31 08:46:15] INFO [iaas:51] - Récupération VMs pour admin (role: admin)
+[2026-01-31 08:46:16] INFO [iaas:51] - Récupération VMs pour admin (role: admin)
+[2026-01-31 08:46:18] INFO [iaas:90] - Total VMs trouvées: 4
+[2026-01-31 08:46:18] INFO [iaas:90] - Total VMs trouvées: 4
+[2026-01-31 08:46:20] INFO [iaas:51] - Récupération VMs pour admin (role: admin)
+[2026-01-31 08:46:23] INFO [iaas:90] - Total VMs trouvées: 4
+[2026-01-31 08:46:25] INFO [iaas:51] - Récupération VMs pour admin (role: admin)
+[2026-01-31 08:46:28] INFO [iaas:90] - Total VMs trouvées: 4
+[2026-01-31 08:46:30] INFO [iaas:51] - Récupération VMs pour admin (role: admin)
+[2026-01-31 08:46:33] INFO [iaas:90] - Total VMs trouvées: 4
+[2026-01-31 08:46:35] INFO [iaas:51] - Récupération VMs pour admin (role: admin)
+[2026-01-31 08:46:39] INFO [iaas:90] - Total VMs trouvées: 4
+[2026-01-31 08:46:41] INFO [iaas:51] - Récupération VMs pour admin (role: admin)
+[2026-01-31 08:46:44] INFO [iaas:90] - Total VMs trouvées: 4
+[2026-01-31 08:46:46] INFO [iaas:51] - Récupération VMs pour admin (role: admin)
+[2026-01-31 08:46:47] INFO [iaas:51] - Récupération VMs pour admin (role: admin)
+[2026-01-31 08:46:49] INFO [iaas:90] - Total VMs trouvées: 4
+[2026-01-31 08:46:49] INFO [iaas:90] - Total VMs trouvées: 4
+[2026-01-31 08:46:51] INFO [iaas:51] - Récupération VMs pour admin (role: admin)
+[2026-01-31 08:46:54] INFO [iaas:90] - Total VMs trouvées: 4
+[2026-01-31 08:46:56] INFO [iaas:51] - Récupération VMs pour admin (role: admin)
+[2026-01-31 08:46:59] INFO [iaas:90] - Total VMs trouvées: 4
+[2026-01-31 08:47:01] INFO [iaas:51] - Récupération VMs pour admin (role: admin)
+[2026-01-31 08:47:04] INFO [iaas:90] - Total VMs trouvées: 4
+[2026-01-31 08:47:06] INFO [iaas:51] - Récupération VMs pour admin (role: admin)
+[2026-01-31 08:47:09] INFO [iaas:90] - Total VMs trouvées: 4
+[2026-01-31 08:47:11] INFO [iaas:51] - Récupération VMs pour admin (role: admin)
+[2026-01-31 08:47:14] INFO [iaas:90] - Total VMs trouvées: 4
+[2026-01-31 08:47:16] INFO [iaas:51] - Récupération VMs pour admin (role: admin)
+[2026-01-31 08:47:17] INFO [iaas:51] - Récupération VMs pour admin (role: admin)
+[2026-01-31 08:47:19] INFO [iaas:90] - Total VMs trouvées: 4
+[2026-01-31 08:47:19] INFO [iaas:90] - Total VMs trouvées: 4
+[2026-01-31 08:47:22] INFO [iaas:51] - Récupération VMs pour admin (role: admin)
+[2026-01-31 08:47:25] INFO [iaas:90] - Total VMs trouvées: 4
+[2026-01-31 08:47:27] INFO [iaas:51] - Récupération VMs pour admin (role: admin)
+[2026-01-31 08:47:30] INFO [iaas:90] - Total VMs trouvées: 4
+[2026-01-31 08:47:32] INFO [iaas:51] - Récupération VMs pour admin (role: admin)
+[2026-01-31 08:47:32] INFO [iaas:51] - Récupération VMs pour admin (role: admin)
+[2026-01-31 08:47:35] INFO [iaas:90] - Total VMs trouvées: 4
+[2026-01-31 08:47:35] INFO [iaas:90] - Total VMs trouvées: 4
+[2026-01-31 08:47:37] INFO [iaas:51] - Récupération VMs pour admin (role: admin)
+[2026-01-31 08:47:40] INFO [iaas:90] - Total VMs trouvées: 4
+[2026-01-31 08:54:00] INFO [iaas:51] - Récupération VMs pour admin (role: admin)
+[2026-01-31 08:54:04] INFO [iaas:90] - Total VMs trouvées: 4
+[2026-01-31 08:54:05] INFO [iaas:51] - Récupération VMs pour admin (role: admin)
+[2026-01-31 08:54:09] INFO [iaas:90] - Total VMs trouvées: 4

@@ -3,670 +3,369 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestion des Hôtes KVM</title>
+    <title>CloudAdmin - Gestion des Hôtes KVM</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --bg-body: #080c14;
+            --bg-card: #111827;
+            --accent: #7c3aed;
+            --accent-light: #a78bfa;
+            --border: rgba(255, 255, 255, 0.08);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --success: #10b981;
+            --danger: #f43f5e;
+            --warning: #fbbf24;
+            --glass: rgba(255, 255, 255, 0.03);
+        }
+
         * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+            margin: 0; padding: 0; box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', sans-serif;
         }
-        
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background-color: var(--bg-body);
+            color: var(--text-main);
             min-height: 100vh;
-            padding: 20px;
+            padding: 2rem;
+            background-image: radial-gradient(circle at top right, rgba(124, 58, 237, 0.07), transparent 40%);
         }
-        
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
+
+        .container { max-width: 1400px; margin: 0 auto; }
+
+        /* Header Styles */
+        .header-section {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 3rem;
         }
-        
-        .header {
-            background: white;
-            padding: 20px 30px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+
+        .header-title h1 {
+            font-size: 2rem; font-weight: 800; letter-spacing: -0.02em;
+            background: linear-gradient(to right, #fff, var(--text-muted));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
         }
-        
-        h1 {
-            color: #333;
-            font-size: 24px;
+
+        .header-title p { color: var(--text-muted); margin-top: 4px; font-size: 0.95rem; }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem; margin-bottom: 3rem;
         }
-        
+
+        .stat-card {
+            background: var(--bg-card); padding: 1.5rem; border-radius: 20px;
+            border: 1px solid var(--border); position: relative; overflow: hidden;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-card::after {
+            content: ''; position: absolute; top: 0; right: 0;
+            width: 60px; height: 60px; background: var(--accent);
+            opacity: 0.05; border-radius: 0 0 0 100%;
+        }
+
+        .stat-label { color: var(--text-muted); font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+        .stat-value { font-size: 2.2rem; font-weight: 700; margin-top: 0.5rem; display: block; }
+
+        /* Buttons */
         .btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.3s;
+            padding: 12px 24px; border-radius: 12px; border: none;
+            cursor: pointer; font-weight: 600; display: inline-flex;
+            align-items: center; gap: 10px; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 0.9rem; text-decoration: none;
         }
+
+        .btn-primary { background: var(--accent); color: white; box-shadow: 0 4px 15px rgba(124, 58, 237, 0.3); }
+        .btn-primary:hover { background: var(--accent-light); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(124, 58, 237, 0.4); }
         
-        .btn-primary {
-            background: #667eea;
-            color: white;
-        }
-        
-        .btn-primary:hover {
-            background: #5568d3;
-        }
-        
-        .btn-secondary {
-            background: #6c757d;
-            color: white;
-        }
-        
-        .btn-success {
-            background: #28a745;
-            color: white;
-        }
-        
-        .btn-danger {
-            background: #dc3545;
-            color: white;
-        }
-        
-        .btn-warning {
-            background: #ffc107;
-            color: #333;
-        }
-        
+        .btn-secondary { background: var(--glass); color: white; border: 1px solid var(--border); }
+        .btn-secondary:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.2); }
+
+        /* Hosts Cards */
         .hosts-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
-            gap: 20px;
-            margin-bottom: 20px;
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            gap: 2rem;
         }
-        
+
         .host-card {
-            background: white;
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            transition: transform 0.3s;
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 24px; padding: 1.8rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
         }
-        
+
         .host-card:hover {
-            transform: translateY(-5px);
+            transform: translateY(-8px);
+            border-color: var(--accent);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
         }
-        
+
         .host-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid #f0f0f0;
+            display: flex; justify-content: space-between; align-items: flex-start;
+            margin-bottom: 1.5rem;
         }
+
+        .host-name { font-weight: 700; font-size: 1.25rem; color: #fff; margin-bottom: 4px; }
         
-        .host-name {
-            font-size: 18px;
-            font-weight: bold;
-            color: #333;
+        .status-badge {
+            padding: 6px 14px; border-radius: 12px; font-size: 0.7rem;
+            font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+            display: flex; align-items: center; gap: 6px;
         }
-        
-        .host-status {
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: bold;
+
+        .status-online { background: rgba(16, 185, 129, 0.1); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.2); }
+        .status-offline { background: rgba(244, 63, 94, 0.1); color: var(--danger); border: 1px solid rgba(244, 63, 94, 0.2); }
+
+        .info-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+            margin-bottom: 1.5rem; background: rgba(0,0,0,0.2);
+            padding: 14px; border-radius: 16px;
         }
-        
-        .status-online {
-            background: #d4edda;
-            color: #155724;
-        }
-        
-        .status-offline {
-            background: #f8d7da;
-            color: #721c24;
-        }
-        
-        .priority-badge {
-            display: inline-block;
-            padding: 3px 10px;
-            border-radius: 15px;
-            font-size: 11px;
-            font-weight: bold;
-            margin-left: 10px;
-        }
-        
-        .priority-1 {
-            background: #ffd700;
-            color: #333;
-        }
-        
-        .priority-2 {
-            background: #c0c0c0;
-            color: #333;
-        }
-        
-        .priority-3 {
-            background: #cd7f32;
-            color: white;
-        }
-        
-        .host-info {
-            margin-bottom: 15px;
-        }
-        
-        .info-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 5px 0;
-            font-size: 14px;
-        }
-        
-        .info-label {
-            color: #666;
-        }
-        
-        .info-value {
-            font-weight: bold;
-            color: #333;
-        }
-        
-        .resources {
-            margin-top: 15px;
-        }
-        
-        .resource-bar {
-            margin-bottom: 12px;
-        }
-        
+
+        .info-item label { color: var(--text-muted); font-size: 0.65rem; font-weight: 700; text-transform: uppercase; display: block; }
+        .info-item span { font-size: 0.85rem; color: #cbd5e1; font-weight: 500; word-break: break-all; }
+
+        /* Resource Management */
+        .resource-bar { margin-bottom: 16px; }
         .resource-label {
-            font-size: 12px;
-            color: #666;
-            margin-bottom: 5px;
-            display: flex;
-            justify-content: space-between;
+            display: flex; justify-content: space-between;
+            font-size: 0.8rem; margin-bottom: 8px; font-weight: 500; color: var(--text-muted);
         }
-        
-        .progress-bar {
-            height: 8px;
-            background: #e9ecef;
-            border-radius: 4px;
-            overflow: hidden;
+        .progress-bg {
+            height: 8px; background: rgba(255,255,255,0.05);
+            border-radius: 10px; overflow: hidden;
         }
-        
         .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #667eea, #764ba2);
-            transition: width 0.3s;
+            height: 100%; border-radius: 10px;
+            transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Card Actions */
+        .card-actions {
+            display: flex; gap: 10px; margin-top: 1.5rem;
+            padding-top: 1.5rem; border-top: 1px solid var(--border);
         }
         
-        .progress-fill.warning {
-            background: #ffc107;
+        .btn-icon {
+            width: 42px; height: 42px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            border: 1px solid var(--border); color: var(--text-muted);
+            transition: all 0.2s; cursor: pointer; background: var(--glass);
         }
-        
-        .progress-fill.danger {
-            background: #dc3545;
-        }
-        
-        .host-actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
-            padding-top: 15px;
-            border-top: 1px solid #f0f0f0;
-        }
-        
-        .host-actions button {
-            flex: 1;
-        }
-        
+
+        .btn-icon:hover { background: var(--glass); color: white; transform: scale(1.05); }
+        .btn-icon.edit:hover { color: var(--warning); border-color: var(--warning); }
+        .btn-icon.delete:hover { color: var(--danger); border-color: var(--danger); }
+
+        /* Modals */
         .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.85); backdrop-filter: blur(8px);
+            z-index: 1000; padding: 20px;
         }
-        
+
         .modal-content {
-            background: white;
-            margin: 50px auto;
-            padding: 30px;
-            border-radius: 10px;
-            max-width: 600px;
-            max-height: 90vh;
-            overflow-y: auto;
+            background: var(--bg-card); max-width: 550px;
+            margin: 4rem auto; border-radius: 24px;
+            border: 1px solid var(--border); padding: 2.5rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         }
-        
-        .modal-header {
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid #f0f0f0;
+
+        .form-group { margin-bottom: 1.5rem; }
+        .form-group label { display: block; color: var(--text-muted); font-size: 0.85rem; margin-bottom: 8px; font-weight: 500; }
+        .form-group input, .form-group textarea {
+            width: 100%; background: #0f172a; border: 1px solid var(--border);
+            padding: 12px 16px; border-radius: 12px; color: white;
+            outline: none; transition: all 0.2s; font-size: 0.95rem;
         }
-        
-        .form-group {
-            margin-bottom: 20px;
-        }
-        
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: #333;
-            font-weight: 500;
-        }
-        
-        .form-group input,
-        .form-group textarea,
-        .form-group select {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 14px;
-        }
-        
-        .form-group small {
-            display: block;
-            margin-top: 5px;
-            color: #666;
-            font-size: 12px;
-        }
-        
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
-        
-        .modal-actions {
-            display: flex;
-            gap: 10px;
-            justify-content: flex-end;
-            margin-top: 20px;
-        }
-        
-        .back-link {
-            color: white;
-            text-decoration: none;
-            padding: 10px 20px;
-            background: rgba(255,255,255,0.2);
-            border-radius: 5px;
-            transition: background 0.3s;
-        }
-        
-        .back-link:hover {
-            background: rgba(255,255,255,0.3);
-        }
+        .form-group input:focus { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.1); }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <div>
-                <h1>🖥️ Gestion des Hôtes KVM</h1>
+        <header class="header-section">
+            <div class="header-title">
+                <h1><i class="fas fa-server" style="color: var(--accent); margin-right: 12px;"></i>Hôtes KVM</h1>
+                <p>Gestion et monitoring de l'infrastructure physique</p>
             </div>
-            <div style="display: flex; gap: 15px; align-items: center;">
-                <button class="btn btn-primary" onclick="showAddModal()">➕ Ajouter un Hôte</button>
-                <button class="btn btn-secondary" onclick="loadHosts()">🔄 Actualiser</button>
-                <a href="/" class="back-link">← Retour au Dashboard</a>
+            <div style="display: flex; gap: 12px;">
+                <a href="/" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Dashboard</a>
+                <button class="btn btn-secondary" onclick="loadHosts()"><i class="fas fa-sync-alt"></i></button>
+                <button class="btn btn-primary" onclick="showAddModal()">
+                    <i class="fas fa-plus"></i> Nouvel Hôte
+                </button>
             </div>
-        </div>
+        </header>
+
+        <section class="stats-grid">
+            <div class="stat-card">
+                <span class="stat-label">Hôtes Totaux</span>
+                <span class="stat-value" id="statTotalHosts">0</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">Hôtes Actifs</span>
+                <span class="stat-value" id="statOnlineHosts" style="color: var(--success)">0</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">Capacité vCPU</span>
+                <span class="stat-value" id="statTotalVcpu" style="color: var(--accent-light)">0</span>
+            </div>
+        </section>
         
         <div id="hostsGrid" class="hosts-grid">
-            <!-- Les cartes d'hôtes seront générées ici -->
-        </div>
+            </div>
     </div>
-    
-    <!-- Modal Ajouter/Éditer -->
+
     <div id="hostModal" class="modal">
         <div class="modal-content">
-            <div class="modal-header">
-                <h2 id="modalTitle">Ajouter un Hôte KVM</h2>
-            </div>
+            <h2 style="margin-bottom: 2rem;" id="modalTitle">Ajouter un Hôte</h2>
             <form id="hostForm">
-                <input type="hidden" id="hostId" name="id">
-                
+                <input type="hidden" id="hostId">
                 <div class="form-group">
-                    <label>Nom de l'hôte *</label>
-                    <input type="text" id="hostName" required placeholder="ex: KVM Serveur Principal">
+                    <label>Nom de l'hôte</label>
+                    <input type="text" id="hostName" placeholder="ex: Compute-Node-01" required>
                 </div>
-                
                 <div class="form-group">
-                    <label>URI de connexion *</label>
-                    <input type="text" id="hostUri" required placeholder="ex: qemu+ssh://user@192.168.1.100/system">
-                    <small>Format: qemu:///system (local) ou qemu+ssh://user@ip/system (distant)</small>
+                    <label>URI Libvirt (SSH conseillé)</label>
+                    <input type="text" id="hostUri" placeholder="qemu+ssh://user@ip/system" required>
                 </div>
-                
-                <div class="form-row">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                     <div class="form-group">
-                        <label>Priorité *</label>
-                        <input type="number" id="hostPriority" required min="1" value="1">
-                        <small>1 = plus haute priorité</small>
+                        <label>Priorité (1-10)</label>
+                        <input type="number" id="hostPriority" value="1">
                     </div>
-                    
                     <div class="form-group">
-                        <label>Chemin de stockage</label>
-                        <input type="text" id="hostStorage" value="/var/lib/libvirt/images">
+                        <label>RAM Max (MiB)</label>
+                        <input type="number" id="maxRam" value="16384">
                     </div>
                 </div>
-                
-                <div class="form-group">
-                    <h3 style="margin-bottom: 10px;">Quotas de ressources</h3>
-                </div>
-                
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>vCPU Maximum</label>
-                        <input type="number" id="maxVcpu" min="1" value="8">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>RAM Maximum (MiB)</label>
-                        <input type="number" id="maxRam" min="1024" step="1024" value="16384">
-                        <small>16384 MiB = 16 GB</small>
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label>Disque Maximum (GB)</label>
-                    <input type="number" id="maxDisk" min="10" value="200">
-                </div>
-                
-                <div class="form-group">
-                    <label>Description</label>
-                    <textarea id="hostDescription" rows="3" placeholder="Description de l'hôte..."></textarea>
-                </div>
-                
-                <div class="form-group">
-                    <label>
-                        <input type="checkbox" id="hostEnabled" checked>
-                        Activer cet hôte
-                    </label>
-                </div>
-                
-                <div class="modal-actions">
+                <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 1rem;">
                     <button type="button" class="btn btn-secondary" onclick="closeModal()">Annuler</button>
-                    <button type="submit" class="btn btn-primary">Enregistrer</button>
+                    <button type="submit" class="btn btn-primary">Enregistrer l'hôte</button>
                 </div>
             </form>
         </div>
     </div>
-    
+
     <script>
-        let currentHostId = null;
-        
-        // Charger les hôtes au démarrage
-        document.addEventListener('DOMContentLoaded', function() {
-            loadHosts();
-        });
-        
-        // Charger tous les hôtes
         async function loadHosts() {
             try {
                 const response = await fetch('/api/admin/hosts');
                 const hosts = await response.json();
-                
-                const grid = document.getElementById('hostsGrid');
-                grid.innerHTML = '';
-                
-                if (hosts.length === 0) {
-                    grid.innerHTML = '<p style="color: white; text-align: center; grid-column: 1/-1;">Aucun hôte configuré</p>';
-                    return;
-                }
-                
-                hosts.forEach(host => {
-                    const card = createHostCard(host);
-                    grid.appendChild(card);
-                });
-            } catch (error) {
-                console.error('Erreur:', error);
-                alert('Erreur lors du chargement des hôtes');
+                updateStats(hosts);
+                renderGrid(hosts);
+            } catch (e) { 
+                console.error("Erreur de chargement:", e); 
             }
         }
-        
-        // Créer une carte d'hôte
+
+        function updateStats(hosts) {
+            document.getElementById('statTotalHosts').textContent = hosts.length;
+            document.getElementById('statOnlineHosts').textContent = hosts.filter(h => h.status === 'online').length;
+            const totalVcpu = hosts.reduce((acc, h) => acc + (h.quotas?.max_vcpu || 0), 0);
+            document.getElementById('statTotalVcpu').textContent = totalVcpu;
+        }
+
+        function getProgressColor(percent) {
+            if (percent > 90) return 'var(--danger)';
+            if (percent > 75) return 'var(--warning)';
+            return 'var(--accent)';
+        }
+
         function createHostCard(host) {
             const card = document.createElement('div');
-            card.className = 'host-card';
+            const isOnline = host.status === 'online';
+            card.className = `host-card`;
             
-            const status = host.status || 'offline';
-            const usage = host.usage || {};
-            
-            const vcpuPercent = usage.vcpu_percent || 0;
-            const ramPercent = usage.ram_percent || 0;
-            
-            let vcpuClass = '';
-            if (vcpuPercent > 80) vcpuClass = 'danger';
-            else if (vcpuPercent > 60) vcpuClass = 'warning';
-            
-            let ramClass = '';
-            if (ramPercent > 80) ramClass = 'danger';
-            else if (ramPercent > 60) ramClass = 'warning';
-            
-            const priorityClass = `priority-${Math.min(host.priority || 999, 3)}`;
+            const usage = host.usage || { vcpu_percent: 0, ram_percent: 0 };
+            const vcpuColor = getProgressColor(usage.vcpu_percent);
+            const ramColor = getProgressColor(usage.ram_percent);
             
             card.innerHTML = `
                 <div class="host-header">
                     <div>
-                        <span class="host-name">${host.name}</span>
-                        <span class="priority-badge ${priorityClass}">Priorité ${host.priority}</span>
+                        <div class="host-name">${host.name}</div>
+                        <div style="font-size: 0.7rem; color: var(--text-muted); font-family: monospace;">ID: ${host.id}</div>
                     </div>
-                    <span class="host-status status-${status}">${status === 'online' ? '🟢 En ligne' : '🔴 Hors ligne'}</span>
+                    <span class="status-badge ${isOnline ? 'status-online' : 'status-offline'}">
+                        <i class="fas ${isOnline ? 'fa-circle' : 'fa-circle-notch'}" style="font-size: 8px;"></i>
+                        ${isOnline ? 'Online' : 'Offline'}
+                    </span>
                 </div>
                 
-                <div class="host-info">
-                    <div class="info-row">
-                        <span class="info-label">URI:</span>
-                        <span class="info-value" style="font-size: 12px;">${host.uri}</span>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <label>Priorité</label>
+                        <span>Tier ${host.priority}</span>
                     </div>
-                    <div class="info-row">
-                        <span class="info-label">Stockage:</span>
-                        <span class="info-value">${host.storage_path}</span>
-                    </div>
-                    ${host.description ? `
-                    <div class="info-row">
-                        <span class="info-label">Description:</span>
-                        <span class="info-value">${host.description}</span>
-                    </div>
-                    ` : ''}
-                </div>
-                
-                ${usage && status === 'online' ? `
-                <div class="resources">
-                    <div class="resource-bar">
-                        <div class="resource-label">
-                            <span>vCPU</span>
-                            <span>${usage.used_vcpu || 0} / ${usage.max_vcpu || 0}</span>
-                        </div>
-                        <div class="progress-bar">
-                            <div class="progress-fill ${vcpuClass}" style="width: ${vcpuPercent}%"></div>
-                        </div>
-                    </div>
-                    
-                    <div class="resource-bar">
-                        <div class="resource-label">
-                            <span>RAM</span>
-                            <span>${Math.round(usage.used_ram || 0)} / ${usage.max_ram || 0} MiB</span>
-                        </div>
-                        <div class="progress-bar">
-                            <div class="progress-fill ${ramClass}" style="width: ${ramPercent}%"></div>
-                        </div>
-                    </div>
-                    
-                    <div class="resource-bar">
-                        <div class="resource-label">
-                            <span>Disque</span>
-                            <span>${usage.used_disk || 0} / ${usage.max_disk || 0} GB</span>
-                        </div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: ${(usage.used_disk / usage.max_disk * 100) || 0}%"></div>
-                        </div>
+                    <div class="info-item">
+                        <label>Endpoint</label>
+                        <span>${host.uri.split('@')[1] || host.uri}</span>
                     </div>
                 </div>
-                ` : ''}
-                
-                <div class="host-actions">
-                    <button class="btn btn-warning" onclick="editHost('${host.id}')">✏️ Éditer</button>
-                    <button class="btn ${host.enabled ? 'btn-secondary' : 'btn-success'}" 
-                            onclick="toggleHost('${host.id}', ${!host.enabled})">
-                        ${host.enabled ? '⏸️ Désactiver' : '▶️ Activer'}
+
+                ${isOnline ? `
+                <div class="resource-bar">
+                    <div class="resource-label">
+                        <span><i class="fas fa-microchip" style="width:15px"></i> vCPU</span>
+                        <span>${usage.used_vcpu || 0} / ${usage.max_vcpu || 0}</span>
+                    </div>
+                    <div class="progress-bg">
+                        <div class="progress-fill" style="width: ${usage.vcpu_percent}%; background: ${vcpuColor}"></div>
+                    </div>
+                </div>
+                <div class="resource-bar">
+                    <div class="resource-label">
+                        <span><i class="fas fa-memory" style="width:15px"></i> RAM</span>
+                        <span>${Math.round(usage.used_ram/1024 || 0)}GB / ${Math.round(usage.max_ram/1024 || 0)}GB</span>
+                    </div>
+                    <div class="progress-bg">
+                        <div class="progress-fill" style="width: ${usage.ram_percent}%; background: ${ramColor}"></div>
+                    </div>
+                </div>
+                ` : `
+                <div style="text-align:center; padding: 35px 20px; color: var(--text-muted); background: rgba(0,0,0,0.2); border-radius: 16px; border: 1px dashed var(--border);">
+                    <i class="fas fa-ghost" style="font-size: 24px; margin-bottom: 12px; opacity: 0.3;"></i>
+                    <p style="font-size: 0.85rem;">Hôte injoignable ou désactivé</p>
+                </div>`}
+
+                <div class="card-actions">
+                    <button class="btn-icon edit" onclick="editHost('${host.id}')" title="Modifier"><i class="fas fa-pen"></i></button>
+                    <button class="btn-icon" onclick="toggleHost('${host.id}', ${!host.enabled})" title="${host.enabled ? 'Suspendre' : 'Démarrer'}">
+                        <i class="fas ${host.enabled ? 'fa-pause' : 'fa-play'}"></i>
                     </button>
-                    <button class="btn btn-danger" onclick="deleteHost('${host.id}', '${host.name}')">🗑️ Supprimer</button>
+                    <div style="flex-grow: 1;"></div>
+                    <button class="btn-icon delete" onclick="deleteHost('${host.id}', '${host.name}')" title="Supprimer"><i class="fas fa-trash-alt"></i></button>
                 </div>
             `;
-            
             return card;
         }
-        
-        // Afficher le modal d'ajout
+
+        function renderGrid(hosts) {
+            const grid = document.getElementById('hostsGrid');
+            grid.innerHTML = '';
+            hosts.forEach(host => grid.appendChild(createHostCard(host)));
+        }
+
         function showAddModal() {
-            currentHostId = null;
-            document.getElementById('modalTitle').textContent = 'Ajouter un Hôte KVM';
             document.getElementById('hostForm').reset();
             document.getElementById('hostId').value = '';
+            document.getElementById('modalTitle').textContent = "Ajouter un Hôte";
             document.getElementById('hostModal').style.display = 'block';
         }
-        
-        // Éditer un hôte
-        async function editHost(hostId) {
-            try {
-                const response = await fetch('/api/admin/hosts');
-                const hosts = await response.json();
-                const host = hosts.find(h => h.id === hostId);
-                
-                if (!host) return;
-                
-                currentHostId = hostId;
-                document.getElementById('modalTitle').textContent = 'Éditer l\'Hôte KVM';
-                document.getElementById('hostId').value = host.id;
-                document.getElementById('hostName').value = host.name;
-                document.getElementById('hostUri').value = host.uri;
-                document.getElementById('hostPriority').value = host.priority || 1;
-                document.getElementById('hostStorage').value = host.storage_path || '/var/lib/libvirt/images';
-                document.getElementById('maxVcpu').value = host.quotas?.max_vcpu || 8;
-                document.getElementById('maxRam').value = host.quotas?.max_ram || 16384;
-                document.getElementById('maxDisk').value = host.quotas?.max_disk || 200;
-                document.getElementById('hostDescription').value = host.description || '';
-                document.getElementById('hostEnabled').checked = host.enabled !== false;
-                
-                document.getElementById('hostModal').style.display = 'block';
-            } catch (error) {
-                console.error('Erreur:', error);
-                alert('Erreur lors du chargement de l\'hôte');
-            }
-        }
-        
-        // Fermer le modal
-        function closeModal() {
-            document.getElementById('hostModal').style.display = 'none';
-            currentHostId = null;
-        }
-        
-        // Soumettre le formulaire
-        document.getElementById('hostForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const data = {
-                id: document.getElementById('hostId').value || `host-${Date.now()}`,
-                name: document.getElementById('hostName').value,
-                uri: document.getElementById('hostUri').value,
-                priority: parseInt(document.getElementById('hostPriority').value),
-                storage_path: document.getElementById('hostStorage').value,
-                max_vcpu: parseInt(document.getElementById('maxVcpu').value),
-                max_ram: parseInt(document.getElementById('maxRam').value),
-                max_disk: parseInt(document.getElementById('maxDisk').value),
-                description: document.getElementById('hostDescription').value,
-                enabled: document.getElementById('hostEnabled').checked
-            };
-            
-            try {
-                let response;
-                if (currentHostId) {
-                    response = await fetch(`/api/admin/hosts/${currentHostId}`, {
-                        method: 'PUT',
-                        headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify(data)
-                    });
-                } else {
-                    response = await fetch('/api/admin/hosts', {
-                        method: 'POST',
-                        headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify(data)
-                    });
-                }
-                
-                if (response.ok) {
-                    closeModal();
-                    loadHosts();
-                    alert(currentHostId ? 'Hôte modifié avec succès' : 'Hôte ajouté avec succès');
-                } else {
-                    alert('Erreur lors de l\'enregistrement');
-                }
-            } catch (error) {
-                console.error('Erreur:', error);
-                alert('Erreur lors de l\'enregistrement');
-            }
-        });
-        
-        // Activer/Désactiver un hôte
-        async function toggleHost(hostId, enabled) {
-            try {
-                const response = await fetch('/api/admin/hosts');
-                const hosts = await response.json();
-                const host = hosts.find(h => h.id === hostId);
-                
-                if (!host) return;
-                
-                host.enabled = enabled;
-                
-                const updateResponse = await fetch(`/api/admin/hosts/${hostId}`, {
-                    method: 'PUT',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify(host)
-                });
-                
-                if (updateResponse.ok) {
-                    loadHosts();
-                }
-            } catch (error) {
-                console.error('Erreur:', error);
-                alert('Erreur lors de la modification');
-            }
-        }
-        
-        // Supprimer un hôte
-        async function deleteHost(hostId, hostName) {
-            if (!confirm(`Êtes-vous sûr de vouloir supprimer l'hôte "${hostName}" ?\n\nAttention: Les VMs sur cet hôte ne seront pas supprimées.`)) {
-                return;
-            }
-            
-            try {
-                const response = await fetch(`/api/admin/hosts/${hostId}`, {
-                    method: 'DELETE'
-                });
-                
-                if (response.ok) {
-                    loadHosts();
-                    alert('Hôte supprimé avec succès');
-                } else {
-                    alert('Erreur lors de la suppression');
-                }
-            } catch (error) {
-                console.error('Erreur:', error);
-                alert('Erreur lors de la suppression');
-            }
-        }
-        
-        // Fermer le modal en cliquant à l'extérieur
-        window.onclick = function(event) {
-            const modal = document.getElementById('hostModal');
-            if (event.target === modal) {
-                closeModal();
-            }
+
+        function closeModal() { document.getElementById('hostModal').style.display = 'none'; }
+
+        // Initialisation au chargement
+        document.addEventListener('DOMContentLoaded', loadHosts);
+
+        // Fermeture modal clic extérieur
+        window.onclick = (event) => {
+            if (event.target == document.getElementById('hostModal')) closeModal();
         }
     </script>
 </body>
