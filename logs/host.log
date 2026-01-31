@@ -118,3 +118,20 @@
 [2026-01-31 13:28:06] INFO [host:280] - 2 hôte(s) à tester
 [2026-01-31 13:28:06] INFO [host:283] - Test hôte [1/2]: rick-kvm
 [2026-01-31 13:28:07] INFO [host:310] - ✓ Hôte sélectionné: rick-kvm
+[2026-01-31 13:51:45] INFO [host:279] - Recherche hôte pour: 1vCPU, 2048MiB RAM, 15GB Disk
+[2026-01-31 13:51:45] INFO [host:280] - 2 hôte(s) à tester
+[2026-01-31 13:51:45] INFO [host:283] - Test hôte [1/2]: rick-kvm
+[2026-01-31 13:51:46] INFO [host:310] - ✓ Hôte sélectionné: rick-kvm
+[2026-01-31 13:58:02] INFO [host:279] - Recherche hôte pour: 2vCPU, 4096MiB RAM, 30GB Disk
+[2026-01-31 13:58:02] INFO [host:280] - 2 hôte(s) à tester
+[2026-01-31 13:58:02] INFO [host:283] - Test hôte [1/2]: rick-kvm
+[2026-01-31 13:58:03] INFO [host:310] - ✓ Hôte sélectionné: rick-kvm
+[2026-01-31 14:09:14] INFO [host:239] - Hôte mis à jour: host-1769859334553
+[2026-01-31 14:12:06] INFO [host:279] - Recherche hôte pour: 1vCPU, 2048MiB RAM, 15GB Disk
+[2026-01-31 14:12:06] INFO [host:280] - 1 hôte(s) à tester
+[2026-01-31 14:12:06] INFO [host:283] - Test hôte [1/1]: KVM Local
+[2026-01-31 14:12:06] INFO [host:310] - ✓ Hôte sélectionné: KVM Local
+[2026-01-31 14:13:21] INFO [host:279] - Recherche hôte pour: 1vCPU, 2048MiB RAM, 15GB Disk
+[2026-01-31 14:13:21] INFO [host:280] - 1 hôte(s) à tester
+[2026-01-31 14:13:21] INFO [host:283] - Test hôte [1/1]: KVM Local
+[2026-01-31 14:13:21] INFO [host:310] - ✓ Hôte sélectionné: KVM Local

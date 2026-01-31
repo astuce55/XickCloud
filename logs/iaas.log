@@ -6605,3 +6605,563 @@ PermissionError: [Errno 13] Permission denied: '/home/xponentiel/dev/cloud/Xick-
 [2026-01-31 13:27:32] INFO [iaas:90] - Total VMs trouvées: 2
 [2026-01-31 13:27:35] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
 [2026-01-31 13:27:35] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:37:25] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:37:26] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:37:31] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:37:31] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:37:36] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:37:36] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:37:41] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:37:41] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:37:46] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:37:47] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:37:51] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:37:51] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:37:55] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:37:56] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:37:56] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:37:57] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:38:01] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:38:02] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:38:06] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:38:07] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:38:11] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:38:12] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:38:16] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:38:17] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:38:21] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:38:22] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:38:25] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:38:26] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:38:26] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:38:27] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:38:31] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:38:32] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:38:36] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:38:37] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:38:41] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:38:42] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:38:46] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:38:47] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:38:52] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:38:52] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:38:55] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:38:56] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:38:56] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:38:57] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:39:01] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:39:02] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:39:06] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:39:07] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:39:11] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:39:12] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:39:16] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:39:17] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:39:21] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:39:22] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:39:25] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:39:26] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:39:26] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:39:27] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:39:31] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:39:32] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:39:36] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:39:37] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:39:41] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:39:42] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:39:46] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:39:47] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:39:51] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:39:52] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:39:55] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:39:56] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:39:56] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:39:57] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:40:01] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:40:02] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:40:06] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:40:07] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:40:11] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:40:12] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:40:17] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:40:17] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:40:22] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:40:22] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:40:25] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:40:26] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:40:27] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:40:27] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:40:32] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:40:32] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:40:37] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:40:37] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:40:42] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:40:42] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:40:47] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:40:48] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:40:52] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:40:52] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:40:55] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:40:56] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:40:57] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:40:57] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:41:02] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:41:02] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:41:07] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:41:07] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:41:12] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:41:12] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:41:17] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:41:18] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:41:22] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:41:22] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:41:25] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:41:26] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:41:27] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:41:27] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:41:32] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:41:34] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:41:37] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:41:37] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:41:42] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:41:42] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:41:47] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:41:48] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:41:52] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:41:52] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:41:55] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:41:56] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:41:57] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:41:57] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:42:02] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:42:02] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:42:07] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:42:07] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:42:12] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:42:12] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:42:17] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:42:17] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:42:22] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:42:24] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:42:25] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:42:26] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:42:27] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:42:27] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:42:32] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:42:32] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:42:37] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:42:37] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:42:42] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:42:42] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:42:47] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:42:48] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:42:52] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:42:53] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:42:55] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:42:56] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:42:57] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:42:57] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:43:02] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:43:02] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:43:07] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:43:07] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:43:12] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:43:13] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:43:17] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:43:17] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:43:22] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:43:23] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:43:25] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:43:26] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:43:27] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:43:27] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:43:32] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:43:32] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:43:37] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:43:38] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:43:42] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:43:43] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:43:47] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:43:47] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:43:52] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:43:52] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:43:55] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:43:56] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:43:57] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:43:57] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:44:02] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:44:02] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:44:07] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:44:07] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:44:12] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:44:13] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:44:17] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:44:17] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:44:22] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:44:22] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:44:25] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:44:26] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:44:27] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:44:28] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:44:32] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:44:32] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:44:37] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:44:38] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:44:42] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:44:43] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:44:47] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:44:47] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:44:52] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:44:52] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:44:55] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:44:56] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:44:57] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:44:57] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:45:02] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:45:03] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:45:07] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:45:07] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:45:12] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:45:12] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:45:17] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:45:17] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:45:22] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:45:22] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:45:25] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:45:26] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:45:27] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:45:27] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:45:32] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:45:32] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:45:37] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:45:37] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:45:42] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:45:42] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:45:47] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:45:48] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:45:52] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:45:52] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:45:55] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:45:57] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:45:57] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:45:57] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:46:02] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:46:02] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:46:07] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:46:07] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:46:12] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:46:13] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:46:17] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:46:17] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:46:22] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:46:22] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:46:25] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:46:26] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:46:27] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:46:27] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:46:32] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:46:32] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:46:37] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:46:37] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:46:42] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:46:42] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:46:47] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:46:48] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:46:52] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:46:52] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:48:48] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:48:49] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:48:53] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:48:54] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:48:58] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:48:59] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:49:03] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:49:04] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:49:08] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:49:09] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:49:13] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:49:14] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:49:18] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:49:18] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:49:19] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:49:19] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:49:24] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:49:24] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:49:29] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:49:29] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:49:34] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:49:34] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:49:39] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 13:49:39] INFO [iaas:90] - Total VMs trouvées: 2
+[2026-01-31 13:49:54] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:49:54] INFO [iaas:90] - Total VMs trouvées: 0
+[2026-01-31 13:49:59] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:49:59] INFO [iaas:90] - Total VMs trouvées: 0
+[2026-01-31 13:50:04] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:50:04] INFO [iaas:90] - Total VMs trouvées: 0
+[2026-01-31 13:50:09] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:50:09] INFO [iaas:90] - Total VMs trouvées: 0
+[2026-01-31 13:50:14] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:50:14] INFO [iaas:90] - Total VMs trouvées: 0
+[2026-01-31 13:50:19] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:50:19] INFO [iaas:90] - Total VMs trouvées: 0
+[2026-01-31 13:50:24] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:50:24] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:50:24] INFO [iaas:90] - Total VMs trouvées: 0
+[2026-01-31 13:50:24] INFO [iaas:90] - Total VMs trouvées: 0
+[2026-01-31 13:50:29] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:50:30] INFO [iaas:90] - Total VMs trouvées: 0
+[2026-01-31 13:50:34] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:50:34] INFO [iaas:90] - Total VMs trouvées: 0
+[2026-01-31 13:50:39] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:50:39] INFO [iaas:90] - Total VMs trouvées: 0
+[2026-01-31 13:50:44] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:50:44] INFO [iaas:90] - Total VMs trouvées: 0
+[2026-01-31 13:50:49] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:50:49] INFO [iaas:90] - Total VMs trouvées: 0
+[2026-01-31 13:50:54] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:50:54] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:50:55] INFO [iaas:90] - Total VMs trouvées: 0
+[2026-01-31 13:50:55] INFO [iaas:90] - Total VMs trouvées: 0
+[2026-01-31 13:50:59] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:50:59] INFO [iaas:90] - Total VMs trouvées: 0
+[2026-01-31 13:51:04] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:51:04] INFO [iaas:90] - Total VMs trouvées: 0
+[2026-01-31 13:51:09] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:51:10] INFO [iaas:90] - Total VMs trouvées: 0
+[2026-01-31 13:51:14] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:51:14] INFO [iaas:90] - Total VMs trouvées: 0
+[2026-01-31 13:51:19] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:51:19] INFO [iaas:90] - Total VMs trouvées: 0
+[2026-01-31 13:51:24] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:51:24] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:51:25] INFO [iaas:90] - Total VMs trouvées: 0
+[2026-01-31 13:51:25] INFO [iaas:90] - Total VMs trouvées: 0
+[2026-01-31 13:51:29] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:51:29] INFO [iaas:90] - Total VMs trouvées: 0
+[2026-01-31 13:51:34] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:51:34] INFO [iaas:90] - Total VMs trouvées: 0
+[2026-01-31 13:51:39] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:51:39] INFO [iaas:90] - Total VMs trouvées: 0
+[2026-01-31 13:51:44] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:51:45] INFO [iaas:90] - Total VMs trouvées: 0
+[2026-01-31 13:51:45] INFO [iaas:225] - Déploiement VM sofoPC pour user2
+[2026-01-31 13:51:46] INFO [iaas:236] - Hôte sélectionné: rick-kvm
+[2026-01-31 13:51:49] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:51:49] INFO [iaas:90] - Total VMs trouvées: 0
+[2026-01-31 13:51:54] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:51:54] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:51:55] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:51:55] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:51:59] INFO [iaas:323] - VM user2_sofoPC déployée avec succès
+[2026-01-31 13:51:59] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:51:59] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:52:02] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:52:02] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:52:04] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:52:04] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:52:07] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:52:07] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:52:09] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:52:09] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:52:12] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:52:13] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:52:14] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:52:14] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:52:17] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:52:18] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:52:19] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:52:19] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:52:22] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:52:23] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:52:24] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:52:24] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:52:25] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:52:25] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:52:27] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:52:27] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:52:29] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:52:31] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:52:31] INFO [iaas:300] - IP attribuée à user2_sofoPC: 192.168.141.169
+[2026-01-31 13:52:32] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:52:32] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:52:34] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:52:35] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:52:37] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:52:37] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:52:39] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:52:39] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:52:42] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:52:42] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:52:44] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:52:44] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:52:47] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:52:47] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:52:49] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:52:49] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:52:52] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:52:52] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:52:54] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:52:54] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:52:55] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:52:55] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:52:57] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:52:57] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:52:59] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:52:59] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:53:02] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:53:02] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:53:04] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:53:05] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:53:07] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:53:07] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:53:09] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:53:09] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:53:12] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:53:12] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:53:14] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:53:14] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:53:17] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:53:17] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:53:19] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:53:20] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:53:22] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:53:22] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:53:24] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:53:24] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:53:25] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:53:25] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:53:27] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:53:28] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:53:29] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:53:30] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:53:32] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:53:32] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:53:34] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:53:34] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:53:37] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:53:37] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:53:39] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:53:40] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:53:42] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:53:42] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:53:44] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:53:45] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:53:47] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:53:47] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:53:49] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:53:49] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:53:52] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:53:53] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:53:54] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:53:54] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:53:54] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:53:54] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:53:57] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:53:57] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:53:59] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:53:59] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:54:02] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:54:02] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:54:04] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:54:06] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:54:07] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:54:07] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:54:09] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:54:09] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:54:12] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:54:12] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:54:14] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:54:15] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:54:17] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:54:17] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:54:19] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:54:20] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:54:22] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:54:22] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:54:24] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:54:24] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:54:24] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:54:24] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:54:27] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:54:27] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:54:29] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:54:29] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:54:32] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:54:32] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:54:34] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:54:34] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:54:39] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:54:39] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:54:44] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:54:45] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:54:49] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:54:49] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:54:54] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:54:54] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:54:54] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:54:54] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:54:59] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:54:59] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:55:04] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:55:04] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:55:09] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:55:09] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:55:14] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:55:14] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:55:19] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:55:20] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:55:24] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:55:24] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:55:24] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:55:24] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:55:29] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:55:29] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:55:32] INFO [iaas:354] - Action stop sur VM user2_sofoPC par user2
+[2026-01-31 13:55:34] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:55:34] INFO [iaas:410] - Action stop réussie sur user2_sofoPC
+[2026-01-31 13:55:34] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:55:36] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:55:36] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:55:39] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:55:39] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:55:44] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:55:44] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:55:49] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:55:49] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:55:54] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:55:54] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:55:54] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:55:54] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:55:59] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:56:00] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:56:04] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:56:05] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:56:09] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:56:10] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:56:14] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:56:15] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:56:19] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:56:19] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:56:24] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:56:24] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:56:25] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:56:25] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:56:29] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:56:29] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:56:34] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:56:34] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:56:39] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:56:40] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 13:56:44] INFO [iaas:51] - Récupération VMs pour user2 (role: user)
+[2026-01-31 13:56:45] INFO [iaas:90] - Total VMs trouvées: 1
+[2026-01-31 14:08:59] INFO [iaas:51] - Récupération VMs pour admin (role: admin)
+[2026-01-31 14:09:00] INFO [iaas:90] - Total VMs trouvées: 7
+[2026-01-31 14:10:11] INFO [iaas:51] - Récupération VMs pour admin (role: admin)
+[2026-01-31 14:10:11] INFO [iaas:90] - Total VMs trouvées: 4
+[2026-01-31 14:10:16] INFO [iaas:51] - Récupération VMs pour admin (role: admin)
+[2026-01-31 14:10:16] INFO [iaas:90] - Total VMs trouvées: 4
+[2026-01-31 14:10:21] INFO [iaas:51] - Récupération VMs pour admin (role: admin)
+[2026-01-31 14:10:21] INFO [iaas:90] - Total VMs trouvées: 4
+[2026-01-31 14:10:34] INFO [iaas:51] - Récupération VMs pour user1 (role: user)
+[2026-01-31 14:10:34] INFO [iaas:90] - Total VMs trouvées: 2

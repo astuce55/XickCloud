@@ -3253,3 +3253,36 @@
 [2026-01-31 13:28:35] INFO [libvirt:290] - ✓ IP mise à jour: 192.168.249.145
 [2026-01-31 13:28:40] INFO [libvirt:37] - Récupération IP via lease pour user1_cluster005-worker-1
 [2026-01-31 13:28:40] INFO [libvirt:63] - ✓ IP trouvée via lease: 192.168.249.145
+[2026-01-31 13:52:09] INFO [libvirt:280] - Récupération IP pour user2_sofoPC
+[2026-01-31 13:52:09] INFO [libvirt:37] - Récupération IP via lease pour user2_sofoPC
+[2026-01-31 13:52:09] INFO [libvirt:63] - ✓ IP trouvée via lease: 192.168.141.169
+[2026-01-31 13:52:09] INFO [libvirt:290] - ✓ IP mise à jour: 192.168.141.169
+[2026-01-31 13:52:29] INFO [libvirt:37] - Récupération IP via lease pour user2_sofoPC
+[2026-01-31 13:52:31] INFO [libvirt:63] - ✓ IP trouvée via lease: 192.168.141.169
+[2026-01-31 13:58:18] INFO [libvirt:37] - Récupération IP via lease pour user2_cluster-manager-1
+[2026-01-31 13:58:23] INFO [libvirt:280] - Récupération IP pour user2_cluster-manager-1
+[2026-01-31 13:58:23] INFO [libvirt:37] - Récupération IP via lease pour user2_cluster-manager-1
+[2026-01-31 13:58:24] WARNING [libvirt:73] - Pas d'IP après 5s
+[2026-01-31 13:58:24] INFO [libvirt:37] - Récupération IP via lease pour user2_cluster-worker-1
+[2026-01-31 13:58:24] INFO [libvirt:63] - ✓ IP trouvée via lease: 192.168.179.71
+[2026-01-31 13:58:24] INFO [libvirt:290] - ✓ IP mise à jour: 192.168.179.71
+[2026-01-31 13:58:29] WARNING [libvirt:73] - Pas d'IP après 5s
+[2026-01-31 13:58:33] INFO [libvirt:37] - Récupération IP via lease pour user2_cluster-manager-1
+[2026-01-31 13:58:33] INFO [libvirt:280] - Récupération IP pour user2_cluster-worker-1
+[2026-01-31 13:58:33] INFO [libvirt:37] - Récupération IP via lease pour user2_cluster-worker-1
+[2026-01-31 13:58:33] INFO [libvirt:63] - ✓ IP trouvée via lease: 192.168.179.71
+[2026-01-31 13:58:33] INFO [libvirt:37] - Récupération IP via lease pour user2_cluster-worker-1
+[2026-01-31 13:58:34] INFO [libvirt:63] - ✓ IP trouvée via lease: 192.168.179.20
+[2026-01-31 13:58:34] INFO [libvirt:290] - ✓ IP mise à jour: 192.168.179.20
+[2026-01-31 13:58:34] INFO [libvirt:63] - ✓ IP trouvée via lease: 192.168.179.20
+[2026-01-31 14:12:07] ERROR [libvirt:240] - Erreur delete: Domain not found: no domain with matching name 'user1_cluster02-manager-1'
+[2026-01-31 14:13:31] INFO [libvirt:37] - Récupération IP via lease pour user1_cluster02-manager-1
+[2026-01-31 14:13:36] WARNING [libvirt:73] - Pas d'IP après 5s
+[2026-01-31 14:13:45] INFO [libvirt:280] - Récupération IP pour user1_cluster02-manager-1
+[2026-01-31 14:13:45] INFO [libvirt:37] - Récupération IP via lease pour user1_cluster02-manager-1
+[2026-01-31 14:13:46] INFO [libvirt:37] - Récupération IP via lease pour user1_cluster02-manager-1
+[2026-01-31 14:13:51] WARNING [libvirt:73] - Pas d'IP après 5s
+[2026-01-31 14:14:00] INFO [libvirt:63] - ✓ IP trouvée via lease: 192.168.228.142
+[2026-01-31 14:14:00] INFO [libvirt:290] - ✓ IP mise à jour: 192.168.228.142
+[2026-01-31 14:14:01] INFO [libvirt:37] - Récupération IP via lease pour user1_cluster02-manager-1
+[2026-01-31 14:14:01] INFO [libvirt:63] - ✓ IP trouvée via lease: 192.168.228.142

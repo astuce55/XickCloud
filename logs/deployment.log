@@ -170,3 +170,35 @@ okvcy0fnkt8j   wordpress-xpo5_wordpress   replicated   0/1        wordpress:late
 [2026-01-31 13:28:16] INFO [deployment:73] - Déploiement VM user1_cluster005-worker-1
 [2026-01-31 13:28:16] INFO [deployment:143] - Lancement virt-install pour user1_cluster005-worker-1
 [2026-01-31 13:28:19] INFO [deployment:153] - ✓ VM user1_cluster005-worker-1 déployée
+[2026-01-31 13:51:47] INFO [deployment:73] - Déploiement VM user2_sofoPC
+[2026-01-31 13:51:48] INFO [deployment:143] - Lancement virt-install pour user2_sofoPC
+[2026-01-31 13:51:54] INFO [deployment:153] - ✓ VM user2_sofoPC déployée
+[2026-01-31 13:58:03] INFO [deployment:177] - Déploiement nœud Swarm: cluster-manager-1
+[2026-01-31 13:58:03] INFO [deployment:73] - Déploiement VM user2_cluster-manager-1
+[2026-01-31 13:58:04] INFO [deployment:143] - Lancement virt-install pour user2_cluster-manager-1
+[2026-01-31 13:58:08] INFO [deployment:153] - ✓ VM user2_cluster-manager-1 déployée
+[2026-01-31 13:58:13] INFO [deployment:177] - Déploiement nœud Swarm: cluster-worker-1
+[2026-01-31 13:58:13] INFO [deployment:73] - Déploiement VM user2_cluster-worker-1
+[2026-01-31 13:58:14] INFO [deployment:143] - Lancement virt-install pour user2_cluster-worker-1
+[2026-01-31 13:58:18] INFO [deployment:153] - ✓ VM user2_cluster-worker-1 déployée
+[2026-01-31 14:12:07] INFO [deployment:177] - Déploiement nœud Swarm: cluster02-manager-1
+[2026-01-31 14:12:07] INFO [deployment:73] - Déploiement VM user1_cluster02-manager-1
+[2026-01-31 14:12:07] ERROR [deployment:165] - Erreur déploiement: Command '['qemu-img', 'create', '-f', 'qcow2', '-F', 'qcow2', '-b', '/var/lib/libvirt/images/base-images/base-ubuntu.qcow2', '/var/lib/libvirt/images/user1_cluster02-manager-1.qcow2', '15G']' returned non-zero exit status 1.
+Traceback (most recent call last):
+  File "/home/xponentiel/dev/cloud/Xick-cloud/services/deployment_service.py", line 87, in deploy_vm
+    subprocess.run([
+    ~~~~~~~~~~~~~~^^
+        "qemu-img", "create", "-f", "qcow2", "-F", "qcow2",
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        "-b", base_image, vm_disk, f"{disk_size}G"
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ], check=True, timeout=30)
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/subprocess.py", line 577, in run
+    raise CalledProcessError(retcode, process.args,
+                             output=stdout, stderr=stderr)
+subprocess.CalledProcessError: Command '['qemu-img', 'create', '-f', 'qcow2', '-F', 'qcow2', '-b', '/var/lib/libvirt/images/base-images/base-ubuntu.qcow2', '/var/lib/libvirt/images/user1_cluster02-manager-1.qcow2', '15G']' returned non-zero exit status 1.
+[2026-01-31 14:13:21] INFO [deployment:177] - Déploiement nœud Swarm: cluster02-manager-1
+[2026-01-31 14:13:21] INFO [deployment:73] - Déploiement VM user1_cluster02-manager-1
+[2026-01-31 14:13:21] INFO [deployment:143] - Lancement virt-install pour user1_cluster02-manager-1
+[2026-01-31 14:13:30] INFO [deployment:153] - ✓ VM user1_cluster02-manager-1 déployée
