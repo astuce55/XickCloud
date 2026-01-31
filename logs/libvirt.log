@@ -3210,3 +3210,46 @@
 [2026-01-31 00:57:53] INFO [libvirt:37] - Récupération IP via lease pour user1_test_cluster-manager-1
 [2026-01-31 00:57:53] INFO [libvirt:63] - ✓ IP trouvée via lease: 192.168.113.178
 [2026-01-31 00:57:53] INFO [libvirt:63] - ✓ IP trouvée via lease: 192.168.113.178
+[2026-01-31 12:37:48] ERROR [libvirt:29] - Erreur connexion qemu+ssh://rick@10.232.234.204/system: Cannot recv data: Warning: Permanently added '10.232.234.204' (ED25519) to the list of known hosts.: Connection reset by peer
+[2026-01-31 12:45:35] ERROR [libvirt:29] - Erreur connexion qemu+ssh://rick@10.232.234.204/system: Cannot recv data: : Connection reset by peer
+[2026-01-31 12:46:18] ERROR [libvirt:29] - Erreur connexion qemu+ssh://r1ck@10.232.234.204/system: Cannot recv data: Host key verification failed.: Connection reset by peer
+[2026-01-31 12:46:21] ERROR [libvirt:29] - Erreur connexion qemu+ssh://r1ck@10.232.234.204/system: Cannot recv data: Host key verification failed.: Connection reset by peer
+[2026-01-31 12:46:39] ERROR [libvirt:29] - Erreur connexion qemu+ssh://r1ck@10.232.234.204/system: Cannot recv data: : Connection reset by peer
+[2026-01-31 12:46:39] ERROR [libvirt:29] - Erreur connexion qemu+ssh://r1ck@10.232.234.204/system: Cannot recv data: : Connection reset by peer
+[2026-01-31 12:46:39] ERROR [libvirt:29] - Erreur connexion qemu+ssh://r1ck@10.232.234.204/system: Cannot recv data: : Connection reset by peer
+[2026-01-31 12:46:39] ERROR [libvirt:29] - Erreur connexion qemu+ssh://r1ck@10.232.234.204/system: Cannot recv data: : Connection reset by peer
+[2026-01-31 12:46:39] ERROR [libvirt:29] - Erreur connexion qemu+ssh://r1ck@10.232.234.204/system: Cannot recv data: : Connection reset by peer
+[2026-01-31 12:46:39] ERROR [libvirt:29] - Erreur connexion qemu+ssh://r1ck@10.232.234.204/system: Cannot recv data: : Connection reset by peer
+[2026-01-31 12:46:39] ERROR [libvirt:29] - Erreur connexion qemu+ssh://r1ck@10.232.234.204/system: Cannot recv data: : Connection reset by peer
+[2026-01-31 12:57:46] INFO [libvirt:280] - Récupération IP pour user1_vm102
+[2026-01-31 12:57:46] INFO [libvirt:37] - Récupération IP via lease pour user1_vm102
+[2026-01-31 12:57:47] INFO [libvirt:63] - ✓ IP trouvée via lease: 192.168.23.45
+[2026-01-31 12:57:47] INFO [libvirt:290] - ✓ IP mise à jour: 192.168.23.45
+[2026-01-31 12:58:06] INFO [libvirt:37] - Récupération IP via lease pour user1_vm102
+[2026-01-31 12:58:07] INFO [libvirt:63] - ✓ IP trouvée via lease: 192.168.23.45
+[2026-01-31 13:02:58] INFO [libvirt:37] - Récupération IP via lease pour user1_cluster002-manager-1
+[2026-01-31 13:03:00] INFO [libvirt:37] - Récupération IP via lease pour user1_cluster002-manager-1
+[2026-01-31 13:03:00] INFO [libvirt:63] - ✓ IP trouvée via lease: 192.168.106.162
+[2026-01-31 13:03:03] WARNING [libvirt:73] - Pas d'IP après 5s
+[2026-01-31 13:03:06] INFO [libvirt:280] - Récupération IP pour user1_cluster002-manager-1
+[2026-01-31 13:03:06] INFO [libvirt:37] - Récupération IP via lease pour user1_cluster002-manager-1
+[2026-01-31 13:03:06] INFO [libvirt:63] - ✓ IP trouvée via lease: 192.168.106.162
+[2026-01-31 13:03:06] INFO [libvirt:290] - ✓ IP mise à jour: 192.168.106.162
+[2026-01-31 13:28:10] INFO [libvirt:37] - Récupération IP via lease pour user1_cluster005-manager-1
+[2026-01-31 13:28:15] WARNING [libvirt:73] - Pas d'IP après 5s
+[2026-01-31 13:28:15] INFO [libvirt:37] - Récupération IP via lease pour user1_cluster005-worker-1
+[2026-01-31 13:28:15] ERROR [libvirt:77] - Erreur: Domain not found: no domain with matching name 'user1_cluster005-worker-1'
+[2026-01-31 13:28:25] INFO [libvirt:37] - Récupération IP via lease pour user1_cluster005-manager-1
+[2026-01-31 13:28:25] INFO [libvirt:63] - ✓ IP trouvée via lease: 192.168.249.136
+[2026-01-31 13:28:25] INFO [libvirt:37] - Récupération IP via lease pour user1_cluster005-worker-1
+[2026-01-31 13:28:26] INFO [libvirt:280] - Récupération IP pour user1_cluster005-manager-1
+[2026-01-31 13:28:26] INFO [libvirt:37] - Récupération IP via lease pour user1_cluster005-manager-1
+[2026-01-31 13:28:26] INFO [libvirt:63] - ✓ IP trouvée via lease: 192.168.249.136
+[2026-01-31 13:28:26] INFO [libvirt:290] - ✓ IP mise à jour: 192.168.249.136
+[2026-01-31 13:28:30] WARNING [libvirt:73] - Pas d'IP après 5s
+[2026-01-31 13:28:34] INFO [libvirt:280] - Récupération IP pour user1_cluster005-worker-1
+[2026-01-31 13:28:34] INFO [libvirt:37] - Récupération IP via lease pour user1_cluster005-worker-1
+[2026-01-31 13:28:35] INFO [libvirt:63] - ✓ IP trouvée via lease: 192.168.249.145
+[2026-01-31 13:28:35] INFO [libvirt:290] - ✓ IP mise à jour: 192.168.249.145
+[2026-01-31 13:28:40] INFO [libvirt:37] - Récupération IP via lease pour user1_cluster005-worker-1
+[2026-01-31 13:28:40] INFO [libvirt:63] - ✓ IP trouvée via lease: 192.168.249.145

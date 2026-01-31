@@ -370,3 +370,107 @@
 [2026-01-31 09:38:30] INFO [swarm:61] - Récupération clusters pour user1: 1 trouvés
 [2026-01-31 09:38:45] INFO [swarm:61] - Récupération clusters pour user1: 1 trouvés
 [2026-01-31 09:39:00] INFO [swarm:61] - Récupération clusters pour user1: 1 trouvés
+[2026-01-31 11:53:16] INFO [swarm:61] - Récupération clusters pour admin: 0 trouvés
+[2026-01-31 12:30:24] INFO [swarm:61] - Récupération clusters pour admin: 0 trouvés
+[2026-01-31 12:32:40] INFO [swarm:61] - Récupération clusters pour admin: 0 trouvés
+[2026-01-31 12:32:48] INFO [swarm:61] - Récupération clusters pour admin: 0 trouvés
+[2026-01-31 12:32:49] INFO [swarm:61] - Récupération clusters pour admin: 0 trouvés
+[2026-01-31 12:34:03] INFO [swarm:61] - Récupération clusters pour admin: 0 trouvés
+[2026-01-31 12:34:08] INFO [swarm:61] - Récupération clusters pour admin: 0 trouvés
+[2026-01-31 13:00:28] INFO [swarm:61] - Récupération clusters pour user1: 1 trouvés
+[2026-01-31 13:00:43] INFO [swarm:61] - Récupération clusters pour user1: 1 trouvés
+[2026-01-31 13:00:58] INFO [swarm:61] - Récupération clusters pour user1: 1 trouvés
+[2026-01-31 13:01:13] INFO [swarm:61] - Récupération clusters pour user1: 1 trouvés
+[2026-01-31 13:01:28] INFO [swarm:61] - Récupération clusters pour user1: 1 trouvés
+[2026-01-31 13:01:37] INFO [swarm:79] - Déploiement cluster cluster001: 1M + 1W par user1
+[2026-01-31 13:01:43] INFO [swarm:61] - Récupération clusters pour user1: 1 trouvés
+[2026-01-31 13:01:58] INFO [swarm:61] - Récupération clusters pour user1: 1 trouvés
+[2026-01-31 13:02:15] INFO [swarm:61] - Récupération clusters pour user1: 1 trouvés
+[2026-01-31 13:02:30] INFO [swarm:61] - Récupération clusters pour user1: 1 trouvés
+[2026-01-31 13:02:35] INFO [swarm:79] - Déploiement cluster cluster002: 1M + 1W par user1
+[2026-01-31 13:02:45] INFO [swarm:61] - Récupération clusters pour user1: 1 trouvés
+[2026-01-31 13:02:45] INFO [swarm:79] - Déploiement cluster cluster002: 1M + 0W par user1
+[2026-01-31 13:02:45] INFO [swarm:120] - Hôte sélectionné: rick-kvm
+[2026-01-31 13:02:45] INFO [swarm:124] - Création réseau: swarm_user1_cluster002
+[2026-01-31 13:02:46] INFO [swarm:140] - Cluster cluster002 créé en base de données
+[2026-01-31 13:02:46] INFO [swarm:147] - Déploiement nœud: cluster002-manager-1 (manager)
+[2026-01-31 13:02:56] INFO [swarm:164] - ✓ Nœud cluster002-manager-1 déployé
+[2026-01-31 13:03:00] INFO [swarm:59] - IP mise à jour pour cluster002-manager-1: 192.168.106.162
+[2026-01-31 13:03:00] INFO [swarm:61] - Récupération clusters pour user1: 2 trouvés
+[2026-01-31 13:03:04] INFO [swarm:61] - Récupération clusters pour user1: 2 trouvés
+[2026-01-31 13:03:15] INFO [swarm:61] - Récupération clusters pour user1: 2 trouvés
+[2026-01-31 13:03:30] INFO [swarm:61] - Récupération clusters pour user1: 2 trouvés
+[2026-01-31 13:03:45] INFO [swarm:61] - Récupération clusters pour user1: 2 trouvés
+[2026-01-31 13:10:16] INFO [swarm:61] - Récupération clusters pour user1: 2 trouvés
+[2026-01-31 13:10:17] INFO [swarm:61] - Récupération clusters pour user1: 2 trouvés
+[2026-01-31 13:10:32] INFO [swarm:61] - Récupération clusters pour user1: 2 trouvés
+[2026-01-31 13:10:40] INFO [swarm:284] - Statut cluster test_cluster récupéré
+[2026-01-31 13:10:47] INFO [swarm:61] - Récupération clusters pour user1: 2 trouvés
+[2026-01-31 13:11:02] INFO [swarm:61] - Récupération clusters pour user1: 2 trouvés
+[2026-01-31 13:11:17] INFO [swarm:61] - Récupération clusters pour user1: 2 trouvés
+[2026-01-31 13:11:32] INFO [swarm:61] - Récupération clusters pour user1: 2 trouvés
+[2026-01-31 13:11:47] INFO [swarm:61] - Récupération clusters pour user1: 2 trouvés
+[2026-01-31 13:12:02] INFO [swarm:61] - Récupération clusters pour user1: 2 trouvés
+[2026-01-31 13:12:17] INFO [swarm:61] - Récupération clusters pour user1: 2 trouvés
+[2026-01-31 13:12:32] INFO [swarm:61] - Récupération clusters pour user1: 2 trouvés
+[2026-01-31 13:12:47] INFO [swarm:61] - Récupération clusters pour user1: 2 trouvés
+[2026-01-31 13:13:02] INFO [swarm:61] - Récupération clusters pour user1: 2 trouvés
+[2026-01-31 13:13:17] INFO [swarm:61] - Récupération clusters pour user1: 2 trouvés
+[2026-01-31 13:13:32] INFO [swarm:61] - Récupération clusters pour user1: 2 trouvés
+[2026-01-31 13:13:47] INFO [swarm:61] - Récupération clusters pour user1: 2 trouvés
+[2026-01-31 13:14:02] INFO [swarm:61] - Récupération clusters pour user1: 2 trouvés
+[2026-01-31 13:14:17] INFO [swarm:61] - Récupération clusters pour user1: 2 trouvés
+[2026-01-31 13:14:32] INFO [swarm:61] - Récupération clusters pour user1: 2 trouvés
+[2026-01-31 13:14:47] INFO [swarm:61] - Récupération clusters pour user1: 2 trouvés
+[2026-01-31 13:14:57] INFO [swarm:61] - Récupération clusters pour user1: 2 trouvés
+[2026-01-31 13:24:44] INFO [swarm:61] - Récupération clusters pour user1: 2 trouvés
+[2026-01-31 13:24:46] INFO [swarm:61] - Récupération clusters pour user1: 2 trouvés
+[2026-01-31 13:24:49] INFO [swarm:284] - Statut cluster cluster002 récupéré
+[2026-01-31 13:24:57] INFO [swarm:215] - Suppression cluster cluster002 par user1
+[2026-01-31 13:24:58] INFO [swarm:229] - Cluster cluster002 supprimé
+[2026-01-31 13:24:59] INFO [swarm:61] - Récupération clusters pour user1: 1 trouvés
+[2026-01-31 13:27:40] INFO [swarm:61] - Récupération clusters pour user1: 1 trouvés
+[2026-01-31 13:27:55] INFO [swarm:61] - Récupération clusters pour user1: 1 trouvés
+[2026-01-31 13:28:06] INFO [swarm:79] - Déploiement cluster cluster005: 1M + 1W par user1
+[2026-01-31 13:28:07] INFO [swarm:120] - Hôte sélectionné: rick-kvm
+[2026-01-31 13:28:07] INFO [swarm:124] - Création réseau: swarm_user1_cluster005
+[2026-01-31 13:28:07] INFO [swarm:140] - Cluster cluster005 créé en base de données
+[2026-01-31 13:28:07] INFO [swarm:147] - Déploiement nœud: cluster005-manager-1 (manager)
+[2026-01-31 13:28:16] INFO [swarm:61] - Récupération clusters pour user1: 2 trouvés
+[2026-01-31 13:28:16] INFO [swarm:164] - ✓ Nœud cluster005-manager-1 déployé
+[2026-01-31 13:28:16] INFO [swarm:147] - Déploiement nœud: cluster005-worker-1 (worker)
+[2026-01-31 13:28:24] INFO [swarm:164] - ✓ Nœud cluster005-worker-1 déployé
+[2026-01-31 13:28:25] INFO [swarm:59] - IP mise à jour pour cluster005-manager-1: 192.168.249.136
+[2026-01-31 13:28:30] INFO [swarm:61] - Récupération clusters pour user1: 2 trouvés
+[2026-01-31 13:28:40] INFO [swarm:59] - IP mise à jour pour cluster005-worker-1: 192.168.249.145
+[2026-01-31 13:28:40] INFO [swarm:61] - Récupération clusters pour user1: 2 trouvés
+[2026-01-31 13:28:55] INFO [swarm:61] - Récupération clusters pour user1: 2 trouvés
+[2026-01-31 13:29:10] INFO [swarm:61] - Récupération clusters pour user1: 2 trouvés
+[2026-01-31 13:29:25] INFO [swarm:61] - Récupération clusters pour user1: 2 trouvés
+[2026-01-31 13:29:40] INFO [swarm:61] - Récupération clusters pour user1: 2 trouvés
+[2026-01-31 13:29:55] INFO [swarm:61] - Récupération clusters pour user1: 2 trouvés
+[2026-01-31 13:30:10] INFO [swarm:61] - Récupération clusters pour user1: 2 trouvés
+[2026-01-31 13:30:25] INFO [swarm:61] - Récupération clusters pour user1: 2 trouvés
+[2026-01-31 13:30:40] INFO [swarm:61] - Récupération clusters pour user1: 2 trouvés
+[2026-01-31 13:30:55] INFO [swarm:61] - Récupération clusters pour user1: 2 trouvés
+[2026-01-31 13:31:10] INFO [swarm:61] - Récupération clusters pour user1: 2 trouvés
+[2026-01-31 13:31:25] INFO [swarm:61] - Récupération clusters pour user1: 2 trouvés
+[2026-01-31 13:31:40] INFO [swarm:61] - Récupération clusters pour user1: 2 trouvés
+[2026-01-31 13:31:55] INFO [swarm:61] - Récupération clusters pour user1: 2 trouvés
+[2026-01-31 13:32:10] INFO [swarm:61] - Récupération clusters pour user1: 2 trouvés
+[2026-01-31 13:32:25] INFO [swarm:61] - Récupération clusters pour user1: 2 trouvés
+[2026-01-31 13:32:40] INFO [swarm:61] - Récupération clusters pour user1: 2 trouvés
+[2026-01-31 13:32:55] INFO [swarm:61] - Récupération clusters pour user1: 2 trouvés
+[2026-01-31 13:33:10] INFO [swarm:61] - Récupération clusters pour user1: 2 trouvés
+[2026-01-31 13:33:25] INFO [swarm:61] - Récupération clusters pour user1: 2 trouvés
+[2026-01-31 13:33:40] INFO [swarm:61] - Récupération clusters pour user1: 2 trouvés
+[2026-01-31 13:33:55] INFO [swarm:61] - Récupération clusters pour user1: 2 trouvés
+[2026-01-31 13:34:10] INFO [swarm:61] - Récupération clusters pour user1: 2 trouvés
+[2026-01-31 13:34:25] INFO [swarm:61] - Récupération clusters pour user1: 2 trouvés
+[2026-01-31 13:34:40] INFO [swarm:61] - Récupération clusters pour user1: 2 trouvés
+[2026-01-31 13:34:55] INFO [swarm:61] - Récupération clusters pour user1: 2 trouvés
+[2026-01-31 13:35:10] INFO [swarm:61] - Récupération clusters pour user1: 2 trouvés
+[2026-01-31 13:35:25] INFO [swarm:61] - Récupération clusters pour user1: 2 trouvés
+[2026-01-31 13:35:40] INFO [swarm:61] - Récupération clusters pour user1: 2 trouvés
+[2026-01-31 13:35:55] INFO [swarm:61] - Récupération clusters pour user1: 2 trouvés
+[2026-01-31 13:36:10] INFO [swarm:61] - Récupération clusters pour user1: 2 trouvés

@@ -57,10 +57,10 @@ FLAVORS = {
     },
     'swarm': {
         'name': 'Docker Swarm Node',
-        'vcpu': 2,
-        'ram': 4096,
-        'disk': 30,
-        'price': 4000
+        'vcpu': 1,
+        'ram': 2048,
+        'disk': 15,
+        'price': 3000
     }
 }
 

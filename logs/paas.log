@@ -189,3 +189,35 @@
 [2026-01-31 06:47:01] INFO [paas:52] - Récupération apps pour user1: 1 apps
 [2026-01-31 08:02:08] INFO [paas:52] - Récupération apps pour user1: 1 apps
 [2026-01-31 08:02:08] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 11:53:16] INFO [paas:52] - Récupération apps pour admin: 0 apps
+[2026-01-31 12:30:24] INFO [paas:52] - Récupération apps pour admin: 0 apps
+[2026-01-31 12:32:40] INFO [paas:52] - Récupération apps pour admin: 0 apps
+[2026-01-31 12:32:49] INFO [paas:52] - Récupération apps pour admin: 0 apps
+[2026-01-31 12:34:03] INFO [paas:52] - Récupération apps pour admin: 0 apps
+[2026-01-31 12:34:08] INFO [paas:52] - Récupération apps pour admin: 0 apps
+[2026-01-31 13:10:16] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 13:14:57] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 13:15:27] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 13:15:36] INFO [paas:68] - Déploiement app wordpress (wordpress001) sur cluster cluster002 par user1
+[2026-01-31 13:15:46] INFO [paas:68] - Déploiement app wordpress (wordpress001) sur cluster cluster002 par user1
+[2026-01-31 13:15:57] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 13:16:27] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 13:16:57] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 13:17:07] INFO [paas:68] - Déploiement app wordpress (wordpress001) sur cluster  par user1
+[2026-01-31 13:17:16] INFO [paas:68] - Déploiement app wordpress (wordpress001) sur cluster cluster002 par user1
+[2026-01-31 13:17:27] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 13:17:57] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 13:18:27] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 13:18:57] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 13:19:27] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 13:19:57] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 13:20:27] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 13:20:57] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 13:21:27] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 13:21:57] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 13:22:27] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 13:22:57] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 13:23:27] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 13:23:57] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 13:24:27] INFO [paas:52] - Récupération apps pour user1: 1 apps
+[2026-01-31 13:24:44] INFO [paas:52] - Récupération apps pour user1: 1 apps

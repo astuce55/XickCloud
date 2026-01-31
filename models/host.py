@@ -1,4 +1,4 @@
-# models/host.py - VERSION CORRIGÉE POUR COMMUNICATION HÔTES DISTANTS
+# models/host.py - VERSION CORRIGÉE POUR HÔTES DISTANTS
 import time
 import socket
 import queue
@@ -33,188 +33,207 @@ class HostManager:
     
     def add_host(self, host_data: Dict) -> Dict:
         """
-        Ajoute un nouvel hôte avec validation de la connexion
+        Ajoute un nouvel hôte avec validation optionnelle
         
-        CORRECTIONS APPORTÉES:
-        1. Test de connectivité SSH avant d'ajouter l'hôte
-        2. Validation des clés SSH
-        3. Test de la connexion libvirt
+        CORRECTIONS:
+        - Validation de connexion optionnelle (pas bloquante)
+        - Meilleure gestion des erreurs
+        - Logs détaillés
         """
         hosts = self.get_all_hosts()
+        
+        # Validation des données minimales
+        if not host_data.get('name'):
+            raise ValueError("Le nom de l'hôte est requis")
+        if not host_data.get('uri'):
+            raise ValueError("L'URI de l'hôte est requis")
         
         # Créer la structure de l'hôte
         new_host = {
             'id': host_data.get('id', f"host-{int(time.time())}"),
-            'name': host_data.get('name', 'Nouvel hôte'),
+            'name': host_data.get('name'),
             'uri': host_data.get('uri', 'qemu:///system'),
             'enabled': host_data.get('enabled', True),
             'priority': host_data.get('priority', len(hosts) + 1),
             'storage_path': host_data.get('storage_path', '/var/lib/libvirt/images'),
-            'quotas': {
-                'max_vcpu': host_data.get('max_vcpu', 8),
-                'max_ram': host_data.get('max_ram', 16384),
-                'max_disk': host_data.get('max_disk', 200)
-            },
-            'description': host_data.get('description', '')
+            'quotas': host_data.get('quotas', {
+                'max_vcpu': 8,
+                'max_ram': 16384,
+                'max_disk': 200
+            }),
+            'description': host_data.get('description', ''),
+            'connection_verified': False,
+            'last_check': None
         }
         
-        # Si c'est un hôte distant (SSH), tester la connexion
-        if new_host['uri'].startswith('qemu+ssh://'):
-            logger.info(f"Test de connexion à l'hôte distant: {new_host['name']}")
-            
-            # Test 1: Connectivité SSH
-            ssh_test = self._test_ssh_connectivity(new_host['uri'])
-            if not ssh_test['accessible']:
-                logger.error(f"Échec connexion SSH: {ssh_test['error']}")
-                raise Exception(f"Impossible de se connecter en SSH à l'hôte: {ssh_test['error']}")
-            
-            # Test 2: Configuration clés SSH
-            if not self._verify_ssh_keys(new_host['uri']):
-                logger.warning("Les clés SSH ne sont pas configurées - configuration automatique recommandée")
-            
-            # Test 3: Connexion libvirt
-            libvirt_test = self.test_host_connectivity(new_host['uri'])
-            if not libvirt_test['accessible']:
-                logger.error(f"Échec connexion libvirt: {libvirt_test['error']}")
-                raise Exception(f"Impossible de se connecter à libvirt sur l'hôte: {libvirt_test['error']}")
+        logger.info(f"Ajout de l'hôte: {new_host['name']} ({new_host['uri']})")
         
-        # Ajouter l'hôte
+        # Tester la connexion en mode non-bloquant
+        if new_host['uri'].startswith('qemu+ssh://'):
+            logger.info(f"Tentative de connexion à l'hôte distant: {new_host['name']}")
+            
+            # Test rapide SSH (non bloquant)
+            try:
+                ssh_result = self._quick_ssh_test(new_host['uri'], timeout=3)
+                if ssh_result['accessible']:
+                    logger.info(f"✓ Connexion SSH OK pour {new_host['name']}")
+                    new_host['connection_verified'] = True
+                    new_host['last_check'] = time.time()
+                else:
+                    logger.warning(f"⚠ SSH non accessible: {ssh_result.get('error')}")
+                    logger.info("L'hôte sera ajouté mais marqué comme non vérifié")
+            except Exception as e:
+                logger.warning(f"⚠ Erreur test connexion: {e}")
+                logger.info("L'hôte sera ajouté mais nécessitera une vérification ultérieure")
+        
+        # Ajouter l'hôte même si la connexion n'est pas vérifiée
         hosts.append(new_host)
         self.storage.save_hosts(hosts)
-        logger.info(f"Hôte ajouté avec succès: {new_host['name']}")
         
+        logger.info(f"✓ Hôte ajouté: {new_host['name']}")
         return new_host
     
-    def _test_ssh_connectivity(self, uri: str, timeout: int = 5) -> Dict:
+    def _quick_ssh_test(self, uri: str, timeout: int = 3) -> Dict:
         """
-        Test la connectivité SSH vers un hôte distant
-        
-        NOUVEAU: Test SSH amélioré avec vérification de l'authentification
+        Test SSH rapide et simple
         """
-        result = {
-            'accessible': False,
-            'error': None,
-            'method': None
-        }
+        result = {'accessible': False, 'error': None}
         
         try:
-            # Extraire hostname et port de l'URI
-            parts = uri.split('@')
-            if len(parts) < 2:
-                result['error'] = 'URI invalide (format attendu: qemu+ssh://user@host/system)'
+            # Extraire hostname et port
+            if '@' not in uri:
+                result['error'] = 'Format URI invalide (attendu: qemu+ssh://user@host/system)'
                 return result
             
+            parts = uri.split('@')
             user = parts[0].replace('qemu+ssh://', '')
             hostname_part = parts[1].split('/')[0]
             
             if ':' in hostname_part:
-                hostname, port = hostname_part.split(':')
-                port = int(port)
+                hostname, port_str = hostname_part.split(':')
+                port = int(port_str)
             else:
                 hostname = hostname_part
                 port = 22
             
             logger.debug(f"Test SSH: {user}@{hostname}:{port}")
             
-            # Test 1: Port ouvert
+            # Test 1: Port accessible
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             sock.settimeout(timeout)
             connect_result = sock.connect_ex((hostname, port))
             sock.close()
             
             if connect_result != 0:
-                result['error'] = f'Port SSH {port} fermé ou inaccessible'
+                result['error'] = f'Port SSH {port} inaccessible sur {hostname}'
                 return result
             
-            logger.debug(f"✓ Port SSH {port} ouvert")
-            
-            # Test 2: Authentification SSH (avec clé ou mot de passe)
+            # Test 2: Authentification SSH (optionnel, non bloquant)
             ssh_cmd = [
                 'ssh',
                 '-o', 'StrictHostKeyChecking=no',
-                '-o', 'BatchMode=yes',  # Pas d'interaction
-                '-o', 'ConnectTimeout=5',
+                '-o', 'BatchMode=yes',
+                '-o', f'ConnectTimeout={timeout}',
                 '-p', str(port),
                 f'{user}@{hostname}',
-                'echo "SSH_OK"'
+                'echo "OK"'
             ]
             
-            ssh_result = subprocess.run(
-                ssh_cmd,
-                capture_output=True,
-                text=True,
-                timeout=10
-            )
-            
-            if ssh_result.returncode == 0 and 'SSH_OK' in ssh_result.stdout:
-                result['accessible'] = True
-                result['method'] = 'ssh_key'
-                logger.info(f"✓ Connexion SSH réussie avec clé")
-            else:
-                result['error'] = 'Authentification SSH échouée - Clés SSH non configurées'
-                logger.warning(f"Authentification SSH échouée. Configurez les clés SSH pour {user}@{hostname}")
+            try:
+                ssh_result = subprocess.run(
+                    ssh_cmd,
+                    capture_output=True,
+                    text=True,
+                    timeout=timeout + 2
+                )
+                
+                if ssh_result.returncode == 0:
+                    result['accessible'] = True
+                    logger.debug(f"✓ SSH accessible")
+                else:
+                    result['error'] = 'Clés SSH non configurées ou authentification refusée'
+                    logger.debug(f"⚠ {result['error']}")
+            except subprocess.TimeoutExpired:
+                result['error'] = 'Timeout SSH'
             
             return result
             
-        except socket.timeout:
-            result['error'] = f'Timeout lors de la connexion à {hostname}'
-            return result
-        except subprocess.TimeoutExpired:
-            result['error'] = 'Timeout SSH'
-            return result
         except Exception as e:
-            result['error'] = f'Erreur: {str(e)}'
-            logger.error(f"Erreur test SSH: {e}", exc_info=True)
+            result['error'] = str(e)
+            logger.debug(f"Erreur test SSH: {e}")
             return result
     
-    def _verify_ssh_keys(self, uri: str) -> bool:
+    def verify_host_connection(self, host_id: str) -> Dict:
         """
-        Vérifie que les clés SSH sont configurées
+        Vérifie la connexion d'un hôte (peut être appelé manuellement)
+        """
+        host = self.get_host_by_id(host_id)
+        if not host:
+            return {'success': False, 'error': 'Hôte non trouvé'}
         
-        NOUVEAU: Aide à diagnostiquer les problèmes de clés SSH
-        """
+        result = {
+            'success': False,
+            'host_id': host_id,
+            'host_name': host['name'],
+            'tests': {}
+        }
+        
         try:
-            parts = uri.split('@')
-            if len(parts) < 2:
-                return False
+            # Test SSH si distant
+            if host['uri'].startswith('qemu+ssh://'):
+                ssh_test = self._quick_ssh_test(host['uri'], timeout=5)
+                result['tests']['ssh'] = ssh_test
+                
+                if not ssh_test['accessible']:
+                    result['error'] = f"SSH: {ssh_test['error']}"
+                    return result
             
-            user = parts[0].replace('qemu+ssh://', '')
-            hostname = parts[1].split('/')[0].split(':')[0]
-            
-            # Tester la connexion sans mot de passe
-            test_cmd = [
-                'ssh',
-                '-o', 'StrictHostKeyChecking=no',
-                '-o', 'BatchMode=yes',
-                '-o', 'ConnectTimeout=5',
-                f'{user}@{hostname}',
-                'exit'
-            ]
-            
-            result = subprocess.run(
-                test_cmd,
-                capture_output=True,
-                timeout=10
-            )
-            
-            if result.returncode == 0:
-                logger.info("✓ Clés SSH configurées correctement")
-                return True
+            # Test Libvirt
+            conn = LibvirtService.get_connection(host['uri'], timeout=10)
+            if conn:
+                result['tests']['libvirt'] = {'accessible': True}
+                
+                # Récupérer infos hôte
+                try:
+                    usage = LibvirtService.get_host_usage(host['uri'])
+                    if usage:
+                        result['tests']['resources'] = usage
+                    conn.close()
+                except Exception as e:
+                    logger.warning(f"Impossible de récupérer les ressources: {e}")
+                
+                # Marquer comme vérifié
+                self.update_host(host_id, {
+                    'connection_verified': True,
+                    'last_check': time.time()
+                })
+                
+                result['success'] = True
+                result['message'] = 'Connexion vérifiée avec succès'
             else:
-                logger.warning(f"⚠ Clés SSH non configurées pour {user}@{hostname}")
-                logger.warning(f"Exécutez: ssh-copy-id {user}@{hostname}")
-                return False
+                result['tests']['libvirt'] = {'accessible': False}
+                result['error'] = 'Connexion libvirt refusée'
                 
         except Exception as e:
-            logger.error(f"Erreur vérification clés SSH: {e}")
-            return False
+            result['error'] = f'Erreur: {str(e)}'
+            logger.error(f"Erreur vérification hôte {host_id}: {e}")
+        
+        return result
     
     def update_host(self, host_id: str, updates: Dict) -> Optional[Dict]:
         """Met à jour un hôte"""
         hosts = self.get_all_hosts()
-        
         for i, host in enumerate(hosts):
             if host.get('id') == host_id:
+                # Garder l'ID
+                updates['id'] = host_id
+                # Mettre à jour quotas si présent
+                if 'quotas' in updates and isinstance(updates['quotas'], dict):
+                    if 'quotas' not in host:
+                        host['quotas'] = {}
+                    host['quotas'].update(updates['quotas'])
+                    del updates['quotas']
+                
                 hosts[i].update(updates)
                 self.storage.save_hosts(hosts)
                 logger.info(f"Hôte mis à jour: {host_id}")
@@ -238,66 +257,77 @@ class HostManager:
         """Récupère l'utilisation d'un hôte"""
         return self.libvirt_service.get_host_usage(host_uri)
     
-    def select_best_host(self, required_vcpu: int, required_ram: int, required_disk: int = 0, 
-                        timeout_per_host: int = 5) -> Optional[Dict]:
-        """Sélectionne le meilleur hôte avec gestion des timeouts"""
+    def select_best_host(self, required_vcpu: int, required_ram: int, 
+                        required_disk: int = 0, timeout_per_host: int = 10) -> Optional[Dict]:
+        """
+        Sélectionne le meilleur hôte disponible
+        
+        AMÉLIORATIONS:
+        - Timeout plus long pour hôtes distants
+        - Meilleure gestion des erreurs
+        - Logs détaillés
+        """
         hosts = self.get_enabled_hosts()
         
         if not hosts:
             logger.error("Aucun hôte activé disponible")
             return None
         
+        # Trier par priorité
         hosts.sort(key=lambda h: h.get('priority', 999))
         
-        logger.info(f"Recherche hôte: {required_vcpu}vCPU, {required_ram}MiB RAM, {required_disk}GB Disk")
-        logger.debug(f"Hôtes disponibles: {len(hosts)}")
+        logger.info(f"Recherche hôte pour: {required_vcpu}vCPU, {required_ram}MiB RAM, {required_disk}GB Disk")
+        logger.info(f"{len(hosts)} hôte(s) à tester")
         
         for i, host in enumerate(hosts):
-            logger.debug(f"Test hôte [{i+1}/{len(hosts)}]: {host['name']}")
+            logger.info(f"Test hôte [{i+1}/{len(hosts)}]: {host['name']}")
             
-            start_time = time.time()
             try:
-                # Test connectivité SSH si nécessaire
+                # Timeout adapté au type d'hôte
                 if host['uri'].startswith('qemu+ssh://'):
-                    ssh_test = self._test_ssh_connectivity(host['uri'], timeout=3)
-                    if not ssh_test['accessible']:
-                        logger.debug(f"SSH inaccessible: {ssh_test['error']}")
-                        continue
+                    timeout = timeout_per_host
+                else:
+                    timeout = 5
                 
-                # Récupérer usage avec timeout
-                usage = self.get_host_usage_with_timeout(host['uri'], timeout=timeout_per_host)
+                # Récupérer usage
+                usage = self._get_host_usage_with_timeout(host['uri'], timeout)
                 
                 if not usage:
-                    logger.debug(f"Impossible de récupérer ressources hôte {host['name']}")
+                    logger.warning(f"Impossible de récupérer ressources de {host['name']}")
                     continue
                 
-                # Vérifier ressources
+                # Vérifier disponibilité
                 has_cpu = usage.get('available_vcpu', 0) >= required_vcpu
                 has_ram = usage.get('available_ram', 0) >= required_ram
                 has_disk = usage.get('available_disk', 0) >= required_disk
                 
+                logger.debug(f"Ressources {host['name']}: " +
+                           f"CPU {usage.get('available_vcpu')}/{required_vcpu} " +
+                           f"RAM {usage.get('available_ram')}/{required_ram} " +
+                           f"Disk {usage.get('available_disk')}/{required_disk}")
+                
                 if has_cpu and has_ram and has_disk:
-                    elapsed = time.time() - start_time
-                    logger.info(f"Hôte sélectionné: {host['name']} (temps: {elapsed:.2f}s)")
-                    logger.debug(f"Ressources: CPU {usage.get('available_vcpu')}/{required_vcpu}, " +
-                               f"RAM {usage.get('available_ram')}/{required_ram}, " +
-                               f"Disk {usage.get('available_disk')}/{required_disk}")
+                    logger.info(f"✓ Hôte sélectionné: {host['name']}")
                     return host
                 else:
-                    logger.debug(f"Ressources insuffisantes sur {host['name']}: " +
-                               f"CPU={'✓' if has_cpu else '✗'} " +
-                               f"RAM={'✓' if has_ram else '✗'} " +
-                               f"Disk={'✓' if has_disk else '✗'}")
+                    reasons = []
+                    if not has_cpu:
+                        reasons.append(f"CPU insuffisant ({usage.get('available_vcpu')}/{required_vcpu})")
+                    if not has_ram:
+                        reasons.append(f"RAM insuffisante ({usage.get('available_ram')}/{required_ram})")
+                    if not has_disk:
+                        reasons.append(f"Disk insuffisant ({usage.get('available_disk')}/{required_disk})")
+                    logger.debug(f"Ressources insuffisantes: {', '.join(reasons)}")
                     
             except Exception as e:
                 logger.error(f"Erreur test hôte {host['name']}: {e}")
                 continue
         
-        logger.warning("Aucun hôte avec ressources suffisantes")
+        logger.error("Aucun hôte avec ressources suffisantes trouvé")
         return None
     
-    def get_host_usage_with_timeout(self, host_uri: str, timeout: int = 5):
-        """Récupère l'utilisation d'un hôte avec timeout"""
+    def _get_host_usage_with_timeout(self, host_uri: str, timeout: int = 10):
+        """Récupère usage avec timeout"""
         result_queue = queue.Queue()
         
         def worker():
@@ -305,7 +335,7 @@ class HostManager:
                 usage = self.get_host_usage(host_uri)
                 result_queue.put(('success', usage))
             except Exception as e:
-                result_queue.put(('error', e))
+                result_queue.put(('error', str(e)))
         
         thread = threading.Thread(target=worker)
         thread.daemon = True
@@ -313,119 +343,74 @@ class HostManager:
         thread.join(timeout=timeout)
         
         if thread.is_alive():
-            logger.debug(f"Timeout récupération usage: {host_uri}")
+            logger.debug(f"Timeout récupération usage ({timeout}s)")
             return None
         
         try:
             status, result = result_queue.get_nowait()
-            if status == 'success':
-                return result
-            else:
-                logger.debug(f"Erreur récupération usage: {result}")
-                return None
+            return result if status == 'success' else None
         except queue.Empty:
             return None
     
-    def test_host_connectivity(self, host_uri: str) -> Dict:
-        """
-        Test la connectivité d'un hôte (SSH + Libvirt)
-        
-        AMÉLIORÉ: Diagnostics détaillés
-        """
-        result = {
-            'uri': host_uri,
-            'accessible': False,
-            'status': 'unknown',
-            'response_time': 0,
-            'error': None,
-            'details': {}
-        }
-        
-        start_time = time.time()
-        
+    def get_ssh_setup_guide(self, host_uri: str) -> str:
+        """Guide pour configurer SSH"""
         try:
-            if host_uri.startswith('qemu+ssh://'):
-                # Test SSH
-                ssh_test = self._test_ssh_connectivity(host_uri)
-                result['details']['ssh'] = ssh_test
-                
-                if not ssh_test['accessible']:
-                    result['status'] = 'ssh_failed'
-                    result['error'] = ssh_test['error']
-                    return result
-                
-                # Test Libvirt
-                conn = LibvirtService.get_connection(host_uri, timeout=5)
-                if conn:
-                    result['accessible'] = True
-                    result['status'] = 'online'
-                    result['details']['libvirt'] = 'ok'
-                    
-                    # Test usage
-                    usage = self.get_host_usage(host_uri)
-                    if usage:
-                        result['details']['usage'] = usage
-                    
-                    conn.close()
-                else:
-                    result['status'] = 'libvirt_failed'
-                    result['error'] = 'Connexion libvirt refusée'
-                    
-            else:
-                # Hôte local
-                conn = LibvirtService.get_connection(host_uri, timeout=3)
-                if conn:
-                    result['accessible'] = True
-                    result['status'] = 'online'
-                    conn.close()
-                else:
-                    result['status'] = 'libvirt_failed'
-                    result['error'] = 'Connexion refusée'
-                    
-        except Exception as e:
-            result['status'] = 'error'
-            result['error'] = str(e)
-            logger.debug(f"Test connectivité échoué {host_uri}: {e}")
-        
-        result['response_time'] = time.time() - start_time
-        return result
-    
-    def setup_ssh_keys_guide(self, host_uri: str) -> str:
-        """
-        NOUVEAU: Génère un guide pour configurer les clés SSH
-        """
-        try:
-            parts = host_uri.split('@')
-            if len(parts) < 2:
+            if '@' not in host_uri:
                 return "URI invalide"
             
+            parts = host_uri.split('@')
             user = parts[0].replace('qemu+ssh://', '')
             hostname = parts[1].split('/')[0].split(':')[0]
             
             guide = f"""
-═══════════════════════════════════════════════════════════════
-CONFIGURATION DES CLÉS SSH POUR {hostname}
-═══════════════════════════════════════════════════════════════
+╔═══════════════════════════════════════════════════════════════╗
+║  CONFIGURATION SSH POUR L'HÔTE DISTANT                        ║
+║  Hôte: {hostname:<52} ║
+╚═══════════════════════════════════════════════════════════════╝
 
-1. Générer une paire de clés SSH (si pas déjà fait):
-   ssh-keygen -t rsa -b 4096
+📋 ÉTAPES DE CONFIGURATION:
 
-2. Copier la clé publique vers l'hôte distant:
-   ssh-copy-id {user}@{hostname}
+1️⃣  Générer une paire de clés SSH (si nécessaire):
+   $ ssh-keygen -t rsa -b 4096 -f ~/.ssh/id_rsa
 
-3. Tester la connexion:
-   ssh {user}@{hostname} 'echo "Connexion OK"'
+2️⃣  Copier la clé publique vers l'hôte distant:
+   $ ssh-copy-id {user}@{hostname}
+   
+   OU manuellement:
+   $ cat ~/.ssh/id_rsa.pub | ssh {user}@{hostname} "mkdir -p ~/.ssh && cat >> ~/.ssh/authorized_keys"
 
-4. Configuration libvirt (sur l'hôte distant):
-   sudo usermod -aG libvirt {user}
-   sudo systemctl restart libvirtd
+3️⃣  Tester la connexion SSH:
+   $ ssh {user}@{hostname} 'echo "Connexion OK"'
 
-5. Test final depuis l'application:
-   virsh -c {host_uri} list --all
+4️⃣  Configurer libvirt sur l'hôte distant:
+   $ ssh {user}@{hostname}
+   $ sudo usermod -aG libvirt {user}
+   $ sudo systemctl restart libvirtd
+   $ exit
 
-═══════════════════════════════════════════════════════════════
+5️⃣  Tester la connexion libvirt:
+   $ virsh -c {host_uri} list --all
+
+6️⃣  Dans l'interface web, cliquer sur "Vérifier la connexion"
+
+╔═══════════════════════════════════════════════════════════════╗
+║  DÉPANNAGE                                                     ║
+╚═══════════════════════════════════════════════════════════════╝
+
+❌ Si "Permission denied":
+   • Vérifier que la clé publique est dans ~/.ssh/authorized_keys
+   • Vérifier les permissions: chmod 700 ~/.ssh && chmod 600 ~/.ssh/authorized_keys
+
+❌ Si "Connection refused":
+   • Vérifier que SSH est actif: sudo systemctl status sshd
+   • Vérifier le firewall: sudo ufw allow ssh
+
+❌ Si "libvirt: authentication unavailable":
+   • Vérifier groupe libvirt: groups {user}
+   • Redémarrer session SSH après usermod
+
 """
             return guide
             
         except Exception as e:
-            return f"Erreur génération guide: {e}"
+            return f"Erreur: {e}"

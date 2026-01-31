@@ -79,3 +79,42 @@
 [2026-01-31 08:08:00] INFO [host:65] - Hôte mis à jour: host-1769843071215
 [2026-01-31 08:09:23] INFO [host:97] - Recherche hôte: 1vCPU, 2048MiB RAM, 15GB Disk
 [2026-01-31 08:09:26] INFO [host:138] - Hôte sélectionné: KVM Local (temps: 0.01s)
+[2026-01-31 12:11:12] INFO [host:232] - Hôte supprimé: host-1769843071215
+[2026-01-31 12:35:34] INFO [host:69] - Ajout de l'hôte: rick-kvm (qemu+ssh://rick@10.232.234.204/system)
+[2026-01-31 12:35:34] INFO [host:73] - Tentative de connexion à l'hôte distant: rick-kvm
+[2026-01-31 12:35:37] WARNING [host:83] - ⚠ SSH non accessible: Port SSH 22 inaccessible sur 10.232.234.204
+[2026-01-31 12:35:37] INFO [host:84] - L'hôte sera ajouté mais marqué comme non vérifié
+[2026-01-31 12:35:37] INFO [host:93] - ✓ Hôte ajouté: rick-kvm
+[2026-01-31 12:37:18] INFO [host:239] - Hôte mis à jour: host-1769859334553
+[2026-01-31 12:37:24] INFO [host:239] - Hôte mis à jour: host-1769859334553
+[2026-01-31 12:38:26] INFO [host:239] - Hôte mis à jour: host-1769859334553
+[2026-01-31 12:44:47] INFO [host:279] - Recherche hôte pour: 1vCPU, 2048MiB RAM, 15GB Disk
+[2026-01-31 12:44:47] INFO [host:280] - 2 hôte(s) à tester
+[2026-01-31 12:44:47] INFO [host:283] - Test hôte [1/2]: rick-kvm
+[2026-01-31 12:44:48] INFO [host:310] - ✓ Hôte sélectionné: rick-kvm
+[2026-01-31 12:50:33] INFO [host:279] - Recherche hôte pour: 1vCPU, 2048MiB RAM, 15GB Disk
+[2026-01-31 12:50:33] INFO [host:280] - 2 hôte(s) à tester
+[2026-01-31 12:50:33] INFO [host:283] - Test hôte [1/2]: rick-kvm
+[2026-01-31 12:50:34] INFO [host:310] - ✓ Hôte sélectionné: rick-kvm
+[2026-01-31 12:57:18] INFO [host:279] - Recherche hôte pour: 1vCPU, 2048MiB RAM, 15GB Disk
+[2026-01-31 12:57:18] INFO [host:280] - 2 hôte(s) à tester
+[2026-01-31 12:57:18] INFO [host:283] - Test hôte [1/2]: rick-kvm
+[2026-01-31 12:57:18] INFO [host:310] - ✓ Hôte sélectionné: rick-kvm
+[2026-01-31 13:01:37] INFO [host:279] - Recherche hôte pour: 4vCPU, 8192MiB RAM, 60GB Disk
+[2026-01-31 13:01:37] INFO [host:280] - 2 hôte(s) à tester
+[2026-01-31 13:01:37] INFO [host:283] - Test hôte [1/2]: rick-kvm
+[2026-01-31 13:01:37] INFO [host:283] - Test hôte [2/2]: KVM Local
+[2026-01-31 13:01:37] ERROR [host:326] - Aucun hôte avec ressources suffisantes trouvé
+[2026-01-31 13:02:35] INFO [host:279] - Recherche hôte pour: 4vCPU, 8192MiB RAM, 60GB Disk
+[2026-01-31 13:02:35] INFO [host:280] - 2 hôte(s) à tester
+[2026-01-31 13:02:35] INFO [host:283] - Test hôte [1/2]: rick-kvm
+[2026-01-31 13:02:35] INFO [host:283] - Test hôte [2/2]: KVM Local
+[2026-01-31 13:02:35] ERROR [host:326] - Aucun hôte avec ressources suffisantes trouvé
+[2026-01-31 13:02:45] INFO [host:279] - Recherche hôte pour: 2vCPU, 4096MiB RAM, 30GB Disk
+[2026-01-31 13:02:45] INFO [host:280] - 2 hôte(s) à tester
+[2026-01-31 13:02:45] INFO [host:283] - Test hôte [1/2]: rick-kvm
+[2026-01-31 13:02:45] INFO [host:310] - ✓ Hôte sélectionné: rick-kvm
+[2026-01-31 13:28:06] INFO [host:279] - Recherche hôte pour: 2vCPU, 4096MiB RAM, 30GB Disk
+[2026-01-31 13:28:06] INFO [host:280] - 2 hôte(s) à tester
+[2026-01-31 13:28:06] INFO [host:283] - Test hôte [1/2]: rick-kvm
+[2026-01-31 13:28:07] INFO [host:310] - ✓ Hôte sélectionné: rick-kvm

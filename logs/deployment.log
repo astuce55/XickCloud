@@ -155,3 +155,18 @@ t2w5ilebrti6   wordpress-xpo5_db          replicated   0/1        mysql:8.0
 okvcy0fnkt8j   wordpress-xpo5_wordpress   replicated   0/1        wordpress:latest   *:80->80/tcp
 
 [2026-01-31 01:21:31] INFO [deployment:268] - ═══════════════════════════════════════════
+[2026-01-31 12:57:19] INFO [deployment:73] - Déploiement VM user1_vm102
+[2026-01-31 12:57:20] INFO [deployment:143] - Lancement virt-install pour user1_vm102
+[2026-01-31 12:57:31] INFO [deployment:153] - ✓ VM user1_vm102 déployée
+[2026-01-31 13:02:46] INFO [deployment:177] - Déploiement nœud Swarm: cluster002-manager-1
+[2026-01-31 13:02:46] INFO [deployment:73] - Déploiement VM user1_cluster002-manager-1
+[2026-01-31 13:02:47] INFO [deployment:143] - Lancement virt-install pour user1_cluster002-manager-1
+[2026-01-31 13:02:51] INFO [deployment:153] - ✓ VM user1_cluster002-manager-1 déployée
+[2026-01-31 13:28:07] INFO [deployment:177] - Déploiement nœud Swarm: cluster005-manager-1
+[2026-01-31 13:28:07] INFO [deployment:73] - Déploiement VM user1_cluster005-manager-1
+[2026-01-31 13:28:08] INFO [deployment:143] - Lancement virt-install pour user1_cluster005-manager-1
+[2026-01-31 13:28:11] INFO [deployment:153] - ✓ VM user1_cluster005-manager-1 déployée
+[2026-01-31 13:28:16] INFO [deployment:177] - Déploiement nœud Swarm: cluster005-worker-1
+[2026-01-31 13:28:16] INFO [deployment:73] - Déploiement VM user1_cluster005-worker-1
+[2026-01-31 13:28:16] INFO [deployment:143] - Lancement virt-install pour user1_cluster005-worker-1
+[2026-01-31 13:28:19] INFO [deployment:153] - ✓ VM user1_cluster005-worker-1 déployée
