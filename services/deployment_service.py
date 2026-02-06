@@ -1,4 +1,4 @@
-# services/deployment_service.py - VERSION SIMPLE QUI FONCTIONNE
+# services/deployment_service.py - VERSION CORRIGÉE AVEC AUTO-INJECTION CLÉ SSH
 import os
 import subprocess
 import time
@@ -10,13 +10,48 @@ from config_logging import deployment_logger as logger
 class DeploymentService:
     
     @staticmethod
+    def get_server_ssh_public_key() -> str:
+        """
+        Récupère la clé SSH publique du serveur pour l'injecter dans les VMs
+        """
+        ssh_key_paths = [
+            os.path.expanduser("~/.ssh/id_rsa.pub"),
+            os.path.expanduser("~/.ssh/id_ed25519.pub"),
+        ]
+        
+        for key_path in ssh_key_paths:
+            if os.path.exists(key_path):
+                try:
+                    with open(key_path, 'r') as f:
+                        key = f.read().strip()
+                        logger.info(f"✓ Clé SSH serveur trouvée: {key_path}")
+                        return key
+                except Exception as e:
+                    logger.warning(f"Erreur lecture {key_path}: {e}")
+        
+        logger.warning("⚠ Aucune clé SSH serveur trouvée - SSH risque de ne pas fonctionner")
+        return ""
+    
+    @staticmethod
     def generate_cloudinit(vm_name: str, hostname: str, username: str, 
                           password: str, ssh_key: str = "") -> Dict:
-        """Cloud-init SIMPLE qui fonctionne - comme dans ton app.py original"""
+        """Cloud-init SIMPLE qui fonctionne - avec auto-injection clé serveur"""
         
-        ssh_block = f"\n      - {ssh_key}" if ssh_key else ""
+        # Récupérer la clé SSH du serveur
+        server_key = DeploymentService.get_server_ssh_public_key()
         
-        # Exactement comme dans ton app.py qui marche
+        # Construire le bloc des clés SSH
+        ssh_keys = []
+        if ssh_key:  # Clé fournie par l'utilisateur
+            ssh_keys.append(ssh_key)
+        if server_key:  # Clé du serveur (pour PaaS)
+            ssh_keys.append(server_key)
+        
+        ssh_block = ""
+        if ssh_keys:
+            for key in ssh_keys:
+                ssh_block += f"\n      - {key}"
+        
         user_data = f"""#cloud-config
 hostname: {hostname}
 manage_etc_hosts: true
@@ -95,7 +130,7 @@ local-hostname: {hostname}
             with open(meta_data_file, 'w') as f:
                 f.write(cloudinit_data['meta_data'])
             
-            # Créer ISO (SANS network-config, comme dans ton original)
+            # Créer ISO (SANS network-config)
             subprocess.run([
                 "cloud-localds",
                 seed_iso,
@@ -124,7 +159,7 @@ local-hostname: {hostname}
             else:
                 variant = "generic"
             
-            # Déployer - EXACTEMENT comme dans ton app.py
+            # Déployer
             virt_install_cmd = [
                 "virt-install",
                 f"--name={vm_name}",
@@ -169,7 +204,7 @@ local-hostname: {hostname}
     def deploy_swarm_node(username: str, node_name: str, cluster_name: str,
                          node_type: str, host_uri: str, storage_path: str,
                          password: str, ssh_key: str = "") -> bool:
-        """Déploie un nœud Swarm avec la méthode simple"""
+        """Déploie un nœud Swarm avec auto-injection clé SSH serveur"""
         
         from models.vm import VMManager
         from services.network_service import NetworkService
@@ -182,7 +217,7 @@ local-hostname: {hostname}
         flavor = FLAVORS['swarm']
         network_name = NetworkService.get_swarm_network_name(username, cluster_name)
         
-        # Cloud-init pour Swarm
+        # Cloud-init pour Swarm AVEC CLÉ SSH SERVEUR
         cloudinit = DeploymentService.generate_swarm_cloudinit(
             vm_name=full_vm_name,
             hostname=node_name,
@@ -209,9 +244,25 @@ local-hostname: {hostname}
     @staticmethod
     def generate_swarm_cloudinit(vm_name: str, hostname: str, username: str,
                                 password: str, ssh_key: str, node_type: str) -> Dict:
-        """Cloud-init pour Swarm - version simple"""
+        """Cloud-init pour Swarm - VERSION AVEC AUTO-INJECTION CLÉ SSH SERVEUR"""
         
-        ssh_block = f"\n      - {ssh_key}" if ssh_key else ""
+        # Récupérer la clé SSH du serveur
+        server_key = DeploymentService.get_server_ssh_public_key()
+        
+        # Construire le bloc des clés SSH
+        ssh_keys = []
+        if ssh_key:  # Clé fournie par l'utilisateur
+            ssh_keys.append(ssh_key)
+        if server_key:  # Clé du serveur (ESSENTIEL pour PaaS)
+            ssh_keys.append(server_key)
+        
+        ssh_block = ""
+        if ssh_keys:
+            for key in ssh_keys:
+                ssh_block += f"\n      - {key}"
+        
+        if not server_key:
+            logger.warning("⚠ ATTENTION: Aucune clé SSH serveur - Le déploiement PaaS ne fonctionnera pas!")
         
         user_data = f"""#cloud-config
 hostname: {hostname}
