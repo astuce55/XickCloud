@@ -1,8 +1,8 @@
-# routes/paas.py - VERSION AVEC DÉPLOIEMENT RÉEL
+# routes/paas.py - VERSION CORRIGÉE AVEC MODE MANUEL POUR POOL KVM DISTANT
 from flask import Blueprint, render_template, request, jsonify, session
 import time
 import secrets
-from config import PaaS_CATALOG, BILLING_RATES
+from config import PaaS_CATALOG, BILLING_RATES, SWARM_DEPLOYMENT_MODE, SKIP_SWARM_INIT, SWARM_BASTION_HOST
 from models.storage import StorageManager
 from models.swarm import SwarmManager
 from services.docker_compose_generator import DockerComposeGenerator
@@ -29,11 +29,19 @@ def index():
     # Récupérer les clusters Swarm de l'utilisateur
     clusters = swarm_manager.get_user_clusters(username)
     
+    # Informations de configuration pour l'interface
+    deployment_info = {
+        'mode': SWARM_DEPLOYMENT_MODE,
+        'skip_init': SKIP_SWARM_INIT,
+        'bastion': SWARM_BASTION_HOST
+    }
+    
     return render_template('paas.html', 
                          username=username,
                          catalog=PaaS_CATALOG,
                          apps=user_apps,
-                         clusters=clusters)
+                         clusters=clusters,
+                         deployment_info=deployment_info)
 
 @paas_bp.route('/api/paas/catalog', methods=['GET'])
 @login_required
@@ -55,7 +63,14 @@ def get_apps():
 @paas_bp.route('/api/paas/deploy', methods=['POST'])
 @login_required
 def deploy_app():
-    """API pour déployer une application - VERSION FONCTIONNELLE"""
+    """
+    API pour déployer une application - VERSION AVEC MODE MANUEL
+    
+    IMPORTANT: Cette version utilise les paramètres de config.py:
+    - SWARM_DEPLOYMENT_MODE: 'auto', 'manual', ou 'bastion'
+    - SKIP_SWARM_INIT: True pour pool KVM distant
+    - SWARM_BASTION_HOST: IP du bastion si mode 'bastion'
+    """
     username = session['username']
     data = request.json
     
@@ -65,7 +80,14 @@ def deploy_app():
         cluster_name = data.get('cluster_name')
         db_password = data.get('db_password', secrets.token_urlsafe(16))
         
-        logger.info(f"Déploiement app {app_id} ({app_name}) sur cluster {cluster_name} par {username}")
+        logger.info(f"═══════════════════════════════════════════")
+        logger.info(f"DÉPLOIEMENT APPLICATION PaaS")
+        logger.info(f"App: {app_id} ({app_name})")
+        logger.info(f"Cluster: {cluster_name}")
+        logger.info(f"User: {username}")
+        logger.info(f"Mode: {SWARM_DEPLOYMENT_MODE}")
+        logger.info(f"Skip Init: {SKIP_SWARM_INIT}")
+        logger.info(f"═══════════════════════════════════════════")
         
         # Validation
         if not app_id or app_id not in PaaS_CATALOG:
@@ -90,16 +112,43 @@ def deploy_app():
         manager_ip = cluster.get('manager_ip')
         
         if not manager_ip:
-            return jsonify({'success': False, 'msg': 'Manager IP non trouvée'}), 500
+            return jsonify({
+                'success': False, 
+                'msg': 'Manager IP non trouvée. Veuillez rafraîchir les IPs du cluster.'
+            }), 500
         
         # Générer un ID unique pour l'application
         app_uuid = f"{app_id}-{username}-{int(time.time())}"
         stack_name = app_name.replace('_', '-')  # Docker Stack ne supporte pas _
         
-        # ÉTAPE 1: Vérifier que Swarm est actif
-        logger.info(f"Vérification Swarm sur {manager_ip}")
-        if not swarm_deploy.check_swarm_ready(manager_ip, username, timeout=30):
-            return jsonify({'success': False, 'msg': 'Cluster Swarm non prêt'}), 503
+        # ÉTAPE 1: Vérifier Swarm (avec config depuis config.py)
+        logger.info(f"Vérification Swarm sur {manager_ip} (mode: {SWARM_DEPLOYMENT_MODE})")
+        
+        if SWARM_DEPLOYMENT_MODE == 'manual' or SKIP_SWARM_INIT:
+            logger.info(f"⚠️  MODE MANUEL: Skip vérification Swarm (assumé initialisé)")
+            logger.info(f"")
+            logger.info(f"RAPPEL: Vous devez avoir initialisé Swarm manuellement avec:")
+            logger.info(f"  1. Se connecter à la VM manager: ssh {username}@{manager_ip}")
+            logger.info(f"  2. Initialiser Swarm: sudo docker swarm init --advertise-addr {manager_ip}")
+            logger.info(f"")
+        else:
+            # Mode auto ou bastion: vérifier Swarm
+            bastion = SWARM_BASTION_HOST if SWARM_DEPLOYMENT_MODE == 'bastion' else None
+            
+            if not swarm_deploy.check_swarm_ready(
+                manager_ip, username, timeout=30,
+                skip_init=SKIP_SWARM_INIT,
+                bastion=bastion
+            ):
+                error_msg = 'Cluster Swarm non prêt'
+                
+                if SWARM_DEPLOYMENT_MODE == 'auto':
+                    error_msg += '\n\nAssurez-vous que:\n'
+                    error_msg += f'- La VM {manager_ip} est accessible en SSH\n'
+                    error_msg += f'- Docker est installé sur la VM\n'
+                    error_msg += f'- Les clés SSH sont configurées\n'
+                
+                return jsonify({'success': False, 'msg': error_msg}), 503
         
         # ÉTAPE 2: Générer le docker-compose.yml
         logger.info(f"Génération docker-compose pour {app_id}")
@@ -108,17 +157,34 @@ def deploy_app():
         if not compose_file:
             return jsonify({'success': False, 'msg': 'Erreur génération compose'}), 500
         
-        # ÉTAPE 3: Déployer sur Swarm
+        # ÉTAPE 3: Déployer sur Swarm (avec config depuis config.py)
         logger.info(f"Déploiement stack {stack_name} sur Swarm")
+        
+        bastion = SWARM_BASTION_HOST if SWARM_DEPLOYMENT_MODE == 'bastion' else None
+        
         success, message = swarm_deploy.deploy_stack(
             manager_ip=manager_ip,
             username=username,
             stack_name=stack_name,
-            compose_file_path=compose_file
+            compose_file_path=compose_file,
+            skip_swarm_check=SKIP_SWARM_INIT,  # Mode manuel = skip checks
+            bastion=bastion
         )
         
         if not success:
-            return jsonify({'success': False, 'msg': f'Erreur déploiement: {message}'}), 500
+            logger.error(f"Échec déploiement: {message}")
+            
+            # Message d'aide en cas d'erreur
+            help_message = f"\n\n{message}"
+            
+            if "SSH" in message or "Connection reset" in message:
+                help_message += "\n\n💡 SOLUTIONS:\n"
+                help_message += "1. Vérifiez que vous avez bien initialisé Swarm manuellement\n"
+                help_message += f"2. Connectez-vous à la VM: ssh {username}@{manager_ip}\n"
+                help_message += f"3. Exécutez: sudo docker swarm init --advertise-addr {manager_ip}\n"
+                help_message += "4. Vérifiez que Docker est actif: sudo docker info\n"
+            
+            return jsonify({'success': False, 'msg': help_message}), 500
         
         # ÉTAPE 4: Enregistrer l'application
         apps = storage.load_apps()
@@ -133,9 +199,10 @@ def deploy_app():
             'cluster': cluster_name,
             'manager_ip': manager_ip,
             'info': app_info,
-            'url': f"http://{manager_ip}",  # URL d'accès
+            'url': f"http://{manager_ip}",
             'port': app_info.get('port', 80),
             'db_password': db_password,
+            'deployment_mode': SWARM_DEPLOYMENT_MODE,
             'billing': {
                 'rate': BILLING_RATES['app_deployment'],
                 'start_time': time.time()
@@ -158,12 +225,21 @@ def deploy_app():
         
         storage.save_billing(billing)
         
-        logger.info(f"Application {app_name} déployée avec succès")
+        logger.info(f"✓ Application {app_name} déployée avec succès")
+        logger.info(f"═══════════════════════════════════════════")
+        
+        # Message de succès avec instructions
+        success_msg = f'Application {app_info["name"]} déployée avec succès'
+        
+        if SWARM_DEPLOYMENT_MODE == 'manual':
+            success_msg += f'\n\nPour vérifier le déploiement:\n'
+            success_msg += f'  ssh {username}@{manager_ip}\n'
+            success_msg += f'  sudo docker stack services {stack_name}\n'
         
         return jsonify({
             'success': True,
             'app': apps[app_uuid],
-            'message': f'Application {app_info["name"]} déployée avec succès',
+            'message': success_msg,
             'access_url': f'http://{manager_ip}:{app_info.get("port", 80)}',
             'credentials': {
                 'db_password': db_password
@@ -196,9 +272,22 @@ def delete_app(app_id):
     stack_name = app.get('stack_name')
     
     if manager_ip and stack_name:
-        success, message = swarm_deploy.remove_stack(manager_ip, username, stack_name)
+        bastion = SWARM_BASTION_HOST if SWARM_DEPLOYMENT_MODE == 'bastion' else None
+        
+        success, message = swarm_deploy.remove_stack(
+            manager_ip, username, stack_name, bastion=bastion
+        )
+        
         if not success:
             logger.warning(f"Erreur suppression stack: {message}")
+            
+            # En mode manuel, proposer la commande
+            if SWARM_DEPLOYMENT_MODE == 'manual':
+                manual_cmd = f"ssh {username}@{manager_ip} 'sudo docker stack rm {stack_name}'"
+                return jsonify({
+                    'success': False,
+                    'msg': f'Erreur suppression stack.\n\nSupprimez manuellement:\n{manual_cmd}'
+                }), 500
     
     # Supprimer de la base
     del apps[app_id]
@@ -233,7 +322,9 @@ def get_app_status(app_id):
         })
     
     # Récupérer le statut réel depuis Swarm
-    status = swarm_deploy.get_stack_status(manager_ip, username, stack_name)
+    bastion = SWARM_BASTION_HOST if SWARM_DEPLOYMENT_MODE == 'bastion' else None
+    
+    status = swarm_deploy.get_stack_status(manager_ip, username, stack_name, bastion=bastion)
     
     if status:
         # Mettre à jour le statut dans la base
@@ -249,10 +340,15 @@ def get_app_status(app_id):
             'running_services': status['running_services']
         })
     else:
+        # En mode manuel, proposer la commande
+        manual_note = ""
+        if SWARM_DEPLOYMENT_MODE == 'manual':
+            manual_note = f"\n\nVérifiez manuellement:\nssh {username}@{manager_ip} 'sudo docker stack services {stack_name}'"
+        
         return jsonify({
             'success': True,
             'status': 'unknown',
-            'msg': 'Impossible de récupérer le statut'
+            'msg': f'Impossible de récupérer le statut{manual_note}'
         })
 
 @paas_bp.route('/api/paas/app/<app_id>/logs', methods=['GET'])
@@ -277,7 +373,9 @@ def get_app_logs(app_id):
     if not manager_ip:
         return jsonify({'success': False, 'msg': 'Manager IP non trouvée'}), 500
     
-    logs = swarm_deploy.get_service_logs(manager_ip, username, service_name)
+    bastion = SWARM_BASTION_HOST if SWARM_DEPLOYMENT_MODE == 'bastion' else None
+    
+    logs = swarm_deploy.get_service_logs(manager_ip, username, service_name, bastion=bastion)
     
     if logs:
         return jsonify({
@@ -285,9 +383,11 @@ def get_app_logs(app_id):
             'logs': logs
         })
     else:
+        manual_cmd = f"ssh {username}@{manager_ip} 'sudo docker service logs {service_name}'"
+        
         return jsonify({
             'success': False,
-            'msg': 'Logs non disponibles'
+            'msg': f'Logs non disponibles\n\nVérifiez manuellement:\n{manual_cmd}'
         })
 
 @paas_bp.route('/api/paas/app/<app_id>/scale', methods=['POST'])
@@ -317,9 +417,18 @@ def scale_app(app_id):
     if not manager_ip:
         return jsonify({'success': False, 'msg': 'Manager IP non trouvée'}), 500
     
-    success, message = swarm_deploy.scale_service(manager_ip, username, service_name, replicas)
+    bastion = SWARM_BASTION_HOST if SWARM_DEPLOYMENT_MODE == 'bastion' else None
+    
+    success, message = swarm_deploy.scale_service(
+        manager_ip, username, service_name, replicas, bastion=bastion
+    )
     
     if success:
         return jsonify({'success': True, 'msg': message})
     else:
-        return jsonify({'success': False, 'msg': message}), 500
+        manual_cmd = f"ssh {username}@{manager_ip} 'sudo docker service scale {service_name}={replicas}'"
+        
+        return jsonify({
+            'success': False,
+            'msg': f'{message}\n\nÉchelle manuellement:\n{manual_cmd}'
+        }), 500

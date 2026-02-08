@@ -1,4 +1,4 @@
-# config.py
+# config.py - VERSION AVEC OPTIONS DE DÉPLOIEMENT
 import os
 import json
 from datetime import datetime
@@ -31,6 +31,46 @@ os.makedirs(KEYS_DIR, exist_ok=True)
 # Configuration Flask
 SECRET_KEY = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production')
 DEBUG = os.environ.get('DEBUG', 'True').lower() == 'true'
+
+# ═══════════════════════════════════════════════════════════════════
+# NOUVELLE SECTION: CONFIGURATION DU DÉPLOIEMENT SWARM
+# ═══════════════════════════════════════════════════════════════════
+
+# MODE DE DÉPLOIEMENT SWARM
+# - 'auto': Vérifie SSH et initialise Swarm automatiquement (défaut)
+# - 'manual': Assume que Swarm est déjà initialisé, skip les vérifications SSH
+# - 'bastion': Utilise un serveur bastion pour l'accès SSH
+SWARM_DEPLOYMENT_MODE = os.environ.get('SWARM_DEPLOYMENT_MODE', 'manual')
+
+# SERVEUR BASTION (optionnel, pour mode 'bastion')
+# Format: "username@bastion_ip" ou "username@bastion_hostname"
+# Exemple: "admin@10.0.0.1" ou "admin@bastion.example.com"
+SWARM_BASTION_HOST = os.environ.get('SWARM_BASTION_HOST', None)
+
+# SKIP SWARM INITIALIZATION
+# Si True, ne tente JAMAIS d'initialiser Swarm (utile pour pools KVM distants)
+SKIP_SWARM_INIT = os.environ.get('SKIP_SWARM_INIT', 'true').lower() == 'true'
+
+# NOTES SUR LA CONFIGURATION:
+# 
+# Pour un POOL KVM DISTANT (votre cas):
+#   SWARM_DEPLOYMENT_MODE = 'manual'
+#   SKIP_SWARM_INIT = True
+#   → Vous devez initialiser Swarm manuellement sur chaque cluster
+#   → Le déploiement d'apps fonctionnera sans vérification SSH
+#
+# Pour un POOL KVM LOCAL:
+#   SWARM_DEPLOYMENT_MODE = 'auto'
+#   SKIP_SWARM_INIT = False
+#   → Swarm sera initialisé automatiquement
+#
+# Pour un POOL VIA BASTION:
+#   SWARM_DEPLOYMENT_MODE = 'bastion'
+#   SWARM_BASTION_HOST = 'user@bastion_ip'
+#   SKIP_SWARM_INIT = False
+#   → Accès via ProxyJump SSH
+
+# ═══════════════════════════════════════════════════════════════════
 
 # Flavors
 FLAVORS = {
@@ -114,7 +154,7 @@ PaaS_CATALOG = {
     },
     'mattermost': {
         'name': 'Mattermost',
-        'description': 'Messagerie d\'équipe',
+        'description': "Messagerie d'équipe",
         'stack': 'mattermost',
         'port': 8065,
         'db_type': 'mysql',
@@ -124,7 +164,7 @@ PaaS_CATALOG = {
     },
     'moodle': {
         'name': 'Moodle',
-        'description': 'Plateforme d\'apprentissage',
+        'description': "Plateforme d'apprentissage",
         'stack': 'moodle',
         'port': 80,
         'db_type': 'mysql',
@@ -163,14 +203,14 @@ BILLING_RATES = {
     'app_deployment': 50  # FCFA par déploiement d'app
 }
 
-# Configuration par défaut des hôtes KVM - MODIFIER ICI POUR KVM LOCAL PAR DÉFAUT
+# Configuration par défaut des hôtes KVM
 DEFAULT_HOSTS = [
     {
         'id': 'local',
         'name': 'KVM Local',
         'uri': 'qemu:///system',
         'enabled': True,
-        'priority': 1,  # Priorité 1 = utilisé en premier
+        'priority': 1,
         'storage_path': '/var/lib/libvirt/images',
         'quotas': {
             'max_vcpu': 8,

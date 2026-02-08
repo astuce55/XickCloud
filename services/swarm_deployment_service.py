@@ -1,4 +1,4 @@
-# services/swarm_deployment_service.py - VERSION CORRIGÉE AVEC MEILLEURE GESTION SSH
+# services/swarm_deployment_service.py - VERSION CORRIGÉE AVEC MODE MANUEL
 import subprocess
 import time
 import os
@@ -6,28 +6,63 @@ from typing import Dict, Optional, Tuple
 from config_logging import deployment_logger as logger
 
 class SwarmDeploymentService:
-    """Service pour déployer des applications sur Docker Swarm"""
+    """
+    Service pour déployer des applications sur Docker Swarm
     
-    def __init__(self):
-        pass
+    MODES DE FONCTIONNEMENT:
+    1. MODE AUTO (par défaut) : Tente SSH + initialisation automatique
+    2. MODE MANUEL : Assume que Swarm est déjà initialisé, skip la vérification SSH
+    3. MODE PROXY : Utilise un proxy/bastion pour accéder aux VMs distantes
+    """
+    
+    def __init__(self, mode='auto'):
+        """
+        Args:
+            mode: 'auto', 'manual', ou 'proxy'
+        """
+        self.mode = mode
+        self.ssh_bastion = None  # Pour le mode proxy
     
     @staticmethod
-    def test_ssh_connection(manager_ip: str, username: str, timeout: int = 10) -> Tuple[bool, str]:
+    def test_ssh_connection(manager_ip: str, username: str, timeout: int = 10, 
+                           bastion: str = None) -> Tuple[bool, str]:
         """
         Teste la connexion SSH avant toute opération
+        
+        Args:
+            manager_ip: IP du manager Swarm
+            username: Utilisateur SSH
+            timeout: Timeout en secondes
+            bastion: IP du serveur bastion (optionnel) format "user@bastion_ip"
+        
         Retourne (success, message)
         """
         logger.info(f"Test connexion SSH vers {username}@{manager_ip}")
         
         try:
-            ssh_test_cmd = [
-                "ssh",
-                "-o", "StrictHostKeyChecking=no",
-                "-o", "BatchMode=yes",  # Pas de prompt interactif
-                "-o", f"ConnectTimeout={timeout}",
-                f"{username}@{manager_ip}",
-                "echo 'SSH_OK'"
-            ]
+            # Construire la commande SSH
+            if bastion:
+                # Mode bastion/proxy : ssh via ProxyJump
+                logger.info(f"Utilisation du bastion: {bastion}")
+                ssh_test_cmd = [
+                    "ssh",
+                    "-o", "StrictHostKeyChecking=no",
+                    "-o", "BatchMode=yes",
+                    "-o", f"ConnectTimeout={timeout}",
+                    "-J", bastion,  # ProxyJump via le bastion
+                    f"{username}@{manager_ip}",
+                    "echo 'SSH_OK'"
+                ]
+            else:
+                # Mode direct
+                ssh_test_cmd = [
+                    "ssh",
+                    "-o", "StrictHostKeyChecking=no",
+                    "-o", "BatchMode=yes",
+                    "-o", f"ConnectTimeout={timeout}",
+                    f"{username}@{manager_ip}",
+                    "echo 'SSH_OK'"
+                ]
             
             result = subprocess.run(
                 ssh_test_cmd,
@@ -45,13 +80,13 @@ class SwarmDeploymentService:
                 
                 # Messages d'erreur spécifiques
                 if "Permission denied" in error_msg:
-                    return False, "❌ Erreur SSH: Permission refusée. Les clés SSH ne sont pas configurées. Veuillez vous assurer que la clé publique du serveur est dans ~/.ssh/authorized_keys de la VM."
+                    return False, "❌ Erreur SSH: Permission refusée. Vérifiez les clés SSH."
                 elif "Connection refused" in error_msg:
-                    return False, "❌ Erreur SSH: Connexion refusée. Le serveur SSH n'est peut-être pas démarré sur la VM."
+                    return False, "❌ Erreur SSH: Connexion refusée. SSH non démarré sur la VM."
                 elif "No route to host" in error_msg:
-                    return False, f"❌ Erreur SSH: Impossible de joindre {manager_ip}. Vérifiez l'IP et le réseau."
-                elif "Host key verification failed" in error_msg:
-                    return False, "❌ Erreur SSH: Vérification de clé d'hôte échouée."
+                    return False, f"❌ Erreur réseau: Impossible de joindre {manager_ip}."
+                elif "Connection reset" in error_msg or "kex_exchange" in error_msg:
+                    return False, f"❌ Erreur SSH: Connexion réinitialisée. Le réseau {manager_ip} n'est probablement pas accessible depuis ce serveur."
                 else:
                     return False, f"❌ Erreur SSH: {error_msg}"
                     
@@ -65,26 +100,44 @@ class SwarmDeploymentService:
             return False, error
     
     @staticmethod
-    def init_swarm_if_needed(manager_ip: str, username: str) -> Tuple[bool, str]:
+    def init_swarm_if_needed(manager_ip: str, username: str, skip_check: bool = False,
+                            bastion: str = None) -> Tuple[bool, str]:
         """
         Initialise Docker Swarm si nécessaire
+        
+        Args:
+            skip_check: Si True, assume que Swarm est déjà initialisé (MODE MANUEL)
+            bastion: Serveur bastion pour accès SSH (optionnel)
+        
         Retourne (success, message)
         """
+        if skip_check:
+            logger.info(f"⚠️  MODE MANUEL: Skip vérification Swarm (assumé initialisé)")
+            return True, "Swarm assumé actif (mode manuel)"
+        
         logger.info(f"Vérification/Initialisation Swarm sur {manager_ip}")
         
         try:
             # D'ABORD: Tester SSH
-            ssh_ok, ssh_msg = SwarmDeploymentService.test_ssh_connection(manager_ip, username, timeout=10)
+            ssh_ok, ssh_msg = SwarmDeploymentService.test_ssh_connection(
+                manager_ip, username, timeout=10, bastion=bastion
+            )
             if not ssh_ok:
                 return False, ssh_msg
             
-            # Vérifier si Swarm est déjà actif
+            # Construire la commande de vérification
             check_cmd = [
                 "ssh", "-o", "StrictHostKeyChecking=no",
                 "-o", "ConnectTimeout=5",
+            ]
+            
+            if bastion:
+                check_cmd.extend(["-J", bastion])
+            
+            check_cmd.extend([
                 f"{username}@{manager_ip}",
                 "docker info --format '{{.Swarm.LocalNodeState}}'"
-            ]
+            ])
             
             result = subprocess.run(
                 check_cmd,
@@ -105,9 +158,15 @@ class SwarmDeploymentService:
                 logger.info("Initialisation de Docker Swarm...")
                 init_cmd = [
                     "ssh", "-o", "StrictHostKeyChecking=no",
+                ]
+                
+                if bastion:
+                    init_cmd.extend(["-J", bastion])
+                
+                init_cmd.extend([
                     f"{username}@{manager_ip}",
                     f"sudo docker swarm init --advertise-addr {manager_ip}"
-                ]
+                ])
                 
                 result = subprocess.run(
                     init_cmd,
@@ -122,14 +181,14 @@ class SwarmDeploymentService:
                 else:
                     # Peut-être déjà dans un swarm
                     if "already part of a swarm" in result.stderr.lower():
-                        logger.info("Swarm déjà configuré (était dans un cluster)")
+                        logger.info("Swarm déjà configuré")
                         return True, "Swarm déjà configuré"
                     
                     error = f"Erreur init Swarm: {result.stderr}"
                     logger.error(error)
                     return False, error
             else:
-                error = f"Impossible de vérifier l'état Docker: {result.stderr}"
+                error = f"Impossible de vérifier Docker: {result.stderr}"
                 logger.error(error)
                 return False, error
         
@@ -143,27 +202,50 @@ class SwarmDeploymentService:
             return False, error
     
     @staticmethod
-    def check_swarm_ready(manager_ip: str, username: str, timeout: int = 30) -> bool:
+    def check_swarm_ready(manager_ip: str, username: str, timeout: int = 30,
+                         skip_init: bool = False, bastion: str = None) -> bool:
         """
-        Vérifie que Docker Swarm est prêt - avec auto-initialisation
-        """
-        logger.info(f"Vérification Swarm sur {manager_ip}")
+        Vérifie que Docker Swarm est prêt
         
-        # ÉTAPE 1: Initialiser si nécessaire
-        success, msg = SwarmDeploymentService.init_swarm_if_needed(manager_ip, username)
+        Args:
+            skip_init: Si True, ne tente PAS d'initialiser Swarm (MODE MANUEL)
+            bastion: Serveur bastion pour accès SSH
+        """
+        logger.info(f"Vérification Swarm sur {manager_ip} (skip_init={skip_init})")
+        
+        # ÉTAPE 1: Initialiser si nécessaire (sauf en mode manuel)
+        success, msg = SwarmDeploymentService.init_swarm_if_needed(
+            manager_ip, username, skip_check=skip_init, bastion=bastion
+        )
         
         if not success:
             logger.error(f"Impossible d'initialiser Swarm: {msg}")
             return False
         
+        # Si mode manuel, on fait confiance
+        if skip_init:
+            logger.info("✓ Mode manuel: Swarm considéré comme prêt")
+            return True
+        
         # ÉTAPE 2: Vérifier que c'est bien actif
         start_time = time.time()
         while time.time() - start_time < timeout:
             try:
-                cmd = f"ssh -o StrictHostKeyChecking=no -o ConnectTimeout=5 {username}@{manager_ip} 'docker info --format \"{{{{.Swarm.LocalNodeState}}}}\"'"
+                check_cmd = [
+                    "ssh", "-o", "StrictHostKeyChecking=no",
+                    "-o", "ConnectTimeout=5",
+                ]
+                
+                if bastion:
+                    check_cmd.extend(["-J", bastion])
+                
+                check_cmd.extend([
+                    f"{username}@{manager_ip}",
+                    "docker info --format '{{.Swarm.LocalNodeState}}'"
+                ])
+                
                 result = subprocess.run(
-                    cmd,
-                    shell=True,
+                    check_cmd,
                     capture_output=True,
                     text=True,
                     timeout=10
@@ -189,9 +271,15 @@ class SwarmDeploymentService:
     
     @staticmethod
     def deploy_stack(manager_ip: str, username: str, stack_name: str, 
-                    compose_file_path: str) -> Tuple[bool, str]:
+                    compose_file_path: str, skip_swarm_check: bool = False,
+                    bastion: str = None) -> Tuple[bool, str]:
         """
-        Déploie une stack Docker Swarm - VERSION AVEC MEILLEURE GESTION SSH
+        Déploie une stack Docker Swarm
+        
+        Args:
+            skip_swarm_check: Si True, ne vérifie PAS l'état Swarm (MODE MANUEL)
+            bastion: Serveur bastion pour accès SSH
+        
         Retourne (success, message/error)
         """
         logger.info(f"═══════════════════════════════════════════")
@@ -199,99 +287,162 @@ class SwarmDeploymentService:
         logger.info(f"Manager: {manager_ip}")
         logger.info(f"User: {username}")
         logger.info(f"Compose: {compose_file_path}")
+        logger.info(f"Mode: {'MANUEL (skip checks)' if skip_swarm_check else 'AUTO'}")
+        logger.info(f"Bastion: {bastion if bastion else 'Aucun'}")
         logger.info(f"═══════════════════════════════════════════")
         
         try:
-            # ÉTAPE 0: TESTER SSH EN PREMIER
-            logger.info(f"[0/5] Test connexion SSH...")
-            ssh_ok, ssh_msg = SwarmDeploymentService.test_ssh_connection(manager_ip, username, timeout=15)
+            # ÉTAPE 0: TESTER SSH (sauf en mode manuel)
+            if not skip_swarm_check:
+                logger.info(f"[0/5] Test connexion SSH...")
+                ssh_ok, ssh_msg = SwarmDeploymentService.test_ssh_connection(
+                    manager_ip, username, timeout=10, bastion=bastion
+                )
+                
+                if not ssh_ok:
+                    logger.error(f"[0/5] ✗ {ssh_msg}")
+                    
+                    # Message d'aide spécifique
+                    help_msg = f"""
+┌─────────────────────────────────────────────────────────────┐
+│ ❌ CONNEXION SSH IMPOSSIBLE                                 │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│ L'IP {manager_ip} n'est pas accessible depuis ce serveur.  │
+│                                                             │
+│ SOLUTIONS POSSIBLES:                                        │
+│                                                             │
+│ 1️⃣  MODE MANUEL (recommandé pour pool KVM distant)         │
+│    → Activer skip_swarm_check=True                         │
+│    → Initialiser Swarm manuellement sur la VM              │
+│    → Les stacks seront déployées en mode "confiance"       │
+│                                                             │
+│ 2️⃣  MODE BASTION (si vous avez accès via un serveur)       │
+│    → Configurer un serveur bastion/jumphost                │
+│    → Utiliser bastion="user@bastion_ip"                    │
+│                                                             │
+│ 3️⃣  TUNNEL SSH (pour accès temporaire)                     │
+│    → Créer un tunnel: ssh -L 2222:{manager_ip}:22 bastion  │
+│    → Utiliser localhost:2222 comme manager_ip              │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+"""
+                    logger.info(help_msg)
+                    return False, f"{ssh_msg}\n\nVoir les logs pour les solutions possibles."
+                
+                logger.info(f"[0/5] ✓ SSH OK")
+            else:
+                logger.info(f"[0/5] ⚠️  MODE MANUEL: Skip test SSH")
             
-            if not ssh_ok:
-                logger.error(f"Test SSH échoué: {ssh_msg}")
-                return False, ssh_msg
+            # ÉTAPE 1: Vérifier le fichier compose existe
+            logger.info(f"[1/5] Vérification fichier compose...")
             
-            logger.info(f"[0/5] ✓ Connexion SSH OK")
-            
-            # ÉTAPE 1: Vérifier que le fichier compose existe
             if not os.path.exists(compose_file_path):
-                error = f"Fichier compose introuvable: {compose_file_path}"
+                error = f"❌ Fichier compose non trouvé: {compose_file_path}"
                 logger.error(error)
                 return False, error
             
-            logger.info(f"[1/5] ✓ Fichier compose existe")
+            logger.info(f"[1/5] ✓ Fichier compose trouvé")
             
-            # Lire et afficher le contenu pour debug
-            with open(compose_file_path, 'r') as f:
-                compose_content = f.read()
-                logger.debug(f"Contenu du compose ({len(compose_content)} chars):\n{compose_content[:500]}...")
+            # ÉTAPE 2: Copier le fichier sur le manager (avec bastion si nécessaire)
+            logger.info(f"[2/5] Copie du fichier compose sur le manager...")
+            remote_compose_path = f"/tmp/{stack_name}-compose.yml"
             
-            # ÉTAPE 2: Copier le compose sur le manager
-            remote_compose = f"/tmp/{stack_name}-compose.yml"
-            
-            scp_cmd = [
-                "scp",
-                "-o", "StrictHostKeyChecking=no",
-                "-o", "ConnectTimeout=15",
-                compose_file_path,
-                f"{username}@{manager_ip}:{remote_compose}"
-            ]
-            
-            logger.info(f"[2/5] Copie compose vers {manager_ip}:{remote_compose}")
-            logger.debug(f"Commande SCP: {' '.join(scp_cmd)}")
-            
-            result = subprocess.run(
-                scp_cmd,
-                capture_output=True,
-                text=True,
-                timeout=30
-            )
+            if bastion:
+                # Copie via bastion en 2 étapes
+                logger.info(f"Copie via bastion {bastion}")
+                
+                # Étape 1: Copier sur le bastion
+                scp_to_bastion = [
+                    "scp",
+                    "-o", "StrictHostKeyChecking=no",
+                    compose_file_path,
+                    f"{bastion}:/tmp/{stack_name}-compose.yml"
+                ]
+                
+                result = subprocess.run(
+                    scp_to_bastion,
+                    capture_output=True,
+                    text=True,
+                    timeout=30
+                )
+                
+                if result.returncode != 0:
+                    error = f"❌ Erreur copie vers bastion: {result.stderr}"
+                    logger.error(error)
+                    return False, error
+                
+                # Étape 2: Copier du bastion vers le manager
+                scp_to_manager = [
+                    "ssh",
+                    "-o", "StrictHostKeyChecking=no",
+                    bastion,
+                    f"scp /tmp/{stack_name}-compose.yml {username}@{manager_ip}:{remote_compose_path}"
+                ]
+                
+                result = subprocess.run(
+                    scp_to_manager,
+                    capture_output=True,
+                    text=True,
+                    timeout=30
+                )
+            else:
+                # Copie directe
+                scp_cmd = [
+                    "scp",
+                    "-o", "StrictHostKeyChecking=no",
+                    compose_file_path,
+                    f"{username}@{manager_ip}:{remote_compose_path}"
+                ]
+                
+                result = subprocess.run(
+                    scp_cmd,
+                    capture_output=True,
+                    text=True,
+                    timeout=30
+                )
             
             if result.returncode != 0:
-                error_msg = result.stderr.strip()
-                logger.error(f"Erreur copie compose (SCP): {error_msg}")
-                
-                # Analyser l'erreur SCP
-                if "Permission denied" in error_msg:
-                    return False, "❌ SCP échoué: Permission refusée. Vérifiez les clés SSH."
-                elif "No such file or directory" in error_msg:
-                    return False, f"❌ SCP échoué: Impossible de créer {remote_compose} sur la VM."
-                else:
-                    return False, f"❌ Erreur SCP: {error_msg}"
-            
-            logger.info(f"[2/5] ✓ Compose copié")
-            
-            # ÉTAPE 3: Vérifier que le fichier a bien été copié
-            verify_cmd = [
-                "ssh",
-                "-o", "StrictHostKeyChecking=no",
-                f"{username}@{manager_ip}",
-                f"test -f {remote_compose} && echo 'OK' || echo 'NOT FOUND'"
-            ]
-            
-            result = subprocess.run(
-                verify_cmd,
-                capture_output=True,
-                text=True,
-                timeout=10
-            )
-            
-            if "OK" not in result.stdout:
-                error = f"Fichier non trouvé sur le serveur distant après copie"
+                error = f"❌ Erreur copie fichier compose: {result.stderr}"
                 logger.error(error)
                 return False, error
             
-            logger.info(f"[3/5] ✓ Fichier vérifié sur le serveur")
+            logger.info(f"[2/5] ✓ Fichier copié sur le manager")
+            
+            # ÉTAPE 3: Vérifier que Swarm est actif (sauf en mode manuel)
+            if not skip_swarm_check:
+                logger.info(f"[3/5] Vérification Swarm...")
+                
+                swarm_ok = SwarmDeploymentService.check_swarm_ready(
+                    manager_ip, username, timeout=30,
+                    skip_init=False, bastion=bastion
+                )
+                
+                if not swarm_ok:
+                    error = "❌ Swarm non prêt"
+                    logger.error(error)
+                    return False, error
+                
+                logger.info(f"[3/5] ✓ Swarm actif")
+            else:
+                logger.info(f"[3/5] ⚠️  MODE MANUEL: Skip vérification Swarm")
             
             # ÉTAPE 4: Déployer la stack
+            logger.info(f"[4/5] Déploiement de la stack...")
+            
             deploy_cmd = [
                 "ssh",
                 "-o", "StrictHostKeyChecking=no",
-                "-o", "ConnectTimeout=10",
-                f"{username}@{manager_ip}",
-                f"docker stack deploy -c {remote_compose} {stack_name}"
             ]
             
-            logger.info(f"[4/5] Déploiement de la stack...")
+            if bastion:
+                deploy_cmd.extend(["-J", bastion])
+            
+            deploy_cmd.extend([
+                f"{username}@{manager_ip}",
+                f"docker stack deploy -c {remote_compose_path} {stack_name}"
+            ])
+            
             logger.debug(f"Commande: {' '.join(deploy_cmd)}")
             
             result = subprocess.run(
@@ -305,15 +456,21 @@ class SwarmDeploymentService:
                 logger.info(f"[4/5] ✓ Stack {stack_name} déployée avec succès")
                 logger.info(f"Output Docker Stack:\n{result.stdout}")
                 
-                # ÉTAPE 5: Vérifier les services déployés
+                # ÉTAPE 5: Vérifier les services déployés (optionnel en mode manuel)
                 logger.info(f"[5/5] Vérification des services...")
                 
                 check_cmd = [
                     "ssh",
                     "-o", "StrictHostKeyChecking=no",
+                ]
+                
+                if bastion:
+                    check_cmd.extend(["-J", bastion])
+                
+                check_cmd.extend([
                     f"{username}@{manager_ip}",
                     f"docker stack services {stack_name}"
-                ]
+                ])
                 
                 check_result = subprocess.run(
                     check_cmd,
@@ -346,19 +503,25 @@ class SwarmDeploymentService:
             logger.info(f"═══════════════════════════════════════════")
     
     @staticmethod
-    def get_stack_status(manager_ip: str, username: str, stack_name: str) -> Optional[Dict]:
+    def get_stack_status(manager_ip: str, username: str, stack_name: str,
+                        bastion: str = None) -> Optional[Dict]:
         """Récupère le statut d'une stack"""
         logger.debug(f"Récupération statut stack {stack_name}")
         
         try:
-            # Lister les services de la stack
             cmd = [
                 "ssh",
                 "-o", "StrictHostKeyChecking=no",
                 "-o", "ConnectTimeout=5",
+            ]
+            
+            if bastion:
+                cmd.extend(["-J", bastion])
+            
+            cmd.extend([
                 f"{username}@{manager_ip}",
                 f"docker stack services {stack_name} --format '{{{{.Name}}}}|{{{{.Replicas}}}}|{{{{.Image}}}}'"
-            ]
+            ])
             
             result = subprocess.run(
                 cmd,
@@ -383,7 +546,6 @@ class SwarmDeploymentService:
                             'image': image
                         })
             
-            # Compter les services running
             total_services = len(services)
             running_services = sum(1 for s in services if '/' in s['replicas'] and 
                                   s['replicas'].split('/')[0] == s['replicas'].split('/')[1])
@@ -401,7 +563,8 @@ class SwarmDeploymentService:
             return None
     
     @staticmethod
-    def remove_stack(manager_ip: str, username: str, stack_name: str) -> Tuple[bool, str]:
+    def remove_stack(manager_ip: str, username: str, stack_name: str,
+                    bastion: str = None) -> Tuple[bool, str]:
         """Supprime une stack Docker Swarm"""
         logger.info(f"Suppression stack {stack_name} sur {manager_ip}")
         
@@ -410,9 +573,15 @@ class SwarmDeploymentService:
                 "ssh",
                 "-o", "StrictHostKeyChecking=no",
                 "-o", "ConnectTimeout=10",
+            ]
+            
+            if bastion:
+                cmd.extend(["-J", bastion])
+            
+            cmd.extend([
                 f"{username}@{manager_ip}",
                 f"docker stack rm {stack_name}"
-            ]
+            ])
             
             result = subprocess.run(
                 cmd,
@@ -436,16 +605,22 @@ class SwarmDeploymentService:
     
     @staticmethod
     def get_service_logs(manager_ip: str, username: str, service_name: str, 
-                        lines: int = 50) -> Optional[str]:
+                        lines: int = 50, bastion: str = None) -> Optional[str]:
         """Récupère les logs d'un service"""
         try:
             cmd = [
                 "ssh",
                 "-o", "StrictHostKeyChecking=no",
                 "-o", "ConnectTimeout=5",
+            ]
+            
+            if bastion:
+                cmd.extend(["-J", bastion])
+            
+            cmd.extend([
                 f"{username}@{manager_ip}",
                 f"docker service logs {service_name} --tail {lines}"
-            ]
+            ])
             
             result = subprocess.run(
                 cmd,
@@ -465,7 +640,7 @@ class SwarmDeploymentService:
     
     @staticmethod
     def scale_service(manager_ip: str, username: str, service_name: str, 
-                     replicas: int) -> Tuple[bool, str]:
+                     replicas: int, bastion: str = None) -> Tuple[bool, str]:
         """Scale un service"""
         logger.info(f"Scale service {service_name} à {replicas} replicas")
         
@@ -474,9 +649,15 @@ class SwarmDeploymentService:
                 "ssh",
                 "-o", "StrictHostKeyChecking=no",
                 "-o", "ConnectTimeout=10",
+            ]
+            
+            if bastion:
+                cmd.extend(["-J", bastion])
+            
+            cmd.extend([
                 f"{username}@{manager_ip}",
                 f"docker service scale {service_name}={replicas}"
-            ]
+            ])
             
             result = subprocess.run(
                 cmd,
