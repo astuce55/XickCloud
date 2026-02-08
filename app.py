@@ -1,4 +1,4 @@
-# app.py - VERSION CORRIGÉE AVEC URL_PREFIX
+# app.py - VERSION CORRIGÉE SANS URL_PREFIX CONFLICTUELS
 from flask import Flask, render_template, session, redirect, url_for
 from config import SECRET_KEY, DEBUG
 from models.user import UserManager
@@ -17,13 +17,13 @@ app.debug = DEBUG
 user_manager = UserManager()
 user_manager.init_default_users()
 
-# Enregistrer les Blueprints AVEC url_prefix pour éviter les conflits
-# CORRECTION: Ajout des url_prefix pour tous les blueprints
-app.register_blueprint(auth_bp, url_prefix='/')
-app.register_blueprint(iaas_bp, url_prefix='/')  
-app.register_blueprint(swarm_bp, url_prefix='/')
-app.register_blueprint(admin_bp, url_prefix='/')
-app.register_blueprint(paas_bp, url_prefix='/')  # IMPORTANT: Ajouter le préfixe
+# Enregistrer les Blueprints SANS url_prefix (les routes sont déjà définies dans les blueprints)
+# CORRECTION: Retirer tous les url_prefix='/' qui ne servent à rien et causent des conflits
+app.register_blueprint(auth_bp)
+app.register_blueprint(iaas_bp)
+app.register_blueprint(swarm_bp)
+app.register_blueprint(admin_bp)
+app.register_blueprint(paas_bp)
 
 # Route dashboard unifié
 @app.route('/')
@@ -59,14 +59,16 @@ def list_routes():
     if not app.debug:
         return "Debug mode only", 403
     
-    import urllib
-    output = []
-    for rule in app.url_map.iter_rules():
-        methods = ','.join(rule.methods)
-        line = urllib.parse.unquote(f"{rule.endpoint:50s} {methods:20s} {rule}")
+    import urllib.parse
+    output = ['<h1>Routes enregistrées dans Flask</h1><pre>']
+    
+    for rule in sorted(app.url_map.iter_rules(), key=lambda r: str(r)):
+        methods = ','.join([m for m in rule.methods if m not in ['HEAD', 'OPTIONS']])
+        line = f"{str(rule):60s} {methods:20s} → {rule.endpoint}"
         output.append(line)
     
-    return '<br>'.join(sorted(output))
+    output.append('</pre>')
+    return '\n'.join(output)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=DEBUG)
